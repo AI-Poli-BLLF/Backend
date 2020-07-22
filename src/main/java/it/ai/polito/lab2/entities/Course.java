@@ -30,6 +30,9 @@ public class Course {
     @JoinColumn(name = "professor_id")
     private Professor professor;
 
+    @OneToOne(mappedBy = "course")
+    private VMModel vmModel;
+
     public void addStudent(Student student){
         if(student == null)
             return;

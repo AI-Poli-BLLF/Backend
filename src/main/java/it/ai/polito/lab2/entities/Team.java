@@ -35,6 +35,9 @@ public class Team {
     )
     private List<Student> members = new ArrayList<>();
 
+    @OneToOne(mappedBy = "team")
+    private VMConfig vmConfig;
+
     public void setCourse(Course course){
         if(this.course != null)
             this.course.getTeams().remove(this);
