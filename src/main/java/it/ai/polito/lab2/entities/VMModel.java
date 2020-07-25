@@ -12,8 +12,7 @@ public class VMModel {
     public enum OS{Windows, Ubuntu, Debian}
 
     @Id
-    @GeneratedValue
-    private Long id;
+    private String id;
 
     private String os;
 
@@ -21,6 +20,7 @@ public class VMModel {
 
     @OneToOne
     @JoinColumn(name = "course_name")
+    @MapsId //Permette di condividere la stessa primary key con corso
     private Course course;
 
     public void setOs(OS os) {

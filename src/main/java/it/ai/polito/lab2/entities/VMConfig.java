@@ -14,11 +14,11 @@ import javax.persistence.*;
 public class VMConfig {
 
     @Id
-    @GeneratedValue
     private Long id;
 
     @OneToOne
     @JoinColumn(name = "team_id")
+    @MapsId
     private Team team;
 
     private int maxCpu;

@@ -19,7 +19,8 @@ public class Team {
     private static final String inverseJoinCol = "student_id";
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(name = "team_seq")
     private Long id;
     private String name;
     private Status status;
