@@ -8,10 +8,10 @@
         <version>2.2.6.RELEASE</version>
         <relativePath /> <!-- lookup parent from repository -->
     </parent>
-    <groupId>it.ai.polito</groupId>
-    <artifactId>virtual_labs</artifactId>
+    <groupId>it.polito.ai</groupId>
+    <artifactId>virtuallabs</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>virtual_labs</name>
+    <name>virtuallabs</name>
     <description>Virtual Labs Project</description>
 
     <properties>
