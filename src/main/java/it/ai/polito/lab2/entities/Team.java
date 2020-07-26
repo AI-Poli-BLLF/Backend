@@ -39,6 +39,9 @@ public class Team {
     @OneToOne(mappedBy = "team")
     private VMConfig vmConfig;
 
+    @OneToMany(mappedBy = "team")
+    private List<VMInstance> vms;
+
     public void setCourse(Course course){
         if(this.course != null)
             this.course.getTeams().remove(this);

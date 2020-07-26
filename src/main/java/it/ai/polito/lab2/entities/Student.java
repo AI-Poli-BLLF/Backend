@@ -29,6 +29,9 @@ public class Student {
     @ManyToMany(mappedBy = "members")
     private List<Team> teams = new ArrayList<>();
 
+    @ManyToMany(mappedBy = "owners")
+    private List<VMInstance> vms = new ArrayList<>();
+
     public void addCourse(Course course){
         if(course == null)
             return;
