@@ -11,22 +11,27 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 
 @Data
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @AllArgsConstructor
 @NoArgsConstructor
 public class StudentDTO extends RepresentationModel<StudentDTO> {
 
+    @EqualsAndHashCode.Include
     @CsvBindByName
     @Pattern(regexp = "s[0-9]+", message = "The id must be in the following format s<id>")
     private String id;
 
+    @EqualsAndHashCode.Include
     @CsvBindByName
     @NotEmpty
     private String name;
 
+    @EqualsAndHashCode.Include
     @CsvBindByName
     @NotEmpty
     private String firstName;
+
+    private String photoName;
 
     public String getEmail(){
         return String.format("%s@studenti.polito.it", id);

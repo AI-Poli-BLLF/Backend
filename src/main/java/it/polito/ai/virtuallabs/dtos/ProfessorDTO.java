@@ -12,16 +12,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@EqualsAndHashCode(callSuper = false)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProfessorDTO extends RepresentationModel<ProfessorDTO> {
+    @EqualsAndHashCode.Include
     @Pattern(regexp = "d[0-9]+", message = "The id must be in the following format d<id>")
     private String id;
+
+    @EqualsAndHashCode.Include
     @NotEmpty
     private String name;
+
+    @EqualsAndHashCode.Include
     @NotEmpty
     private String firstName;
+    private String photoName;
     private List<String> courseNames = new ArrayList<>();
 
     public String getEmail(){

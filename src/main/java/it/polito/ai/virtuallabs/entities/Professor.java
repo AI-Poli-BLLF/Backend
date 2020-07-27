@@ -20,6 +20,7 @@ public class Professor {
     private String id;
     private String name;
     private String firstName;
+    private String photoName;
 
     @OneToMany(mappedBy = "professor")
     private List<Course> courses = new ArrayList<>();
@@ -38,5 +39,9 @@ public class Professor {
 
         courses.remove(course);
         course.setProfessor(null);
+    }
+
+    public String getEmail(){
+        return String.format("%s@polito.it", id);
     }
 }

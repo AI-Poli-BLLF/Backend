@@ -37,8 +37,8 @@ class VirtualLabsApplicationTests {
     @Order(1)
     void student() {
         List<StudentDTO> expected = Arrays.asList(
-                new StudentDTO("s1", "Limoli", "Lorenzo"),
-                new StudentDTO("s2", "Loscalzo", "Stefano")
+                new StudentDTO("s1", "Limoli", "Lorenzo", null),
+                new StudentDTO("s2", "Loscalzo", "Stefano", null)
         );
 
         expected.forEach(s-> assertTrue(teamService.addStudent(s)));
@@ -114,10 +114,10 @@ class VirtualLabsApplicationTests {
         }
 
         List<StudentDTO> expected = Arrays.asList(
-                new StudentDTO("s1", "Limoli", "Lorenzo"),
-                new StudentDTO("s2", "Loscalzo", "Stefano"),
-                new StudentDTO("s3", "Matteotti", "Giacomo"),
-                new StudentDTO("s4", "Rossi", "Marco")
+                new StudentDTO("s1", "Limoli", "Lorenzo", null),
+                new StudentDTO("s2", "Loscalzo", "Stefano", null),
+                new StudentDTO("s3", "Matteotti", "Giacomo", null),
+                new StudentDTO("s4", "Rossi", "Marco", null)
         );
         assertEquals(new HashSet<>(expected), new HashSet<>(teamService.getEnrolledStudents(courseName)));
 
@@ -150,7 +150,7 @@ class VirtualLabsApplicationTests {
     @Test
     @Order(5)
     void getCoursesByStudent(){
-        StudentDTO s = new StudentDTO("prova","test", "test");
+        StudentDTO s = new StudentDTO("prova","test", "test", null);
         teamService.addStudent(s);
         List<CourseDTO> courses = teamService.getAllCourses();
         courses.forEach(c->{
@@ -231,10 +231,10 @@ class VirtualLabsApplicationTests {
         assertEquals(Arrays.asList(teamAI, teamOOP), teamService.getTeamsForStudent("s1"));
 
         List<StudentDTO> expected = Arrays.asList(
-                new StudentDTO("s1", "Limoli", "Lorenzo"),
-                new StudentDTO("s2", "Loscalzo", "Stefano"),
-                new StudentDTO("s3", "Matteotti", "Giacomo"),
-                new StudentDTO("s4", "Rossi", "Marco")
+                new StudentDTO("s1", "Limoli", "Lorenzo", null),
+                new StudentDTO("s2", "Loscalzo", "Stefano", null),
+                new StudentDTO("s3", "Matteotti", "Giacomo", null),
+                new StudentDTO("s4", "Rossi", "Marco", null)
         );
         assertEquals(new HashSet<>(expected), new HashSet<>(teamService.getMembers(teamAI.getId())));
         assertEquals(new HashSet<>(expected), new HashSet<>(teamService.getStudentsInTeams(courseName)));

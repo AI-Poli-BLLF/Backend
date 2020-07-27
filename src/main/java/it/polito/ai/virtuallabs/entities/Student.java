@@ -19,6 +19,7 @@ public class Student {
     private String id;
     private String name;
     private String firstName;
+    private String photoName;
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = joinTable,
@@ -55,5 +56,17 @@ public class Student {
 
         teams.remove(team);
         team.getMembers().remove(this);
+    }
+
+    public void addOwnedVm(VMInstance vm){
+        if (vm == null)
+            return;
+
+        vms.add(vm);
+        vm.getOwners().add(this);
+    }
+
+    public String getEmail(){
+        return String.format("%s@studenti.polito.it", id);
     }
 }

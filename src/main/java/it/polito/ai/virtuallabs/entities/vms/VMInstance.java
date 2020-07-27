@@ -33,5 +33,13 @@ public class VMInstance {
             inverseJoinColumns = @JoinColumn(name = "student_id")
     )
     private List<Student> owners = new ArrayList<>();
+
+    public void addOwner(Student student){
+        if (student == null)
+            return;
+
+        owners.add(student);
+        student.getVms().add(this);
+    }
 }
 

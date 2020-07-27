@@ -19,7 +19,7 @@ public class VMConfig {
 
     @OneToOne
     @JoinColumn(name = "team_id")
-    @MapsId
+    @MapsId //Permette di condividere la stessa primary key con team
     private Team team;
 
     private int maxCpu;

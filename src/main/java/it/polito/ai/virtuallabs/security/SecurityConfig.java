@@ -46,9 +46,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/authenticate").permitAll()
                 .antMatchers("/notification/**").permitAll()
-                /*.antMatchers(HttpMethod.GET, "/vehicles/**").permitAll()
-                .antMatchers(HttpMethod.DELETE, "/vehicles/**").hasRole("ADMIN")
-                .antMatchers(HttpMethod.GET, "/v1/vehicles/**").permitAll()*/
+                .antMatchers("/images/**").permitAll()
                 .anyRequest().authenticated();
 
         http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
