@@ -2,12 +2,14 @@ package it.polito.ai.virtuallabs.dtos.vms;
 
 import it.polito.ai.virtuallabs.entities.vms.VMModel.OS;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotEmpty;
 
 @Data
+@NoArgsConstructor
 public class VMModelDTO {
-    @NotEmpty
+
     private String id;
     @NotEmpty
     private String os;
@@ -15,8 +17,7 @@ public class VMModelDTO {
     private String version;
 
 
-    public VMModelDTO(String id, OS os, String version) {
-        this.id = id;
+    public VMModelDTO(OS os, String version) {
         this.os = os.toString();
         this.version = version;
     }

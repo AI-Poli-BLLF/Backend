@@ -1,7 +1,10 @@
 package it.polito.ai.virtuallabs;
 
+import it.polito.ai.virtuallabs.dtos.vms.VMModelDTO;
+import it.polito.ai.virtuallabs.entities.vms.VMModel;
 import it.polito.ai.virtuallabs.security.entities.User;
 import it.polito.ai.virtuallabs.security.repositories.UserRepository;
+import it.polito.ai.virtuallabs.service.VMService;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -17,13 +20,15 @@ import java.util.Arrays;
 public class VirtualLabsApplication {
 
     @Bean
-    public CommandLineRunner runner(UserRepository repository, PasswordEncoder passwordEncoder){
+    public CommandLineRunner runner(UserRepository repository, PasswordEncoder passwordEncoder,
+                                    VMService vmService){
         return args -> {
-            try {
+            /*try {
                 User admin = User.builder().id("a1").username("admin").password(passwordEncoder.encode("admin")).roles(Arrays.asList("ROLE_ADMIN")).build();
                 repository.saveAndFlush(admin);
                 System.out.println(repository.findAll());
-            }catch (Exception ignored){}
+            }catch (Exception ignored){}*/
+
         };
     }
 

@@ -4,22 +4,29 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 
 @Data
-@AllArgsConstructor
 public class VMConfigDTO {
-    @NotNull
     private Long id;
-    @NotNull
+    @Min(value = 1)
     private int maxCpu;
-    @NotNull
+    @Min(value = 16)
     private int maxDisk;
-    @NotNull
+    @Min(value = 1024)
     private int maxRam;
-    @NotNull
+    @Min(1)
     private int maxActive;
-    @NotNull
+    @Min(1)
     private int maxVm;
+
+    public VMConfigDTO(int maxCpu, int maxDisk, int maxRam, int maxActive, int maxVm) {
+        this.maxCpu = maxCpu;
+        this.maxDisk = maxDisk;
+        this.maxRam = maxRam;
+        this.maxActive = maxActive;
+        this.maxVm = maxVm;
+    }
 }
