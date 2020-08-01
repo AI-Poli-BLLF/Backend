@@ -1,11 +1,13 @@
 package it.polito.ai.virtuallabs.security.service;
 
+import it.polito.ai.virtuallabs.entities.Student;
 import it.polito.ai.virtuallabs.entities.Team;
 import it.polito.ai.virtuallabs.repositories.ProfessorRepository;
 import it.polito.ai.virtuallabs.repositories.StudentRepository;
 import it.polito.ai.virtuallabs.repositories.TeamRepository;
 import it.polito.ai.virtuallabs.security.entities.Roles;
 import it.polito.ai.virtuallabs.security.entities.User;
+import it.polito.ai.virtuallabs.service.exceptions.StudentNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.TeamNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;

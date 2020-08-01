@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.HashMap;
+import java.util.Map;
 
 @Data
 @Entity
@@ -27,4 +29,15 @@ public class VMConfig {
     private int maxRam;
     private int maxActive;
     private int maxVm;
+
+    public Map<String, Integer> getConfig(){
+        Map<String,Integer> map = new HashMap<>();
+
+        map.put("cpu", maxCpu);
+        map.put("disk_size", maxDisk);
+        map.put("ram_size", maxRam);
+        map.put("active", maxActive);
+        map.put("max_vm", maxVm);
+        return map;
+    }
 }

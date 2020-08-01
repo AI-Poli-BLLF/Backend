@@ -4,6 +4,7 @@ import it.polito.ai.virtuallabs.entities.Course;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Data
 @Entity
@@ -23,6 +24,9 @@ public class VMModel {
     @JoinColumn(name = "course_name")
     @MapsId //Permette di condividere la stessa primary key con corso
     private Course course;
+
+    @OneToMany(mappedBy = "vmModel")
+    private List<VMInstance> vmInstances;
 
     public void setOs(OS os) {
         this.os = os.toString();

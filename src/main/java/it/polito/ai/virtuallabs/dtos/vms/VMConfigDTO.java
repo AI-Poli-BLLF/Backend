@@ -1,14 +1,15 @@
 package it.polito.ai.virtuallabs.dtos.vms;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @Data
+@NoArgsConstructor
 public class VMConfigDTO {
     private Long id;
     @Min(value = 1)
@@ -28,5 +29,16 @@ public class VMConfigDTO {
         this.maxRam = maxRam;
         this.maxActive = maxActive;
         this.maxVm = maxVm;
+    }
+
+    public Map<String, Integer> getConfig(){
+        Map<String,Integer> map = new HashMap<>();
+
+        map.put("cpu", maxCpu);
+        map.put("disk_size", maxDisk);
+        map.put("ram_size", maxRam);
+        map.put("active", maxActive);
+        map.put("max_vm", maxVm);
+        return map;
     }
 }

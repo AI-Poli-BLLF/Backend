@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.Min;
+import java.util.HashMap;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -14,7 +16,7 @@ public class VMInstanceDTO {
     @EqualsAndHashCode.Include
     private Long id;
 
-    private boolean online;
+    private boolean active;
 
     @Min(value = 1)
     @EqualsAndHashCode.Include
@@ -27,4 +29,13 @@ public class VMInstanceDTO {
     @Min(value = 16)
     @EqualsAndHashCode.Include
     private int diskSize;
+
+    public Map<String, Integer> getConfig(){
+        Map<String,Integer> map = new HashMap<>();
+
+        map.put("cpu", cpu);
+        map.put("disk_size", diskSize);
+        map.put("ram_size", ramSize);
+        return map;
+    }
 }

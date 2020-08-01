@@ -3,24 +3,33 @@ package it.polito.ai.virtuallabs.entities.vms;
 import it.polito.ai.virtuallabs.entities.Student;
 import it.polito.ai.virtuallabs.entities.Team;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Entity
 @Table(name = "vm_instance")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class VMInstance {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @SequenceGenerator(name = "vm_seq")
+    @EqualsAndHashCode.Include
     private Long id;
 
-    private boolean online;
+    private boolean active;
     private int cpu;
     private int ramSize;
     private int diskSize;
+
+    @ManyToOne
+    @JoinColumn(name = "vm_model_id", nullable = false)
+    private VMModel vmModel;
 
     @ManyToOne
     @JoinColumn(name = "team_id")
@@ -40,6 +49,35 @@ public class VMInstance {
 
         owners.add(student);
         student.getVms().add(this);
+    }
+
+    public void setVmModel(VMModel vmModel) {
+        if(this.vmModel != null)
+            this.vmModel.getVmInstances().remove(this);
+
+        if(vmModel != null && !vmModel.getVmInstances().contains(this))
+            vmModel.getVmInstances().add(this);
+
+        this.vmModel = vmModel;
+    }
+
+    public void setTeam(Team team) {
+        if(this.team != null)
+            this.team.getVms().remove(this);
+
+        if(team != null && !team.getVms().contains(this))
+            team.getVms().add(this);
+
+        this.team = team;
+    }
+
+    public Map<String, Integer> getConfig(){
+        Map<String,Integer> map = new HashMap<>();
+
+        map.put("cpu", cpu);
+        map.put("disk_size", diskSize);
+        map.put("ram_size", ramSize);
+        return map;
     }
 }
 
