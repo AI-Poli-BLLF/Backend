@@ -19,9 +19,11 @@ import it.polito.ai.virtuallabs.service.exceptions.*;
 import it.polito.ai.virtuallabs.service.exceptions.vms.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -157,5 +159,93 @@ public class VMServiceImpl implements VMService{
         vmInstance.addOwner(s);
 
         vmInstanceRepository.save(vmInstance);
+    }
+
+    //@PreAuthorize("@securityApiAuth.isMe(#ownerId)")
+    @Override
+    public void shareVMOwnership(Long vmInstanceId, String ownerId, String teammateId) {
+        VMInstance vmInstance = vmInstanceRepository.findById(vmInstanceId).orElseThrow(
+                () -> new VMInstanceNotFoundException(vmInstanceId)
+        );
+
+        Student owner = studentRepository.findByIdIgnoreCase(ownerId).orElseThrow(
+                () -> new StudentNotFoundException(ownerId)
+        );
+
+        Student teammate = studentRepository.findByIdIgnoreCase(teammateId).orElseThrow(
+                () -> new StudentNotFoundException(ownerId)
+        );
+
+        //Se i due studenti non appartengono allo stesso team, lancia una eccezione
+        if (!vmInstance.getTeam().getMembers().containsAll(Arrays.asList(owner, teammate)))
+            throw new StudentsNotInSameTeamException(ownerId, teammateId, vmInstance.getTeam().getName());
+
+        //Verifico che sia effettivamente l'owner della VM
+        if (!vmInstance.getOwners().contains(owner))
+            throw new StudentNotOwnerException(ownerId, vmInstanceId);
+
+        //Verifico che il corso sia ancora attivo
+        Course c = vmInstance.getTeam().getCourse();
+        if (!c.isEnabled())
+            throw new CourseNotEnabledException(c.getName());
+
+        vmInstance.addOwner(teammate);
+    }
+
+    //@PreAuthorize("@securityApiAuth.isMe(#ownerId)")
+    @Override
+    public void bootVMInstance(Long vmInstanceId, String ownerId) {
+        VMInstance vmInstance = vmInstanceRepository.findById(vmInstanceId).orElseThrow(
+                () -> new VMInstanceNotFoundException(vmInstanceId)
+        );
+
+        Student owner = studentRepository.findByIdIgnoreCase(ownerId).orElseThrow(
+                () -> new StudentNotFoundException(ownerId)
+        );
+
+        if (!vmInstance.getOwners().contains(owner))
+            throw new StudentNotOwnerException(ownerId, vmInstanceId);
+
+        vmInstance.setActive(true);
+    }
+
+    //@PreAuthorize("@securityApiAuth.isMe(#ownerId)")
+    @Override
+    public void shutdownVMInstance(Long vmInstanceId, String ownerId) {
+        VMInstance vmInstance = vmInstanceRepository.findById(vmInstanceId).orElseThrow(
+                () -> new VMInstanceNotFoundException(vmInstanceId)
+        );
+
+        Student owner = studentRepository.findByIdIgnoreCase(ownerId).orElseThrow(
+                () -> new StudentNotFoundException(ownerId)
+        );
+
+        if (!vmInstance.getOwners().contains(owner))
+            throw new StudentNotOwnerException(ownerId, vmInstanceId);
+
+        vmInstance.setActive(false);
+    }
+
+    //@PreAuthorize("@securityApiAuth.isMe(#ownerId)")
+    @Override
+    public void deleteVMInstance(Long vmInstanceId, String ownerId) {
+        VMInstance vmInstance = vmInstanceRepository.findById(vmInstanceId).orElseThrow(
+                () -> new VMInstanceNotFoundException(vmInstanceId)
+        );
+
+        Student owner = studentRepository.findByIdIgnoreCase(ownerId).orElseThrow(
+                () -> new StudentNotFoundException(ownerId)
+        );
+
+        if (!vmInstance.getOwners().contains(owner))
+            throw new StudentNotOwnerException(ownerId, vmInstanceId);
+
+        List<Student> owners = vmInstance.getOwners();
+
+        owners.forEach(vmInstance::removeOwner);
+        vmInstance.getTeam().getVms().remove(vmInstance);
+        vmInstance.getVmModel().getVmInstances().remove(vmInstance);
+
+        vmInstanceRepository.delete(vmInstance);
     }
 }

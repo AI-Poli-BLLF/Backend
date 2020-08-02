@@ -51,6 +51,14 @@ public class VMInstance {
         student.getVms().add(this);
     }
 
+    public void removeOwner(Student student){
+        if(student == null)
+            return;
+
+        owners.remove(student);
+        student.getVms().remove(this);
+    }
+
     public void setVmModel(VMModel vmModel) {
         if(this.vmModel != null)
             this.vmModel.getVmInstances().remove(this);

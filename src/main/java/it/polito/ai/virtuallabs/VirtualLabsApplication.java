@@ -31,11 +31,10 @@ public class VirtualLabsApplication {
                 System.out.println(repository.findAll());
             }catch (Exception ignored){}*/
 
-            Long teamId = 1L;
-            String courseName = "Applicazioni Internet";
-            String studentId = "s1";
-            VMInstanceDTO vmInstanceDTO = new VMInstanceDTO(2, 2048, 20);
-            vmService.createVMInstance(vmInstanceDTO, courseName, studentId);
+            Long vmId = 2L;
+            String ownerId = "s1";
+            String teammateId= "s2";
+            vmService.deleteVMInstance(vmId, teammateId);
         };
     }
 
