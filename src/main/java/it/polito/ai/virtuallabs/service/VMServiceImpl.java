@@ -86,6 +86,7 @@ public class VMServiceImpl implements VMService{
                 () -> new TeamNotFoundException(teamId)
         );
 
+        // Se il team non appartiene a quel corso lancia una eccezione
         if (!t.getCourse().getName().equals(courseName))
             throw new TeamNotBelongToCourseException(t.getName(), courseName);
 

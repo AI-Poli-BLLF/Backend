@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Data
-@AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 public class VMInstanceDTO {
 
@@ -37,5 +36,12 @@ public class VMInstanceDTO {
         map.put("disk_size", diskSize);
         map.put("ram_size", ramSize);
         return map;
+    }
+
+    public VMInstanceDTO(@Min(value = 1) int cpu, @Min(value = 1024) int ramSize, @Min(value = 16) int diskSize) {
+        this.cpu = cpu;
+        this.ramSize = ramSize;
+        this.diskSize = diskSize;
+        this.active = false;
     }
 }

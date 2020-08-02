@@ -1,5 +1,7 @@
 package it.polito.ai.virtuallabs;
 
+import it.polito.ai.virtuallabs.dtos.vms.VMConfigDTO;
+import it.polito.ai.virtuallabs.dtos.vms.VMInstanceDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMModelDTO;
 import it.polito.ai.virtuallabs.entities.vms.VMModel;
 import it.polito.ai.virtuallabs.security.entities.User;
@@ -29,6 +31,11 @@ public class VirtualLabsApplication {
                 System.out.println(repository.findAll());
             }catch (Exception ignored){}*/
 
+            Long teamId = 1L;
+            String courseName = "Applicazioni Internet";
+            String studentId = "s1";
+            VMInstanceDTO vmInstanceDTO = new VMInstanceDTO(2, 2048, 20);
+            vmService.createVMInstance(vmInstanceDTO, courseName, studentId);
         };
     }
 
