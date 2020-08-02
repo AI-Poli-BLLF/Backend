@@ -1,5 +1,6 @@
 package it.polito.ai.virtuallabs.service;
 
+import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMConfigDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMInstanceDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMModelDTO;
@@ -247,5 +248,83 @@ public class VMServiceImpl implements VMService{
         vmInstance.getVmModel().getVmInstances().remove(vmInstance);
 
         vmInstanceRepository.delete(vmInstance);
+    }
+
+    @Override
+    public List<StudentDTO> getVMOwners(Long vmInstanceId) {
+        return vmInstanceRepository.findById(vmInstanceId)
+                .orElseThrow(
+                        () -> new VMInstanceNotFoundException(vmInstanceId)
+                )
+                .getOwners().stream()
+                .map(owner->mapper.map(owner, StudentDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public VMModelDTO getVMModelOfInstance(Long vmInstanceId) {
+        VMInstance vmInstance =  vmInstanceRepository.findById(vmInstanceId)
+                .orElseThrow(
+                        () -> new VMInstanceNotFoundException(vmInstanceId)
+                );
+        return mapper.map(vmInstance, VMModelDTO.class);
+    }
+
+    @Override
+    public List<VMInstanceDTO> getTeamVMs(Long teamId) {
+        if (!teamRepository.findById(teamId).isPresent())
+            throw new TeamNotFoundException(teamId);
+
+        return vmInstanceRepository.findAllByTeamId(teamId).stream()
+                .map(vm-> mapper.map(vm, VMInstanceDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public VMConfigDTO getTeamConfig(Long teamId) {
+        VMConfig config =  teamRepository.findById(teamId)
+                .orElseThrow(
+                        () -> new TeamNotFoundException(teamId)
+                ).getVmConfig();
+        return mapper.map(config, VMConfigDTO.class);
+    }
+
+    @Override
+    public List<VMInstanceDTO> getAllVms() {
+        return vmInstanceRepository.findAll()
+                .stream().map(vm-> mapper.map(vm, VMInstanceDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<VMInstanceDTO> getActiveVms() {
+        return vmInstanceRepository.findAllByActiveTrue()
+                .stream().map(vm-> mapper.map(vm, VMInstanceDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<VMInstanceDTO> getActiveTeamVms(Long teamId) {
+        if (!teamRepository.findById(teamId).isPresent())
+            throw new TeamNotFoundException(teamId);
+        return vmInstanceRepository.findAllByTeamIdAndActiveTrue(teamId)
+                .stream().map(vm-> mapper.map(vm, VMInstanceDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<VMInstanceDTO> getOfflineVms() {
+        return vmInstanceRepository.findAllByActiveFalse()
+                .stream().map(vm-> mapper.map(vm, VMInstanceDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<VMInstanceDTO> getOfflineTeamVms(Long teamId) {
+        if (!teamRepository.findById(teamId).isPresent())
+            throw new TeamNotFoundException(teamId);
+        return vmInstanceRepository.findAllByTeamIdAndActiveFalse(teamId)
+                .stream().map(vm-> mapper.map(vm, VMInstanceDTO.class))
+                .collect(Collectors.toList());
     }
 }

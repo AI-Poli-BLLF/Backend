@@ -31,10 +31,6 @@ public class VirtualLabsApplication {
                 System.out.println(repository.findAll());
             }catch (Exception ignored){}*/
 
-            Long vmId = 2L;
-            String ownerId = "s1";
-            String teammateId= "s2";
-            vmService.deleteVMInstance(vmId, teammateId);
         };
     }
 
