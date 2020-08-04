@@ -1,6 +1,5 @@
 package it.polito.ai.virtuallabs.service;
 
-import it.polito.ai.virtuallabs.dtos.CourseDTO;
 import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMConfigDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMInstanceDTO;

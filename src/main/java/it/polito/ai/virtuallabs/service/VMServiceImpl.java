@@ -24,11 +24,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Transactional
@@ -82,6 +80,7 @@ public class VMServiceImpl implements VMService{
         if (!c.isEnabled())
             throw new CourseNotEnabledException(courseName);
 
+        //Se nessun modello è ancora stato settato lancia una eccezione
         if (c.getVmModel() == null)
             throw new VMModelNotFoundException(courseName);
 
@@ -92,6 +91,16 @@ public class VMServiceImpl implements VMService{
         // Se il team non appartiene a quel corso lancia una eccezione
         if (!t.getCourse().getName().equals(courseName))
             throw new TeamNotBelongToCourseException(t.getName(), courseName);
+
+        // Se le risorse settate sono minori di quelle già utilizzate, lancia una eccezione
+        Stream<VMInstance> vmStream = t.getVms().stream();
+        int totalCpu = vmStream.mapToInt(VMInstance::getCpu).sum();
+        int totalRam = vmStream.mapToInt(VMInstance::getRamSize).sum();
+        int totalDisk = vmStream.mapToInt(VMInstance::getDiskSize).sum();
+        if (totalCpu > vmConfigDTO.getMaxCpu() || totalRam > vmConfigDTO.getMaxRam() ||
+            totalDisk > vmConfigDTO.getMaxDisk())
+            throw new VMResourcesAlreadyAllocatedException(teamId, totalCpu, vmConfigDTO.getMaxCpu(),
+                    totalRam, vmConfigDTO.getMaxRam(), totalDisk, vmConfigDTO.getMaxDisk());
 
         VMConfig vmConfig = mapper.map(vmConfigDTO, VMConfig.class);
         vmConfig.setTeam(t);
@@ -139,6 +148,9 @@ public class VMServiceImpl implements VMService{
 
         //Controllo delle specifiche settate
         Map<String, Integer> limits = config.getConfig();
+        Map<String, Integer> allocatedRes = courseTeam.getVms().stream().map(vm-> vm.getConfig().entrySet())
+                .flatMap(Collection::stream)
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
         Map<String, Integer> vmConfig = vmInstanceDTO.getConfig();
 
         List<VMInstance> instances = courseTeam.getVms();
@@ -149,7 +161,8 @@ public class VMServiceImpl implements VMService{
 
         vmConfig.forEach((key, value) -> {
             int limit = limits.get(key);
-            if (value > limit)
+            int allocated = allocatedRes.get(key);
+            if (value + allocated > limit)
                 throw new VMLimitExceedException(courseTeam.getName(), courseName, key, limit, value);
         });
 
