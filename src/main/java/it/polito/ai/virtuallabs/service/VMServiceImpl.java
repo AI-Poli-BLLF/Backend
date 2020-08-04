@@ -220,6 +220,15 @@ public class VMServiceImpl implements VMService{
         if (!vmInstance.getOwners().contains(owner))
             throw new StudentNotOwnerException(ownerId, vmInstanceId);
 
+        //Se Ci sono già troppe VM attive, lancia una eccezione
+        Team t = vmInstance.getTeam();
+
+        int maxActive = t.getVmConfig().getMaxActive();
+        int currentActive = 1 + (int)t.getVms().stream().filter(VMInstance::isActive).count();
+
+        if (currentActive > maxActive)
+            throw new VMActiveLimitExceededException(t.getId());
+
         vmInstance.setActive(true);
     }
 
