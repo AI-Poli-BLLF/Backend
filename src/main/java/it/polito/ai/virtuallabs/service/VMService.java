@@ -8,7 +8,8 @@ import it.polito.ai.virtuallabs.dtos.vms.VMModelDTO;
 import java.util.List;
 
 public interface VMService {
-    void createVMModel(VMModelDTO vmModelDTO, String courseName);
+    VMModelDTO createVMModel(VMModelDTO vmModelDTO, String courseName);
+    VMModelDTO updateVMModel(VMModelDTO vmModelDTO, String courseName);
     void setVMConfiguration(VMConfigDTO vmConfigDTO, Long teamId, String courseName);
     void createVMInstance(VMInstanceDTO vmInstanceDTO, String courseName, String studentId);
     void shareVMOwnership(Long vmInstanceId, String ownerId, String teammateId);

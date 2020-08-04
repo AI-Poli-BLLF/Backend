@@ -51,7 +51,7 @@ public class VMServiceImpl implements VMService{
 
     //@PreAuthorize("hasRole('PROFESSOR') || @securityApiAuth.ownCourse(#courseName)")
     @Override
-    public void createVMModel(VMModelDTO vmModelDTO, String courseName) {
+    public VMModelDTO createVMModel(VMModelDTO vmModelDTO, String courseName) {
         Course c = courseRepository.findByNameIgnoreCase(courseName).orElseThrow(
                 () -> new CourseNotFoundException(courseName)
         );
@@ -66,7 +66,27 @@ public class VMServiceImpl implements VMService{
 
         VMModel vmModel = mapper.map(vmModelDTO, VMModel.class);
         vmModel.setCourse(c);
-        vmModelRepository.save(vmModel);
+        return mapper.map(vmModelRepository.save(vmModel), VMModelDTO.class);
+    }
+
+    @Override
+    public VMModelDTO updateVMModel(VMModelDTO vmModelDTO, String courseName) {
+        Course c = courseRepository.findByNameIgnoreCase(courseName).orElseThrow(
+                () -> new CourseNotFoundException(courseName)
+        );
+
+        //Se il corso non è attivo lancia una eccezione
+        if (!c.isEnabled())
+            throw new CourseNotEnabledException(courseName);
+
+        //Se è già stata creata un VMModel associato al corso lancia una eccezione
+        VMModel vmModel = vmModelRepository.findByIdIgnoreCase(courseName).orElseThrow(
+                () -> new VMModelNotFoundException(courseName)
+        );
+
+        vmModel.setOs(VMModel.OS.valueOf(vmModelDTO.getOs()));
+        vmModel.setVersion(vmModelDTO.getVersion());
+        return mapper.map(vmModelRepository.save(vmModel), VMModelDTO.class);
     }
 
     //@PreAuthorize("hasRole('PROFESSOR') || @securityApiAuth.ownCourse(#courseName)")

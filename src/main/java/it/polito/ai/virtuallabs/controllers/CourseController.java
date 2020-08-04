@@ -3,11 +3,14 @@ package it.polito.ai.virtuallabs.controllers;
 import it.polito.ai.virtuallabs.dtos.CourseDTO;
 import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.dtos.TeamDTO;
+import it.polito.ai.virtuallabs.dtos.vms.VMModelDTO;
 import it.polito.ai.virtuallabs.service.NotificationService;
 import it.polito.ai.virtuallabs.service.TeamService;
+import it.polito.ai.virtuallabs.service.VMService;
 import it.polito.ai.virtuallabs.service.exceptions.CourseNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.TeamNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.TeamServiceException;
+import it.polito.ai.virtuallabs.service.exceptions.vms.VMServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
@@ -36,6 +39,8 @@ public class CourseController {
     private TeamService teamService;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private VMService vmService;
 
     @GetMapping({"", "/"})
     private List<CourseDTO> all(){
@@ -190,6 +195,24 @@ public class CourseController {
         }
     }
 
+    @PostMapping("/{courseName}/create-vm-model")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    private VMModelDTO createVMModel(@PathVariable String courseName, @RequestBody @Valid VMModelDTO vmModel){
+        try{
+            return vmService.createVMModel(vmModel, courseName);
+        }catch (VMServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
+    @PutMapping("/{courseName}/create-vm-model")
+    private VMModelDTO updateVMModel(@PathVariable String courseName, @RequestBody @Valid VMModelDTO vmModel){
+        try{
+            return vmService.updateVMModel(vmModel, courseName);
+        }catch (VMServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
 
 
     /*
