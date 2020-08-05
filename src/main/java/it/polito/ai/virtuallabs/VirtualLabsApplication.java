@@ -25,11 +25,11 @@ public class VirtualLabsApplication {
     public CommandLineRunner runner(UserRepository repository, PasswordEncoder passwordEncoder,
                                     VMService vmService){
         return args -> {
-            /*try {
+            try {
                 User admin = User.builder().id("a1").username("admin").password(passwordEncoder.encode("admin")).roles(Arrays.asList("ROLE_ADMIN")).build();
                 repository.saveAndFlush(admin);
                 System.out.println(repository.findAll());
-            }catch (Exception ignored){}*/
+            }catch (Exception ignored){}
 
         };
     }

@@ -108,7 +108,6 @@ public class CourseController {
     @ResponseStatus(value = HttpStatus.CREATED)
     private TeamDTO proposeTeam(@PathVariable String courseName, @RequestBody @Valid ModelHelper.TeamProposal proposal){
         try{
-            CourseDTO d = new CourseDTO();
             TeamDTO team = teamService.proposeTeam(courseName, proposal.getTeamName(), proposal.getMemberIds());
             notificationService.notifyTeam(team, proposal.getMemberIds());
             return team;
@@ -139,7 +138,7 @@ public class CourseController {
     @GetMapping("/{courseName}/teams")
     private List<TeamDTO> getTeamsForCourse(@PathVariable String courseName){
         try {
-            return teamService.getTeamForCourse(courseName)
+            return teamService.getTeamsForCourse(courseName)
                     .stream().map(ModelHelper::enrich)
                     .collect(Collectors.toList());
         }catch (TeamServiceException e){
@@ -147,11 +146,11 @@ public class CourseController {
         }
     }
 
-    @GetMapping("/teams/{teamId}")
-    private TeamDTO getTeamById(@PathVariable String teamId){
+    @GetMapping("/{courseName}/teams/{teamId}")
+    private TeamDTO getTeamById(@PathVariable String courseName, @PathVariable String teamId){
         try{
             Long id = Long.valueOf(teamId);
-            return ModelHelper.enrich(teamService.getTeam(id).get());
+            return ModelHelper.enrich(teamService.getTeam(courseName, id).get());
         }catch (NumberFormatException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team");
         }catch (NoSuchElementException e){
@@ -159,11 +158,11 @@ public class CourseController {
         }
     }
 
-    @GetMapping("/teams/{teamId}/members")
-    private List<StudentDTO> getMembers(@PathVariable String teamId){
+    @GetMapping("/{courseName}/teams/{teamId}/members")
+    private List<StudentDTO> getMembers(@PathVariable String courseName, @PathVariable String teamId){
         try{
             Long id = Long.valueOf(teamId);
-            return teamService.getMembers(id).stream()
+            return teamService.getMembers(courseName, id).stream()
                     .map(ModelHelper::enrich)
                     .collect(Collectors.toList());
         }catch (NumberFormatException e){
@@ -195,7 +194,7 @@ public class CourseController {
         }
     }
 
-    @PostMapping("/{courseName}/create-vm-model")
+    @PostMapping("/{courseName}/vm-model")
     @ResponseStatus(value = HttpStatus.CREATED)
     private VMModelDTO createVMModel(@PathVariable String courseName, @RequestBody @Valid VMModelDTO vmModel){
         try{
@@ -205,7 +204,7 @@ public class CourseController {
         }
     }
 
-    @PutMapping("/{courseName}/create-vm-model")
+    @PutMapping("/{courseName}/vm-model")
     private VMModelDTO updateVMModel(@PathVariable String courseName, @RequestBody @Valid VMModelDTO vmModel){
         try{
             return vmService.updateVMModel(vmModel, courseName);

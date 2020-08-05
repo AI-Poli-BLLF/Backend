@@ -2,6 +2,7 @@ import requests
 
 students = "http://localhost:8080/API/students/"
 courses = "http://localhost:8080/API/courses/"
+# vms = "http://localhost:8080/API/vms/"
 
 
 def addStudent(id, firstName, name, token):
@@ -72,19 +73,32 @@ def addProfessor(id, firstName, name, token):
     return requests.post(url, json=json, headers=get_headers(token))
 
 
+def createVMModel(os, version, course_name, token):
+    url = f"{courses}{course_name}/vm-model"
+    json = {"os": os, "version": version}
+    print("POST TO: " + url)
+    return requests.post(url, json=json, headers=get_headers(token))
+
+
+def updateVMModel(os, version, course_name, token):
+    url = f"{courses}{course_name}/vm-model"
+    json = {"os": os, "version": version}
+    print("POST TO: " + url)
+    return requests.put(url, json=json, headers=get_headers(token))
+
+
 if __name__ == '__main__':
-    s1_account = {"username": "s1@studenti.polito.it", "password": "oj3SOdn$)2"}
-    d1_account = {"username": "d1@polito.it", "password": "x,5DW)0hP3"}
-    d2_account = {"username": "d2@polito.it", "password": "QJ*2-W4ezo"}
-    admin_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaWF0IjoxNTg5OTkxODg1LCJleHAiOjE1ODk5OTU0ODV9.kxE8T6b_Vzh9KJfh-S-LPYSEqNIw1s7yNmlEb4xzbVM"
-    d1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMUBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1BST0ZFU1NPUiJdLCJpYXQiOjE1ODk5OTI5MjksImV4cCI6MTU4OTk5NjUyOX0.GHgxRIDPqNVZuZCNTj4mDTJKTD4X_3Uog67enUUYIrc"
-    s1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzMUBzdHVkZW50aS5wb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1NUVURFTlQiXSwiaWF0IjoxNTg5OTkwMjk1LCJleHAiOjE1ODk5OTM4OTV9.Xhe6OQK5gIH70r8SEtIu67DwLLNkKhUvtlchXbUL4O4"
-    d2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMkBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1BST0ZFU1NPUiJdLCJpYXQiOjE1ODk5OTI4MjIsImV4cCI6MTU4OTk5NjQyMn0.s2H_qtYAJUWZ9MgPcVbO7jFVGmb1tudHhX46DKZblNc"
+    s1_account = {"username": "s1@studenti.polito.it", "password": "DmeJv.6f-0"}
+    d1_account = {"username": "d1@polito.it", "password": "DfC&O3N0-l"}
+    d2_account = {"username": "d2@polito.it", "password": '2%Ts1N"sRa'}
+    admin_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaWF0IjoxNTk2NjM2MzY1LCJleHAiOjE1OTY2NzIzNjV9.ekAVceJSjCsvMTHA02QVoDmyGUfPnvRUC2JVB3-kukg"
+    d1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMUBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1BST0ZFU1NPUiJdLCJpYXQiOjE1OTY2MzY2OTAsImV4cCI6MTU5NjY3MjY5MH0.EHU5QZOEAuLEejH8e5niOLVxSMMv69nDe5dQd0y6xxg"
+    s1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzMUBzdHVkZW50aS5wb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1NUVURFTlQiXSwiaWF0IjoxNTk2NjM3NjAyLCJleHAiOjE1OTY2NzM2MDJ9.z1kSA9cgdwz3kwPNUy3Rkwly37BJX-Vptp0YCF3OVyw"
+    d2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMkBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1BST0ZFU1NPUiJdLCJpYXQiOjE1OTY2MzY3MTIsImV4cCI6MTU5NjY3MjcxMn0.adY9W4UVT7p1_BMtGMVIS3yXl8s5rpejham0yUeciJU"
     s3_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzM0BzdHVkZW50aS5wb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1NUVURFTlQiXSwiaWF0IjoxNTg5NjQ1ODI2LCJleHAiOjE1ODk2NDk0MjZ9.aQeVEUD_lB3sPAKVM_2MI_zuxGHoVR4O1x-b8po3z1w"
 
-    #res=authenticate(d1_account['username'], d1_account['password'])
-    #res = authenticate("admin", "admin")
-    #res = addProfessor("d3", "Gianpiero", "Cabodi", admin_token)
-    res = enableDisableCourse("applicazioni Internet", True, d1_token)
+    #res = authenticate(s1_account['username'], s1_account['password'])
+    res = updateVMModel("Ubuntu", "19.10", "AI", d1_token)
+
     print(res.status_code)
     print(res.text)

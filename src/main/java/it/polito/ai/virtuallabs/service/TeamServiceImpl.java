@@ -268,14 +268,21 @@ public class TeamServiceImpl implements TeamService {
 
     @PreAuthorize("hasRole('ADMIN') || @securityApiAuth.doesTeamBelongsToOwnedOrEnrolledCourses(#teamId)")
     @Override
-    public List<StudentDTO> getMembers(Long teamId) {
-        try{
-            return teamRepository.findById(teamId).get().getMembers()
-                    .stream().map(m->mapper.map(m, StudentDTO.class))
-                    .collect(Collectors.toList());
-        }catch (NoSuchElementException e){
-            throw new TeamNotFoundException(teamId);
-        }
+    public List<StudentDTO> getMembers(String courseName, Long teamId) {
+        Course c = courseRepository.findByNameIgnoreCase(courseName).orElseThrow(
+                () -> new CourseNotFoundException(courseName)
+        );
+        Team t = teamRepository.findById(teamId).orElseThrow(
+                () -> new TeamNotFoundException(teamId)
+        );
+
+        if (!t.getCourse().getName().equals(c.getName()))
+            throw new TeamNotBelongToCourseException(t.getName(), courseName);
+
+        return t.getMembers().stream()
+                .map(m->mapper.map(m, StudentDTO.class))
+                .collect(Collectors.toList());
+
     }
 
     @PreAuthorize("@securityApiAuth.isEnrolled(#courseName) && @securityApiAuth.amIbelongToMembers(#memberIds)")
@@ -339,7 +346,7 @@ public class TeamServiceImpl implements TeamService {
 
     @PreAuthorize("hasRole('ADMIN') || @securityApiAuth.isEnrolled(#courseName) || @securityApiAuth.ownCourse(#courseName)")
     @Override
-    public List<TeamDTO> getTeamForCourse(String courseName) {
+    public List<TeamDTO> getTeamsForCourse(String courseName) {
         try {
             return courseRepository.findByNameIgnoreCase(courseName).get()
                     .getTeams().stream()
@@ -386,8 +393,18 @@ public class TeamServiceImpl implements TeamService {
 
     @PreAuthorize("hasRole('ADMIN') || @securityApiAuth.doesTeamBelongsToOwnedOrEnrolledCourses(#id)")
     @Override
-    public Optional<TeamDTO> getTeam(Long id) {
+    public Optional<TeamDTO> getTeam(String courseName, Long id) {
+        /*if (!courseRepository.findByNameIgnoreCase(courseName).isPresent())
+            throw new CourseNotFoundException(courseName);*/
+
+        Course c = courseRepository.findByNameIgnoreCase(courseName).orElseThrow(
+                () -> new CourseNotFoundException(courseName)
+        );
+
         Optional<Team> team = teamRepository.findById(id);
+        if (team.isPresent() && !team.get().getCourse().equals(c))
+            throw new TeamNotBelongToCourseException(team.get().getName(), courseName);
+
         return team.map(t -> mapper.map(t, TeamDTO.class));
     }
 

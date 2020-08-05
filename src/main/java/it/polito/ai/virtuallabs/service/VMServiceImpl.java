@@ -293,6 +293,19 @@ public class VMServiceImpl implements VMService{
     }
 
     @Override
+    public VMModelDTO getVMModel(String courseName) {
+        Course c = courseRepository.findByNameIgnoreCase(courseName).orElseThrow(
+                () -> new CourseNotFoundException(courseName)
+        );
+
+        VMModel vmModel = c.getVmModel();
+        if(c.getVmModel() == null)
+            throw new VMModelNotFoundException(courseName);
+
+        return mapper.map(vmModel, VMModelDTO.class);
+    }
+
+    @Override
     public List<StudentDTO> getVMOwners(Long vmInstanceId) {
         return vmInstanceRepository.findById(vmInstanceId)
                 .orElseThrow(

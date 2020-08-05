@@ -26,12 +26,12 @@ public interface TeamService {
     List<Boolean> addAndEnroll(Reader r, String courseName);
     List<CourseDTO> getCourses(String studentId);
     List<TeamDTO> getTeamsForStudent(String studentId);
-    List<StudentDTO>getMembers(Long TeamId);
+    List<StudentDTO>getMembers(String courseName, Long TeamId);
     TeamDTO proposeTeam(String courseName, String teamName, List<String> memberIds);
-    List<TeamDTO> getTeamForCourse(String courseName);
+    List<TeamDTO> getTeamsForCourse(String courseName);
     List<StudentDTO> getStudentsInTeams(String courseName);
     List<StudentDTO> getAvailableStudents(String courseName);
-    Optional<TeamDTO> getTeam(Long id);
+    Optional<TeamDTO> getTeam(String courseName, Long id);
     void setTeamStatus(Long teamId, Team.Status status);
     void evictTeam(Long teamId);
     List<ProfessorDTO> getProfessors();
