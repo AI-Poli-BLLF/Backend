@@ -83,8 +83,24 @@ def createVMModel(os, version, course_name, token):
 def updateVMModel(os, version, course_name, token):
     url = f"{courses}{course_name}/vm-model"
     json = {"os": os, "version": version}
-    print("POST TO: " + url)
+    print("PUT TO: " + url)
     return requests.put(url, json=json, headers=get_headers(token))
+
+
+def createVmConfiguration(course_name, team_id, max_cpu, max_ram, max_disk, max_active, max_vm, token):
+    url = f"{courses}{course_name}/teams/{team_id}/vm-config"
+    json = {"maxCpu": max_cpu, "maxDisk": max_disk, "maxRam": max_ram, "maxActive": max_active,
+            "maxVm": max_vm}
+    print("PUT TO: " + url)
+    return requests.post(url, json=json, headers=get_headers(token))
+
+def updateVmConfiguration(course_name, team_id, max_cpu, max_ram, max_disk, max_active, max_vm, token):
+    url = f"{courses}{course_name}/teams/{team_id}/vm-config"
+    json = {"maxCpu": max_cpu, "maxDisk": max_disk, "maxRam": max_ram, "maxActive": max_active,
+            "maxVm": max_vm}
+    print("PUT TO: " + url)
+    return requests.put(url, json=json, headers=get_headers(token))
+
 
 
 if __name__ == '__main__':
@@ -92,13 +108,13 @@ if __name__ == '__main__':
     d1_account = {"username": "d1@polito.it", "password": "DfC&O3N0-l"}
     d2_account = {"username": "d2@polito.it", "password": '2%Ts1N"sRa'}
     admin_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaWF0IjoxNTk2NjM2MzY1LCJleHAiOjE1OTY2NzIzNjV9.ekAVceJSjCsvMTHA02QVoDmyGUfPnvRUC2JVB3-kukg"
-    d1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMUBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1BST0ZFU1NPUiJdLCJpYXQiOjE1OTY2MzY2OTAsImV4cCI6MTU5NjY3MjY5MH0.EHU5QZOEAuLEejH8e5niOLVxSMMv69nDe5dQd0y6xxg"
-    s1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzMUBzdHVkZW50aS5wb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1NUVURFTlQiXSwiaWF0IjoxNTk2NjM3NjAyLCJleHAiOjE1OTY2NzM2MDJ9.z1kSA9cgdwz3kwPNUy3Rkwly37BJX-Vptp0YCF3OVyw"
+    d1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMUBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1BST0ZFU1NPUiJdLCJpYXQiOjE1OTY3MjMzODUsImV4cCI6MTU5Njc1OTM4NX0.CB2UIP1C-Ru2whr0K0O6f3WaqSeoIqd6rnb94wbsEzw"
+    s1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzMUBzdHVkZW50aS5wb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1NUVURFTlQiXSwiaWF0IjoxNTk2NzIzNDE1LCJleHAiOjE1OTY3NTk0MTV9.x3k4z9ssaIADWoOZQK2ptXq0fTSQPZmfT9WctDsi2vo"
     d2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMkBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1BST0ZFU1NPUiJdLCJpYXQiOjE1OTY2MzY3MTIsImV4cCI6MTU5NjY3MjcxMn0.adY9W4UVT7p1_BMtGMVIS3yXl8s5rpejham0yUeciJU"
     s3_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzM0BzdHVkZW50aS5wb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1NUVURFTlQiXSwiaWF0IjoxNTg5NjQ1ODI2LCJleHAiOjE1ODk2NDk0MjZ9.aQeVEUD_lB3sPAKVM_2MI_zuxGHoVR4O1x-b8po3z1w"
 
     #res = authenticate(s1_account['username'], s1_account['password'])
-    res = updateVMModel("Ubuntu", "19.10", "AI", d1_token)
+    res = updateVmConfiguration("AI", 1, 8, 16 * 1024, 60, 2, 3, d1_token)
 
     print(res.status_code)
     print(res.text)

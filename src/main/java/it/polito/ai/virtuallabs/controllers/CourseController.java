@@ -3,6 +3,7 @@ package it.polito.ai.virtuallabs.controllers;
 import it.polito.ai.virtuallabs.dtos.CourseDTO;
 import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.dtos.TeamDTO;
+import it.polito.ai.virtuallabs.dtos.vms.VMConfigDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMModelDTO;
 import it.polito.ai.virtuallabs.service.NotificationService;
 import it.polito.ai.virtuallabs.service.TeamService;
@@ -209,6 +210,42 @@ public class CourseController {
         try{
             return vmService.updateVMModel(vmModel, courseName);
         }catch (VMServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
+    @GetMapping("/{courseName}/vm-model")
+    private VMModelDTO getVMModel(@PathVariable String courseName){
+        try{
+            return vmService.getVMModel(courseName);
+        }catch (VMServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
+    @PostMapping("/{courseName}/teams/{teamId}/vm-config")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    private VMConfigDTO createVMConfig(@PathVariable String courseName, @PathVariable String teamId,
+                                       @RequestBody @Valid VMConfigDTO config){
+        try {
+            Long id = Long.valueOf(teamId);
+            return vmService.createVMConfiguration(config, id, courseName);
+        }catch (NumberFormatException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Invalid team");
+        }catch (VMServiceException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
+    @PutMapping("/{courseName}/teams/{teamId}/vm-config")
+    private VMConfigDTO updateVMConfig(@PathVariable String courseName, @PathVariable String teamId,
+                                       @RequestBody @Valid VMConfigDTO config){
+        try {
+            Long id = Long.valueOf(teamId);
+            return vmService.updateVMConfiguration(config, id, courseName);
+        }catch (NumberFormatException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Invalid team");
+        }catch (VMServiceException | TeamServiceException e){
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }

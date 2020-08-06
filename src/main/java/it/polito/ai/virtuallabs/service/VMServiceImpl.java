@@ -91,7 +91,7 @@ public class VMServiceImpl implements VMService{
 
     //@PreAuthorize("hasRole('PROFESSOR') || @securityApiAuth.ownCourse(#courseName)")
     @Override
-    public void setVMConfiguration(VMConfigDTO vmConfigDTO, Long teamId, String courseName) {
+    public VMConfigDTO createVMConfiguration(VMConfigDTO vmConfigDTO, Long teamId, String courseName) {
         Course c = courseRepository.findByNameIgnoreCase(courseName).orElseThrow(
                 () -> new CourseNotFoundException(courseName)
         );
@@ -109,22 +109,67 @@ public class VMServiceImpl implements VMService{
         );
 
         // Se il team non appartiene a quel corso lancia una eccezione
-        if (!t.getCourse().getName().equals(courseName))
+        if (!t.getCourse().equals(c))
             throw new TeamNotBelongToCourseException(t.getName(), courseName);
 
-        // Se le risorse settate sono minori di quelle già utilizzate, lancia una eccezione
-        Stream<VMInstance> vmStream = t.getVms().stream();
-        int totalCpu = vmStream.mapToInt(VMInstance::getCpu).sum();
-        int totalRam = vmStream.mapToInt(VMInstance::getRamSize).sum();
-        int totalDisk = vmStream.mapToInt(VMInstance::getDiskSize).sum();
-        if (totalCpu > vmConfigDTO.getMaxCpu() || totalRam > vmConfigDTO.getMaxRam() ||
-            totalDisk > vmConfigDTO.getMaxDisk())
-            throw new VMResourcesAlreadyAllocatedException(teamId, totalCpu, vmConfigDTO.getMaxCpu(),
-                    totalRam, vmConfigDTO.getMaxRam(), totalDisk, vmConfigDTO.getMaxDisk());
+        // Se è già stata creata una configurazione per il team corrente lancia una eccezione
+        if (vmConfigRepository.findById(teamId).isPresent())
+            throw new VMConfigAlreadyExistException(courseName, teamId);
 
         VMConfig vmConfig = mapper.map(vmConfigDTO, VMConfig.class);
         vmConfig.setTeam(t);
-        vmConfigRepository.save(vmConfig);
+        return mapper.map(vmConfigRepository.save(vmConfig), VMConfigDTO.class);
+    }
+
+    //@PreAuthorize("hasRole('PROFESSOR') || @securityApiAuth.ownCourse(#courseName)")
+    @Override
+    public VMConfigDTO updateVMConfiguration(VMConfigDTO vmConfigDTO, Long teamId, String courseName) {
+        Course c = courseRepository.findByNameIgnoreCase(courseName).orElseThrow(
+                () -> new CourseNotFoundException(courseName)
+        );
+
+        //Se il corso non è attivo lancia una eccezione
+        if (!c.isEnabled())
+            throw new CourseNotEnabledException(courseName);
+
+        //Se nessun modello è ancora stato settato lancia una eccezione
+        if (c.getVmModel() == null)
+            throw new VMModelNotFoundException(courseName);
+
+        Team t = teamRepository.findById(teamId).orElseThrow(
+                () -> new TeamNotFoundException(teamId)
+        );
+
+        // Se il team non appartiene a quel corso lancia una eccezione
+        if (!t.getCourse().equals(c))
+            throw new TeamNotBelongToCourseException(t.getName(), courseName);
+
+        // Se è già stata creata una configurazione per il team corrente lancia una eccezione
+        VMConfig vmConfig = vmConfigRepository.findById(teamId).orElseThrow(
+                () -> new VMConfigNotFoundException(courseName, teamId)
+        );
+
+        // Se le risorse settate sono minori di quelle già utilizzate, lancia una eccezione
+        List<VMInstance> vms = t.getVms();
+        int totalCpu = vms.stream().mapToInt(VMInstance::getCpu).sum();
+        int totalRam = vms.stream().mapToInt(VMInstance::getRamSize).sum();
+        int totalDisk = vms.stream().mapToInt(VMInstance::getDiskSize).sum();
+        int totalVm = vms.size();
+        int totalActive = (int)vms.stream().filter(VMInstance::isActive).count();
+        if (totalCpu > vmConfigDTO.getMaxCpu() || totalRam > vmConfigDTO.getMaxRam() ||
+                totalDisk > vmConfigDTO.getMaxDisk() || totalVm > vmConfigDTO.getMaxVm() ||
+                totalActive > vmConfigDTO.getMaxActive())
+            throw new VMResourcesAlreadyAllocatedException(teamId, totalCpu, vmConfigDTO.getMaxCpu(),
+                    totalRam, vmConfigDTO.getMaxRam(), totalDisk, vmConfigDTO.getMaxDisk(),
+                    totalActive, vmConfigDTO.getMaxActive(), totalVm, vmConfigDTO.getMaxVm());
+
+        vmConfig.setMaxCpu(vmConfigDTO.getMaxCpu());
+        vmConfig.setMaxDisk(vmConfigDTO.getMaxDisk());
+        vmConfig.setMaxRam(vmConfigDTO.getMaxRam());
+        vmConfig.setMaxActive(vmConfigDTO.getMaxActive());
+        vmConfig.setMaxVm(vmConfigDTO.getMaxVm());
+
+        return mapper.map(vmConfig, VMConfigDTO.class);
     }
 
     //@PreAuthorize("@securityApiAuth.isMe(#studentId)")
