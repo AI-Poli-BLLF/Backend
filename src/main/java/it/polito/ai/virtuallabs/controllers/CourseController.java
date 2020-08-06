@@ -4,6 +4,7 @@ import it.polito.ai.virtuallabs.dtos.CourseDTO;
 import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.dtos.TeamDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMConfigDTO;
+import it.polito.ai.virtuallabs.dtos.vms.VMInstanceDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMModelDTO;
 import it.polito.ai.virtuallabs.service.NotificationService;
 import it.polito.ai.virtuallabs.service.TeamService;
@@ -262,10 +263,24 @@ public class CourseController {
         }
     }
 
+    @PostMapping("/{courseName}/teams/{teamId}/vms")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    private VMInstanceDTO createVMInstance(@PathVariable String courseName, @PathVariable String teamId,
+                                           @RequestBody @Valid ModelHelper.VMInstanceData instanceData){
+        try{
+            Long id = Long.valueOf(teamId);
+            return vmService.createVMInstance(instanceData.getInstance(), courseName, id, instanceData.getStudentId());
+        }catch (NumberFormatException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Invalid team");
+        }catch (VMServiceException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
 
     /*
     --------------------------- EXCEPTION HANDLERS ---------------------------------------
      */
+
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)

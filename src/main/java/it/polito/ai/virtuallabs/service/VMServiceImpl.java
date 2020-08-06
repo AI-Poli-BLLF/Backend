@@ -172,7 +172,7 @@ public class VMServiceImpl implements VMService{
 
     //@PreAuthorize("@securityApiAuth.isMe(#studentId)")
     @Override
-    public void createVMInstance(VMInstanceDTO vmInstanceDTO, String courseName, String studentId) {
+    public VMInstanceDTO createVMInstance(VMInstanceDTO vmInstanceDTO, String courseName, Long teamId, String studentId) {
         Course c = courseRepository.findByNameIgnoreCase(courseName).orElseThrow(
                 () -> new CourseNotFoundException(courseName)
         );
@@ -191,13 +191,17 @@ public class VMServiceImpl implements VMService{
         if (!enrolledCourses.contains(courseName.toLowerCase()))
             throw new StudentNotEnrolledException(studentId, courseName);
 
+        Team courseTeam = teamRepository.findById(teamId).orElseThrow(
+                () -> new TeamNotFoundException(teamId)
+        );
 
-        //Controllo se appartiene a un team per il corso
-        Team courseTeam = s.getTeams().stream()
-                .filter(t-> t.getCourse().getName().toLowerCase().equals(courseName.toLowerCase()))
-                .findFirst().orElseThrow(
-                        () -> new NoTeamException(studentId, courseName)
-                );
+        //Controllo se il team appartiene a quel corso
+        if (!courseTeam.getCourse().equals(c))
+            throw new TeamNotBelongToCourseException(courseTeam.getName(), courseName);
+
+        //Controllo se lo studente appartiene al team
+        if (!courseTeam.getMembers().contains(s))
+            throw new StudentNotBelongToTeamException(studentId, teamId);
 
         //Controllo se è stato settato un modello di VM per il corso
         VMModel vmModel = vmModelRepository.findByIdIgnoreCase(courseName).orElseThrow(
@@ -224,7 +228,7 @@ public class VMServiceImpl implements VMService{
 
         vmConfig.forEach((key, value) -> {
             int limit = limits.get(key);
-            int allocated = allocatedRes.get(key);
+            int allocated = allocatedRes.getOrDefault(key, 0);
             if (value + allocated > limit)
                 throw new VMLimitExceedException(courseTeam.getName(), courseName, key, limit, value);
         });
@@ -235,7 +239,7 @@ public class VMServiceImpl implements VMService{
         vmInstance.setTeam(courseTeam);
         vmInstance.addOwner(s);
 
-        vmInstanceRepository.save(vmInstance);
+        return mapper.map(vmInstanceRepository.save(vmInstance), VMInstanceDTO.class);
     }
 
     //@PreAuthorize("@securityApiAuth.isMe(#ownerId)")

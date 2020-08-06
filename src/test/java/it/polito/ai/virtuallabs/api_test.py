@@ -102,6 +102,19 @@ def updateVmConfiguration(course_name, team_id, max_cpu, max_ram, max_disk, max_
     return requests.put(url, json=json, headers=get_headers(token))
 
 
+def createVmInstance(course_name, team_id, student_id, cpu, ram, disk, token):
+    url = f"{courses}{course_name}/teams/{team_id}/vms"
+    json = {
+        "studentId": student_id,
+        "instance": {
+            "cpu": cpu,
+            "ramSize": ram,
+            "diskSize": disk
+        }
+    }
+    print("POST TO: " + url)
+    return requests.post(url, json=json, headers=get_headers(token))
+
 
 if __name__ == '__main__':
     s1_account = {"username": "s1@studenti.polito.it", "password": "DmeJv.6f-0"}
@@ -114,7 +127,7 @@ if __name__ == '__main__':
     s3_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzM0BzdHVkZW50aS5wb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1NUVURFTlQiXSwiaWF0IjoxNTg5NjQ1ODI2LCJleHAiOjE1ODk2NDk0MjZ9.aQeVEUD_lB3sPAKVM_2MI_zuxGHoVR4O1x-b8po3z1w"
 
     #res = authenticate(s1_account['username'], s1_account['password'])
-    res = updateVmConfiguration("AI", 1, 8, 16 * 1024, 60, 2, 3, d1_token)
+    res = createVmInstance("AI", "1", "s1", 2, 2048, 20, s1_token)
 
     print(res.status_code)
     print(res.text)

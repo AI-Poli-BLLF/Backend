@@ -4,7 +4,9 @@ import it.polito.ai.virtuallabs.dtos.CourseDTO;
 import it.polito.ai.virtuallabs.dtos.ProfessorDTO;
 import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.dtos.TeamDTO;
+import it.polito.ai.virtuallabs.dtos.vms.VMInstanceDTO;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.hateoas.Link;
 
 import javax.validation.constraints.NotEmpty;
@@ -62,5 +64,14 @@ public class ModelHelper {
         @NotNull
         @NotEmpty
         private List<String> memberIds;
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class VMInstanceData{
+        @NotEmpty
+        private String studentId;
+        @NotNull
+        private VMInstanceDTO instance;
     }
 }

@@ -3,12 +3,14 @@ package it.polito.ai.virtuallabs.dtos.vms;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Min;
 import java.util.HashMap;
 import java.util.Map;
 
 @Data
+@NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
 public class VMInstanceDTO {
 
