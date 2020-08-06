@@ -79,7 +79,7 @@ public class VMInstance {
         this.team = team;
     }
 
-    public Map<String, Integer> getConfig(){
+    public Map<String, Integer> config(){
         Map<String,Integer> map = new HashMap<>();
 
         map.put("cpu", cpu);

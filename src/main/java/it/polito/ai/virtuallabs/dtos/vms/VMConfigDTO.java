@@ -31,7 +31,7 @@ public class VMConfigDTO {
         this.maxVm = maxVm;
     }
 
-    public Map<String, Integer> getConfig(){
+    public Map<String, Integer> config(){
         Map<String,Integer> map = new HashMap<>();
 
         map.put("cpu", maxCpu);

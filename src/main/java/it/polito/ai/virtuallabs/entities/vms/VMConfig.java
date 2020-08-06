@@ -30,7 +30,7 @@ public class VMConfig {
     private int maxActive;
     private int maxVm;
 
-    public Map<String, Integer> getConfig(){
+    public Map<String, Integer> config(){
         Map<String,Integer> map = new HashMap<>();
 
         map.put("cpu", maxCpu);

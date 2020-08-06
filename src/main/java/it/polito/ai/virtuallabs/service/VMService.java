@@ -22,7 +22,7 @@ public interface VMService {
     List<StudentDTO> getVMOwners(Long vmInstanceId);
     VMModelDTO getVMModelOfInstance(Long vmInstanceId);
     List<VMInstanceDTO> getTeamVMs(Long teamId);
-    VMConfigDTO getTeamConfig(Long teamId);
+    VMConfigDTO getTeamConfig(String courseName, Long teamId);
     List<VMInstanceDTO> getAllVms();
     List<VMInstanceDTO> getActiveVms();
     List<VMInstanceDTO> getActiveTeamVms(Long teamId);

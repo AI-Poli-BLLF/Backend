@@ -250,6 +250,18 @@ public class CourseController {
         }
     }
 
+    @GetMapping("/{courseName}/teams/{teamId}/vm-config")
+    private VMConfigDTO getVMConfig(@PathVariable String courseName, @PathVariable String teamId){
+        try {
+            Long id = Long.valueOf(teamId);
+            return vmService.getTeamConfig(courseName, id);
+        }catch (NumberFormatException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Invalid team");
+        }catch (VMServiceException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
 
     /*
     --------------------------- EXCEPTION HANDLERS ---------------------------------------

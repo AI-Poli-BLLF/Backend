@@ -20,13 +20,11 @@ import it.polito.ai.virtuallabs.service.exceptions.*;
 import it.polito.ai.virtuallabs.service.exceptions.vms.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @Transactional
@@ -212,8 +210,8 @@ public class VMServiceImpl implements VMService{
             throw new NoVMConfigException(courseTeam.getName(), courseName);
 
         //Controllo delle specifiche settate
-        Map<String, Integer> limits = config.getConfig();
-        Map<String, Integer> allocatedRes = courseTeam.getVms().stream().map(vm-> vm.getConfig().entrySet())
+        Map<String, Integer> limits = config.config();
+        Map<String, Integer> allocatedRes = courseTeam.getVms().stream().map(vm-> vm.config().entrySet())
                 .flatMap(Collection::stream)
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
         Map<String, Integer> vmConfig = vmInstanceDTO.getConfig();
@@ -381,11 +379,19 @@ public class VMServiceImpl implements VMService{
     }
 
     @Override
-    public VMConfigDTO getTeamConfig(Long teamId) {
+    public VMConfigDTO getTeamConfig(String courseName, Long teamId) {
+        Course c = courseRepository.findByNameIgnoreCase(courseName).orElseThrow(
+                () -> new CourseNotFoundException(courseName)
+        );
+
         VMConfig config =  teamRepository.findById(teamId)
                 .orElseThrow(
                         () -> new TeamNotFoundException(teamId)
                 ).getVmConfig();
+
+        if (!config.getTeam().getCourse().equals(c))
+            throw new TeamNotBelongToCourseException();
+
         return mapper.map(config, VMConfigDTO.class);
     }
 
