@@ -14,12 +14,12 @@ public interface VMService {
     VMConfigDTO updateVMConfiguration(VMConfigDTO vmConfigDTO, Long teamId, String courseName);
     VMInstanceDTO createVMInstance(VMInstanceDTO vmInstanceDTO, String courseName, Long teamId, String studentId);
     void shareVMOwnership(Long vmInstanceId, String ownerId, String teammateId);
-    void bootVMInstance(Long vmInstanceId, String ownerId);
-    void shutdownVMInstance(Long vmInstanceId, String ownerId);
-    void deleteVMInstance(Long vmInstanceId, String ownerId);
+    void bootVMInstance(String courseName, Long teamId, Long vmInstanceId, String ownerId);
+    void shutdownVMInstance(String courseName, Long teamId, Long vmInstanceId, String ownerId);
+    void deleteVMInstance(String courseName, Long teamId, Long vmInstanceId, String ownerId);
 
     VMModelDTO getCourseVMModel(String courseName);
-    List<StudentDTO> getVMOwners(Long vmInstanceId);
+    List<StudentDTO> getVMOwners(String courseName, Long teamId, Long vmInstanceId);
     VMModelDTO getVMModelOfInstance(Long vmInstanceId);
     List<VMInstanceDTO> getTeamVMs(String courseName, Long teamId);
     VMInstanceDTO getSingleTeamVm(String courseName, Long teamId, Long vmInstanceId);

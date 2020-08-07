@@ -303,7 +303,62 @@ public class CourseController {
         }
     }
 
+    @GetMapping("/{courseName}/teams/{teamId}/vms/{vmId}/owners")
+    private List<StudentDTO> getVmOwners(@PathVariable String courseName, @PathVariable String teamId,
+                                         @PathVariable String vmId){
+        try{
+            Long tId = Long.valueOf(teamId);
+            Long vId = Long.valueOf(vmId);
+            return vmService.getVMOwners(courseName, tId, vId).stream()
+                    .map(ModelHelper::enrich).collect(Collectors.toList());
+        }catch (NumberFormatException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team or vm");
+        }catch (VMServiceException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
 
+    @PutMapping("/{courseName}/teams/{teamId}/vms/{vmId}/boot")
+    private void bootVm(@PathVariable String courseName, @PathVariable String teamId,
+                        @PathVariable String vmId, @RequestBody String ownerId){
+        try{
+            Long tId = Long.valueOf(teamId);
+            Long vId = Long.valueOf(vmId);
+            vmService.bootVMInstance(courseName, tId, vId, ownerId);
+        }catch (NumberFormatException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team or vm");
+        }catch (VMServiceException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @PutMapping("/{courseName}/teams/{teamId}/vms/{vmId}/shutdown")
+    private void shutdownVm(@PathVariable String courseName, @PathVariable String teamId,
+                        @PathVariable String vmId, @RequestBody String ownerId){
+        try{
+            Long tId = Long.valueOf(teamId);
+            Long vId = Long.valueOf(vmId);
+            vmService.shutdownVMInstance(courseName, tId, vId, ownerId);
+        }catch (NumberFormatException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team or vm");
+        }catch (VMServiceException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{courseName}/teams/{teamId}/vms/{vmId}")
+    private void deleteVm(@PathVariable String courseName, @PathVariable String teamId,
+                        @PathVariable String vmId, @RequestBody String ownerId){
+        try{
+            Long tId = Long.valueOf(teamId);
+            Long vId = Long.valueOf(vmId);
+            vmService.deleteVMInstance(courseName, tId, vId, ownerId);
+        }catch (NumberFormatException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team or vm");
+        }catch (VMServiceException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
 
 
     /*

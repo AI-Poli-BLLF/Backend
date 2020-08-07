@@ -247,8 +247,18 @@ public class VMServiceImpl implements VMService{
 
     //@PreAuthorize("@securityApiAuth.isMe(#ownerId)")
     @Override
-    public void bootVMInstance(Long vmInstanceId, String ownerId) {
+    public void bootVMInstance(String courseName, Long teamId, Long vmInstanceId, String ownerId) {
+        Course c = getCourse(courseName);
+
+        Team t = getTeam(teamId);
+
+        if(!teamBelongToCourse(t, c))
+            throw new TeamNotBelongToCourseException(t.getName(), courseName);
+
         VMInstance vmInstance = getVMInstance(vmInstanceId);
+
+        if (!vmInstance.getTeam().equals(t))
+            throw new VMInstanceNotBelongToTeamException(teamId, vmInstanceId);
 
         Student owner = getStudent(ownerId);
 
@@ -256,8 +266,6 @@ public class VMServiceImpl implements VMService{
             throw new StudentNotOwnerException(ownerId, vmInstanceId);
 
         //Se Ci sono già troppe VM attive, lancia una eccezione
-        Team t = vmInstance.getTeam();
-
         int maxActive = t.getVmConfig().getMaxActive();
         int currentActive = 1 + (int)t.getVms().stream().filter(VMInstance::isActive).count();
 
@@ -269,8 +277,18 @@ public class VMServiceImpl implements VMService{
 
     //@PreAuthorize("@securityApiAuth.isMe(#ownerId)")
     @Override
-    public void shutdownVMInstance(Long vmInstanceId, String ownerId) {
+    public void shutdownVMInstance(String courseName, Long teamId, Long vmInstanceId, String ownerId) {
+        Course c = getCourse(courseName);
+
+        Team t = getTeam(teamId);
+
+        if(!teamBelongToCourse(t, c))
+            throw new TeamNotBelongToCourseException(t.getName(), courseName);
+
         VMInstance vmInstance = getVMInstance(vmInstanceId);
+
+        if (!vmInstance.getTeam().equals(t))
+            throw new VMInstanceNotBelongToTeamException(teamId, vmInstanceId);
 
         Student owner = getStudent(ownerId);
 
@@ -282,19 +300,29 @@ public class VMServiceImpl implements VMService{
 
     //@PreAuthorize("@securityApiAuth.isMe(#ownerId)")
     @Override
-    public void deleteVMInstance(Long vmInstanceId, String ownerId) {
+    public void deleteVMInstance(String courseName, Long teamId, Long vmInstanceId, String ownerId) {
+        Course c = getCourse(courseName);
+
+        Team t = getTeam(teamId);
+
+        if(!teamBelongToCourse(t, c))
+            throw new TeamNotBelongToCourseException(t.getName(), courseName);
+
         VMInstance vmInstance = getVMInstance(vmInstanceId);
+
+        if (!vmInstance.getTeam().equals(t))
+            throw new VMInstanceNotBelongToTeamException(teamId, vmInstanceId);
 
         Student owner = getStudent(ownerId);
 
         if (!vmInstance.getOwners().contains(owner))
             throw new StudentNotOwnerException(ownerId, vmInstanceId);
 
-        List<Student> owners = vmInstance.getOwners();
+        /*List<Student> owners = vmInstance.getOwners();
 
         owners.forEach(vmInstance::removeOwner);
         vmInstance.getTeam().getVms().remove(vmInstance);
-        vmInstance.getVmModel().getVmInstances().remove(vmInstance);
+        vmInstance.getVmModel().getVmInstances().remove(vmInstance);*/
 
         vmInstanceRepository.delete(vmInstance);
     }
@@ -311,9 +339,20 @@ public class VMServiceImpl implements VMService{
     }
 
     @Override
-    public List<StudentDTO> getVMOwners(Long vmInstanceId) {
-        return getVMInstance(vmInstanceId)
-                .getOwners().stream()
+    public List<StudentDTO> getVMOwners(String courseName, Long teamId, Long vmInstanceId) {
+        Course c = getCourse(courseName);
+
+        Team t = getTeam(teamId);
+
+        if(!teamBelongToCourse(t, c))
+            throw new TeamNotBelongToCourseException(t.getName(), courseName);
+
+        VMInstance v = getVMInstance(vmInstanceId);
+
+        if (!v.getTeam().equals(t))
+            throw new VMInstanceNotBelongToTeamException(teamId, vmInstanceId);
+
+        return v.getOwners().stream()
                 .map(owner->mapper.map(owner, StudentDTO.class))
                 .collect(Collectors.toList());
     }

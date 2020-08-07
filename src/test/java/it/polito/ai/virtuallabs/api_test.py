@@ -116,6 +116,24 @@ def createVmInstance(course_name, team_id, student_id, cpu, ram, disk, token):
     return requests.post(url, json=json, headers=get_headers(token))
 
 
+def bootVM(course_name, team_id, vm_id, owner_id, token):
+    url = f"{courses}{course_name}/teams/{team_id}/vms/{vm_id}/boot"
+    print("PUT TO: " + url)
+    return requests.put(url, data=owner_id, headers=get_headers(token))
+
+
+def shutdownVM(course_name, team_id, vm_id, owner_id, token):
+    url = f"{courses}{course_name}/teams/{team_id}/vms/{vm_id}/shutdown"
+    print("PUT TO: " + url)
+    return requests.put(url, data=owner_id, headers=get_headers(token))
+
+
+def deleteVM(course_name, team_id, vm_id, owner_id, token):
+    url = f"{courses}{course_name}/teams/{team_id}/vms/{vm_id}"
+    print("PUT TO: " + url)
+    return requests.delete(url, data=owner_id, headers=get_headers(token))
+
+
 if __name__ == '__main__':
     s1_account = {"username": "s1@studenti.polito.it", "password": "DmeJv.6f-0"}
     s2_account = {"username": "s2@studenti.polito.it", "password": "6SqP,t6D1%"}
@@ -128,7 +146,8 @@ if __name__ == '__main__':
     d2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMkBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1BST0ZFU1NPUiJdLCJpYXQiOjE1OTY2MzY3MTIsImV4cCI6MTU5NjY3MjcxMn0.adY9W4UVT7p1_BMtGMVIS3yXl8s5rpejham0yUeciJU"
 
     #res = authenticate(s2_account['username'], s2_account['password'])
-    res = createVmInstance("AI", "1", "s2", 4, 1024*6, 15, s2_token)
+    res = deleteVM("AI", "1", 5, "s2", s2_token)
+    #res = createVmInstance("ai", 1, "s2", 4, 1024*6, 16, s2_token)
 
     print(res.status_code)
     print(res.text)
