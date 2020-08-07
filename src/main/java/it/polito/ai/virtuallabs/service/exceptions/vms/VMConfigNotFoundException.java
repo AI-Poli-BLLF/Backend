@@ -5,4 +5,9 @@ public class VMConfigNotFoundException extends VMServiceException {
         super(String.format("VM config not found for the team %d of the course %s",
                 teamId, courseName));
     }
+
+    public VMConfigNotFoundException(Long teamId) {
+        super(String.format("VM config not found for the team %d",
+                teamId));
+    }
 }

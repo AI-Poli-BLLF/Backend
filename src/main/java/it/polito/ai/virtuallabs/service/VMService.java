@@ -18,10 +18,11 @@ public interface VMService {
     void shutdownVMInstance(Long vmInstanceId, String ownerId);
     void deleteVMInstance(Long vmInstanceId, String ownerId);
 
-    VMModelDTO getVMModel(String courseName);
+    VMModelDTO getCourseVMModel(String courseName);
     List<StudentDTO> getVMOwners(Long vmInstanceId);
     VMModelDTO getVMModelOfInstance(Long vmInstanceId);
-    List<VMInstanceDTO> getTeamVMs(Long teamId);
+    List<VMInstanceDTO> getTeamVMs(String courseName, Long teamId);
+    VMInstanceDTO getSingleTeamVm(String courseName, Long teamId, Long vmInstanceId);
     VMConfigDTO getTeamConfig(String courseName, Long teamId);
     List<VMInstanceDTO> getAllVms();
     List<VMInstanceDTO> getActiveVms();

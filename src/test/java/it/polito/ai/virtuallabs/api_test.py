@@ -118,16 +118,17 @@ def createVmInstance(course_name, team_id, student_id, cpu, ram, disk, token):
 
 if __name__ == '__main__':
     s1_account = {"username": "s1@studenti.polito.it", "password": "DmeJv.6f-0"}
+    s2_account = {"username": "s2@studenti.polito.it", "password": "6SqP,t6D1%"}
     d1_account = {"username": "d1@polito.it", "password": "DfC&O3N0-l"}
     d2_account = {"username": "d2@polito.it", "password": '2%Ts1N"sRa'}
     admin_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaWF0IjoxNTk2NjM2MzY1LCJleHAiOjE1OTY2NzIzNjV9.ekAVceJSjCsvMTHA02QVoDmyGUfPnvRUC2JVB3-kukg"
     d1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMUBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1BST0ZFU1NPUiJdLCJpYXQiOjE1OTY3MjMzODUsImV4cCI6MTU5Njc1OTM4NX0.CB2UIP1C-Ru2whr0K0O6f3WaqSeoIqd6rnb94wbsEzw"
-    s1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzMUBzdHVkZW50aS5wb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1NUVURFTlQiXSwiaWF0IjoxNTk2NzIzNDE1LCJleHAiOjE1OTY3NTk0MTV9.x3k4z9ssaIADWoOZQK2ptXq0fTSQPZmfT9WctDsi2vo"
+    s1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzMUBzdHVkZW50aS5wb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1NUVURFTlQiXSwiaWF0IjoxNTk2ODEyMTA3LCJleHAiOjE1OTY4NDgxMDd9.qGJ-ZgxyW9CCHnM1wCuQUVIUCyy-efonWBSDlqu_o7w"
+    s2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzMkBzdHVkZW50aS5wb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1NUVURFTlQiXSwiaWF0IjoxNTk2ODEyMTQ1LCJleHAiOjE1OTY4NDgxNDV9.ySPsf2GQOlCVpqP1QJyuiPXXDZmzuxV6kQ3fFO37nC4"
     d2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMkBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1BST0ZFU1NPUiJdLCJpYXQiOjE1OTY2MzY3MTIsImV4cCI6MTU5NjY3MjcxMn0.adY9W4UVT7p1_BMtGMVIS3yXl8s5rpejham0yUeciJU"
-    s3_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzM0BzdHVkZW50aS5wb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1NUVURFTlQiXSwiaWF0IjoxNTg5NjQ1ODI2LCJleHAiOjE1ODk2NDk0MjZ9.aQeVEUD_lB3sPAKVM_2MI_zuxGHoVR4O1x-b8po3z1w"
 
-    #res = authenticate(s1_account['username'], s1_account['password'])
-    res = createVmInstance("AI", "1", "s1", 2, 2048, 20, s1_token)
+    #res = authenticate(s2_account['username'], s2_account['password'])
+    res = createVmInstance("AI", "1", "s2", 4, 1024*6, 15, s2_token)
 
     print(res.status_code)
     print(res.text)

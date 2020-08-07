@@ -218,9 +218,9 @@ public class CourseController {
     @GetMapping("/{courseName}/vm-model")
     private VMModelDTO getVMModel(@PathVariable String courseName){
         try{
-            return vmService.getVMModel(courseName);
+            return vmService.getCourseVMModel(courseName);
         }catch (VMServiceException e){
-            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
 
@@ -259,7 +259,7 @@ public class CourseController {
         }catch (NumberFormatException e){
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Invalid team");
         }catch (VMServiceException | TeamServiceException e){
-            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
 
@@ -276,6 +276,35 @@ public class CourseController {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }
+
+    @GetMapping("/{courseName}/teams/{teamId}/vms")
+    private List<VMInstanceDTO> getTeamVms(@PathVariable String courseName, @PathVariable String teamId){
+        try{
+            Long id = Long.valueOf(teamId);
+            return vmService.getTeamVMs(courseName, id);
+        }catch (NumberFormatException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team");
+        }catch (VMServiceException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @GetMapping("/{courseName}/teams/{teamId}/vms/{vmId}")
+    private VMInstanceDTO getTeamVm(@PathVariable String courseName, @PathVariable String teamId,
+                                    @PathVariable String vmId){
+        try{
+            Long tId = Long.valueOf(teamId);
+            Long vId = Long.valueOf(vmId);
+            return vmService.getSingleTeamVm(courseName, tId, vId);
+        }catch (NumberFormatException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team or vm");
+        }catch (VMServiceException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+
+
 
     /*
     --------------------------- EXCEPTION HANDLERS ---------------------------------------
