@@ -27,7 +27,7 @@ public class JwtController {
     @Autowired
     private UserRepository repository;
 
-    @PostMapping("/authenticate")
+    @PostMapping("/lel")
     private ResponseEntity provideToken(@RequestBody JwtRequest request){
         try {
             String username = request.getUsername();
