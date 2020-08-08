@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ProfessorDTO extends RepresentationModel<ProfessorDTO> {
     @EqualsAndHashCode.Include
-    @Pattern(regexp = "d[0-9]+", message = "The id must be in the following format d<id>")
+    @Pattern(regexp = "d[0-9]{6}", message = "The id must be in the following format d<id>")
     private String id;
 
     @EqualsAndHashCode.Include
