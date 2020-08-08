@@ -21,13 +21,16 @@ import java.util.Arrays;
 @EnableScheduling
 public class VirtualLabsApplication {
 
+    // todo: l'uso de repository qua non mi fa impazzire, non sarebbe meglio usare un service?
     @Bean
     public CommandLineRunner runner(UserRepository repository, PasswordEncoder passwordEncoder,
                                     VMService vmService){
         return args -> {
             try {
                 User admin = User.builder().id("a1").username("admin").password(passwordEncoder.encode("admin")).roles(Arrays.asList("ROLE_ADMIN")).build();
+                User test_front = User.builder().id("a2").username("test@front").password(passwordEncoder.encode("admin")).roles(Arrays.asList("ROLE_ADMIN")).build();
                 repository.saveAndFlush(admin);
+                repository.saveAndFlush(test_front);
                 System.out.println(repository.findAll());
             }catch (Exception ignored){}
 
