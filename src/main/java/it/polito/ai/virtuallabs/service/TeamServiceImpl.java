@@ -65,9 +65,20 @@ public class TeamServiceImpl implements TeamService {
 
     //Permit All authenticated
     @Override
+    @PreAuthorize("hasRole('PROFESSOR')")
     public Optional<CourseDTO> getCourse(String courseName) {
+        // todo: aggiungere autorizzazioni, solo il professore del corso può eliminarlo
         Optional<Course> course = courseRepository.findByNameIgnoreCase(courseName);
         return course.map(c -> mapper.map(c, CourseDTO.class));
+    }
+
+    @Override
+    public void deleteCourse(String courseName) {
+        try {
+            courseRepository.deleteById(courseName);
+        }catch (NoSuchElementException e){
+            throw new CourseNotFoundException(courseName);
+        }
     }
 
     //Permit to Every authenticated user

@@ -13,6 +13,7 @@ import java.util.Optional;
 public interface TeamService {
     boolean addCourse(CourseDTO course);
     Optional<CourseDTO> getCourse(String name);
+    void deleteCourse(String name);
     List<CourseDTO> getAllCourses();
     boolean addStudent(StudentDTO student);
     Optional<StudentDTO> getStudent(String studentId);

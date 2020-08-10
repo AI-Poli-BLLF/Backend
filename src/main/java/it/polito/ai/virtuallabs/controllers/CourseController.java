@@ -54,7 +54,20 @@ public class CourseController {
         try{
             return ModelHelper.enrich(teamService.getCourse(courseName).get());
         }catch (NoSuchElementException e){
+            // todo: quando un corso non viene trovato forse ha più senso tornare una bad request,
+            //  perchè la not found mi da l'idea di una pagina che non esiste e anche lato front non capisco la
+            //  differenza se l'url è sbagliato o se la richiesta è sbagliata
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Course not found: %s", courseName));
+        }
+    }
+
+    @DeleteMapping("/{courseName}")
+    private void delete(@PathVariable String courseName){
+        // todo: gestire eccezioni => errore 500 se il corso non è presente
+        try{
+            teamService.deleteCourse(courseName);
+        }catch (NoSuchElementException e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("Course not found: %s", courseName));
         }
     }
 
