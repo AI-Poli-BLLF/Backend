@@ -18,7 +18,7 @@ public class StudentDTO extends RepresentationModel<StudentDTO> {
 
     @EqualsAndHashCode.Include
     @CsvBindByName
-    @Pattern(regexp = "s[0-9]+", message = "The id must be in the following format s<id>")
+    @Pattern(regexp = "s[0-9]{6}", message = "The id must be in the following format s<id>")
     private String id;
 
     @EqualsAndHashCode.Include

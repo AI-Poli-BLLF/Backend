@@ -3,15 +3,24 @@ package it.polito.ai.virtuallabs.controllers;
 import it.polito.ai.virtuallabs.dtos.CourseDTO;
 import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.dtos.TeamDTO;
+import it.polito.ai.virtuallabs.dtos.images.ImageModel;
+import it.polito.ai.virtuallabs.service.ImageUploadService;
 import it.polito.ai.virtuallabs.service.TeamService;
+import it.polito.ai.virtuallabs.service.exceptions.StudentNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.TeamServiceException;
+import it.polito.ai.virtuallabs.service.exceptions.images.ImageServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
@@ -20,6 +29,8 @@ import java.util.stream.Collectors;
 public class StudentController {
     @Autowired
     private TeamService teamService;
+    @Autowired
+    private ImageUploadService imageUploadService;
 
     @GetMapping({"", "/"})
     private List<StudentDTO> all(){
@@ -64,6 +75,30 @@ public class StudentController {
                     .collect(Collectors.toList());
         }catch (TeamServiceException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @PostMapping("/{studentId}/uploadPhoto")
+    private Map<String, String> uploadPhoto(@PathVariable String studentId, @RequestParam("image") MultipartFile image){
+        try {
+            Map<String, String> map = new HashMap<>();
+            map.put("imageRef", imageUploadService.store(image, studentId));
+            return map;
+        }catch (ImageServiceException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
+    @GetMapping(value = "/{studentId}/photo",
+            produces = {MediaType.IMAGE_JPEG_VALUE,
+                    MediaType.IMAGE_PNG_VALUE,
+                    MediaType.IMAGE_JPEG_VALUE})
+    private @ResponseBody byte[] getStudentPhoto(@PathVariable String studentId){
+        try {
+
+            return imageUploadService.getImage(studentId).getPicByte();
+        }catch (ImageServiceException | TeamServiceException | NullPointerException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Photo not found");
         }
     }
 }

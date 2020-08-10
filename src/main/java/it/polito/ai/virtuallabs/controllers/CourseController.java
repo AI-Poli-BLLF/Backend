@@ -372,33 +372,4 @@ public class CourseController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
-
-
-    /*
-    --------------------------- EXCEPTION HANDLERS ---------------------------------------
-     */
-
-
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        errors.put("error", "BAD_REQUEST");
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-        return errors;
-    }
-
-
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(MultipartException.class)
-    public Map<String, String> handleValidationExceptions(MultipartException ex) {
-        Map<String, String> errors = new HashMap<>();
-        errors.put("error", "BAD_REQUEST");
-        errors.put("message", ex.getMessage());
-        return errors;
-    }
 }

@@ -1,5 +1,6 @@
 package it.polito.ai.virtuallabs.security.exceptions;
 
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -17,6 +18,8 @@ public class JwtExceptionHandler implements AuthenticationEntryPoint, Serializab
         final String msg = (String) request.getAttribute("message");
         if(msg != null)
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, msg);
+        else if (authException instanceof BadCredentialsException)
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
         else
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid/Expired JWT: please create a valid one at /authenticate");
     }
