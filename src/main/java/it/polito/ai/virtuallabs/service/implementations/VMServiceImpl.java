@@ -1,4 +1,4 @@
-package it.polito.ai.virtuallabs.service;
+package it.polito.ai.virtuallabs.service.implementations;
 
 import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMConfigDTO;
@@ -16,6 +16,7 @@ import it.polito.ai.virtuallabs.repositories.TeamRepository;
 import it.polito.ai.virtuallabs.repositories.vms.VMConfigRepository;
 import it.polito.ai.virtuallabs.repositories.vms.VMInstanceRepository;
 import it.polito.ai.virtuallabs.repositories.vms.VMModelRepository;
+import it.polito.ai.virtuallabs.service.VMService;
 import it.polito.ai.virtuallabs.service.exceptions.*;
 import it.polito.ai.virtuallabs.service.exceptions.vms.*;
 import org.modelmapper.ModelMapper;
@@ -28,7 +29,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
-public class VMServiceImpl implements VMService{
+public class VMServiceImpl implements VMService {
 
     @Autowired
     private VMModelRepository vmModelRepository;

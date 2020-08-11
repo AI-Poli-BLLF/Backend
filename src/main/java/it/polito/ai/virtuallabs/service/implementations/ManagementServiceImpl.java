@@ -1,4 +1,4 @@
-package it.polito.ai.virtuallabs.service;
+package it.polito.ai.virtuallabs.service.implementations;
 
 import it.polito.ai.virtuallabs.dtos.ProfessorDTO;
 import it.polito.ai.virtuallabs.dtos.StudentDTO;
@@ -6,6 +6,8 @@ import it.polito.ai.virtuallabs.security.dtos.UserDTO;
 import it.polito.ai.virtuallabs.security.entities.Roles;
 import it.polito.ai.virtuallabs.security.entities.User;
 import it.polito.ai.virtuallabs.security.repositories.UserRepository;
+import it.polito.ai.virtuallabs.service.ManagementService;
+import it.polito.ai.virtuallabs.service.NotificationService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +21,7 @@ import java.util.stream.Collectors;
 
 @Transactional
 @Service
-public class ManagementServiceImpl implements ManagementService{
+public class ManagementServiceImpl implements ManagementService {
 
     @Autowired
     private UserRepository userRepository;

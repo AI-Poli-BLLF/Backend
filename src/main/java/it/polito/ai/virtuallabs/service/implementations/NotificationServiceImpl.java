@@ -1,9 +1,11 @@
-package it.polito.ai.virtuallabs.service;
+package it.polito.ai.virtuallabs.service.implementations;
 
 import it.polito.ai.virtuallabs.dtos.TeamDTO;
 import it.polito.ai.virtuallabs.entities.Team;
 import it.polito.ai.virtuallabs.entities.Token;
 import it.polito.ai.virtuallabs.repositories.TokenRepository;
+import it.polito.ai.virtuallabs.service.NotificationService;
+import it.polito.ai.virtuallabs.service.TeamService;
 import it.polito.ai.virtuallabs.service.exceptions.TeamNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.InvalidOrExpiredTokenException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +24,7 @@ import java.util.stream.Collectors;
 
 @Component
 @EnableAsync
-public class NotificationServiceImpl implements NotificationService{
+public class NotificationServiceImpl implements NotificationService {
 
     public static final String from = "applicazioni.internet.test@gmail.com";
     public static final String baseURL = "http://localhost:8080";

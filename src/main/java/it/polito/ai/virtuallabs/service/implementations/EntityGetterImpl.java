@@ -1,4 +1,4 @@
-package it.polito.ai.virtuallabs.service;
+package it.polito.ai.virtuallabs.service.implementations;
 
 import it.polito.ai.virtuallabs.entities.Course;
 import it.polito.ai.virtuallabs.entities.Professor;
@@ -14,6 +14,7 @@ import it.polito.ai.virtuallabs.repositories.TeamRepository;
 import it.polito.ai.virtuallabs.repositories.vms.VMConfigRepository;
 import it.polito.ai.virtuallabs.repositories.vms.VMInstanceRepository;
 import it.polito.ai.virtuallabs.repositories.vms.VMModelRepository;
+import it.polito.ai.virtuallabs.service.EntityGetter;
 import it.polito.ai.virtuallabs.service.exceptions.CourseNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.ProfessorNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.StudentNotFoundException;
@@ -28,7 +29,7 @@ import javax.transaction.Transactional;
 
 @Service
 @Transactional
-public class EntityGetterImpl implements EntityGetter{
+public class EntityGetterImpl implements EntityGetter {
     @Autowired
     private VMModelRepository vmModelRepository;
     @Autowired

@@ -1,4 +1,4 @@
-package it.polito.ai.virtuallabs.service;
+package it.polito.ai.virtuallabs.service.implementations;
 
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
@@ -15,6 +15,7 @@ import it.polito.ai.virtuallabs.repositories.ProfessorRepository;
 import it.polito.ai.virtuallabs.repositories.StudentRepository;
 import it.polito.ai.virtuallabs.repositories.TeamRepository;
 import it.polito.ai.virtuallabs.security.service.SecurityApiAuth;
+import it.polito.ai.virtuallabs.service.TeamService;
 import it.polito.ai.virtuallabs.service.exceptions.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;

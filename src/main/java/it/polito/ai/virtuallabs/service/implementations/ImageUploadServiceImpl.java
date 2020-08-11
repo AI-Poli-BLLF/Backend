@@ -1,9 +1,11 @@
-package it.polito.ai.virtuallabs.service;
+package it.polito.ai.virtuallabs.service.implementations;
 
 import it.polito.ai.virtuallabs.entities.Professor;
 import it.polito.ai.virtuallabs.entities.Student;
 import it.polito.ai.virtuallabs.repositories.ProfessorRepository;
 import it.polito.ai.virtuallabs.repositories.StudentRepository;
+import it.polito.ai.virtuallabs.service.EntityGetter;
+import it.polito.ai.virtuallabs.service.ImageUploadService;
 import it.polito.ai.virtuallabs.service.exceptions.TeamServiceException;
 import it.polito.ai.virtuallabs.service.exceptions.images.*;
 import org.apache.commons.io.FileUtils;
@@ -28,7 +30,7 @@ import java.util.Set;
 
 @Service
 @Transactional
-public class ImageUploadServiceImpl implements ImageUploadService{
+public class ImageUploadServiceImpl implements ImageUploadService {
 
     private Tika tika;
     private Set<String> extensions;

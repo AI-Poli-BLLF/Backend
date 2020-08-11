@@ -3,7 +3,9 @@ package it.polito.ai.virtuallabs.security.controllers;
 import it.polito.ai.virtuallabs.security.JwtTokenProvider;
 import it.polito.ai.virtuallabs.security.dtos.JwtRequest;
 import it.polito.ai.virtuallabs.security.repositories.UserRepository;
+import it.polito.ai.virtuallabs.service.TeamService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -12,8 +14,11 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,6 +31,8 @@ public class JwtController {
     private JwtTokenProvider jwtTokenProvider;
     @Autowired
     private UserRepository repository;
+    @Autowired
+    private TeamService teamService;
 
     @PostMapping("/authenticate")
     private ResponseEntity provideToken(@RequestBody JwtRequest request){
@@ -44,5 +51,15 @@ public class JwtController {
         }catch (AuthenticationException e){
             throw new BadCredentialsException("Invalid username/password");
         }
+    }
+
+    @PostMapping("/register")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    private void registerUser(@RequestBody @Valid UserRegistration user){
+        String idFromMail = user.getEmail().split("@")[0];
+        if (!idFromMail.equals(user.getUserId()))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "User id and email are not coherent");
+
+
     }
 }
