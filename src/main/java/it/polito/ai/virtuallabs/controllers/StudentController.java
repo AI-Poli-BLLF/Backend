@@ -3,14 +3,11 @@ package it.polito.ai.virtuallabs.controllers;
 import it.polito.ai.virtuallabs.dtos.CourseDTO;
 import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.dtos.TeamDTO;
-import it.polito.ai.virtuallabs.dtos.images.ImageModel;
 import it.polito.ai.virtuallabs.service.ImageUploadService;
 import it.polito.ai.virtuallabs.service.TeamService;
-import it.polito.ai.virtuallabs.service.exceptions.StudentNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.TeamServiceException;
 import it.polito.ai.virtuallabs.service.exceptions.images.ImageServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -96,7 +93,7 @@ public class StudentController {
     private @ResponseBody byte[] getStudentPhoto(@PathVariable String studentId){
         try {
 
-            return imageUploadService.getImage(studentId).getPicByte();
+            return imageUploadService.getImage(studentId);
         }catch (ImageServiceException | TeamServiceException | NullPointerException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Photo not found");
         }

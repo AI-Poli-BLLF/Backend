@@ -36,9 +36,11 @@ public class ModelHelper {
         Link self = linkTo(StudentController.class).slash(student.getId()).withSelfRel();
         Link courses = linkTo(StudentController.class).slash(student.getId()).slash("courses").withRel("courses");
         Link teams = linkTo(StudentController.class).slash(student.getId()).slash("teams").withRel("teams");
+        Link photo = linkTo(StudentController.class).slash(student.getId()).slash("photo").withRel("photo");
         student.add(self);
         student.add(courses);
         student.add(teams);
+        student.add(photo);
         return student;
     }
 

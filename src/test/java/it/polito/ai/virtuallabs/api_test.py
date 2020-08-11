@@ -141,11 +141,11 @@ if __name__ == '__main__':
     d2_account = {"username": "d2@polito.it", "password": '2%Ts1N"sRa'}
     admin_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaWF0IjoxNTk2NjM2MzY1LCJleHAiOjE1OTY2NzIzNjV9.ekAVceJSjCsvMTHA02QVoDmyGUfPnvRUC2JVB3-kukg"
     d1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMUBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1BST0ZFU1NPUiJdLCJpYXQiOjE1OTY3MjMzODUsImV4cCI6MTU5Njc1OTM4NX0.CB2UIP1C-Ru2whr0K0O6f3WaqSeoIqd6rnb94wbsEzw"
-    s1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzMUBzdHVkZW50aS5wb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1NUVURFTlQiXSwiaWF0IjoxNTk3MDY3MjE0LCJleHAiOjE1OTcxMDMyMTR9.mGzZF4248l4EPk_mYtcYcWly_-nK8AFAqcIbhbRV_KU"
-    s2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzMkBzdHVkZW50aS5wb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1NUVURFTlQiXSwiaWF0IjoxNTk2ODk5MDczLCJleHAiOjE1OTY5MzUwNzN9.M1SkT_tvZjQbRAd3dcxFT5dtHKUFzCrjeBvjg8SYVC0"
+    s1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzMUBzdHVkZW50aS5wb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1NUVURFTlQiXSwiaWF0IjoxNTk3MTU2NzA5LCJleHAiOjE1OTcxOTI3MDl9.uEd9KB1tKc0BR4xnOIdooB2W422HDzwl979r-tBcRpE"
+    s2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzMkBzdHVkZW50aS5wb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1NUVURFTlQiXSwiaWF0IjoxNTk3MTU2NzUxLCJleHAiOjE1OTcxOTI3NTF9.D7NroRNyOThm9tMJOxfdrwXPhbj8teQXkVVeHlp8XUE"
     d2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMkBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1BST0ZFU1NPUiJdLCJpYXQiOjE1OTY2MzY3MTIsImV4cCI6MTU5NjY3MjcxMn0.adY9W4UVT7p1_BMtGMVIS3yXl8s5rpejham0yUeciJU"
 
-    res = authenticate(s1_account['username'], s1_account['password'])
+    res = authenticate(s2_account['username'], s2_account['password'])
     #res = deleteVM("AI", "1", 5, "s2", s2_token)
     #res = createVmInstance("ai", 1, "s2", 4, 1024*6, 16, s2_token)
 

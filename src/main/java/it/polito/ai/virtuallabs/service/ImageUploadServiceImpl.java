@@ -1,6 +1,5 @@
 package it.polito.ai.virtuallabs.service;
 
-import it.polito.ai.virtuallabs.dtos.images.ImageModel;
 import it.polito.ai.virtuallabs.entities.Professor;
 import it.polito.ai.virtuallabs.entities.Student;
 import it.polito.ai.virtuallabs.repositories.ProfessorRepository;
@@ -29,12 +28,13 @@ import java.util.stream.Collectors;
 @Transactional
 public class ImageUploadServiceImpl implements ImageUploadService{
 
-    private final long MAX_SIZE = (1<<20)*3;
     private Tika tika;
     private Set<String> extensions;
 
     @Value("${app.path.images}")
     private String baseImagePath;
+    @Value("${app.default.image}")
+    private String defaultImg;
 
     private final StudentRepository studentRepository;
     private final ProfessorRepository professorRepository;
@@ -76,15 +76,15 @@ public class ImageUploadServiceImpl implements ImageUploadService{
     }
 
     @Override
-    public ImageModel getImage(String userId) {
+    public byte[] getImage(String userId) {
         Student s = getter.getStudent(userId);
-        String path = String.format("%s/%s", baseImagePath, s.getPhotoName());
+        String photoName = s.getPhotoName() == null ? defaultImg : s.getPhotoName();
+        String path = String.format("%s/%s", baseImagePath, photoName);
 
         try {
             File image = new File(path);
-            byte[] imageBytes = FileUtils.readFileToByteArray(image);
-            return new ImageModel(image.getName(), tika.detect(image), imageBytes);
-        } catch (IOException | NullPointerException e) {
+            return FileUtils.readFileToByteArray(image);
+        } catch (IOException e) {
             throw new ImageConversionException();
         }
     }
@@ -110,20 +110,5 @@ public class ImageUploadServiceImpl implements ImageUploadService{
             e.printStackTrace();
             throw new ImageStorageException(imageName);
         }
-    }
-
-    private String generateRandomName() {
-        String upperCaseLetters = RandomStringUtils.random(3, 65, 90, true, true);
-        String lowerCaseLetters = RandomStringUtils.random(3, 97, 122, true, true);
-        String numbers = RandomStringUtils.randomNumeric(3);
-        String combinedChars = upperCaseLetters.concat(lowerCaseLetters)
-                .concat(numbers);
-        List<Character> pwdChars = combinedChars.chars()
-                .mapToObj(c -> (char) c)
-                .collect(Collectors.toList());
-        Collections.shuffle(pwdChars);
-        return pwdChars.stream()
-                .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
-                .toString();
     }
 }
