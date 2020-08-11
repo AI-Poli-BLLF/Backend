@@ -27,7 +27,7 @@ public class ProfessorDTO extends RepresentationModel<ProfessorDTO> {
     @EqualsAndHashCode.Include
     @NotEmpty
     private String firstName;
-    private String photoName;
+    //private String photoName;
     private List<String> courseNames = new ArrayList<>();
 
     public String getEmail(){

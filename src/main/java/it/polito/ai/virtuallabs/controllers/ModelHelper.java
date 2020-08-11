@@ -55,7 +55,9 @@ public class ModelHelper {
 
     public static ProfessorDTO enrich(ProfessorDTO professor){
         Link self = linkTo(ProfessorController.class).slash(professor.getId()).withSelfRel();
+        Link photo = linkTo(ProfessorController.class).slash(professor.getId()).slash("photo").withRel("photo");
         professor.add(self);
+        professor.add(photo);
         return professor;
     }
 

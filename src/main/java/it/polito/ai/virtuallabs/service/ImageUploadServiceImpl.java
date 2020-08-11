@@ -7,10 +7,10 @@ import it.polito.ai.virtuallabs.repositories.StudentRepository;
 import it.polito.ai.virtuallabs.service.exceptions.TeamServiceException;
 import it.polito.ai.virtuallabs.service.exceptions.images.*;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,8 +22,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -51,6 +52,7 @@ public class ImageUploadServiceImpl implements ImageUploadService{
         extensions = new HashSet<>(Arrays.asList("jpg", "jpeg", "png"));
     }
 
+    @PreAuthorize("@securityApiAuth.isMe(#userId)")
     @Override
     public String store(MultipartFile image, String userId){
         String type;
