@@ -94,8 +94,8 @@ public class StudentController {
         try {
 
             return imageUploadService.getImage(studentId);
-        }catch (ImageServiceException | TeamServiceException | NullPointerException e){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Photo not found");
+        }catch (ImageServiceException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
 }

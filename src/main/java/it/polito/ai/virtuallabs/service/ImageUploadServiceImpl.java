@@ -4,6 +4,7 @@ import it.polito.ai.virtuallabs.entities.Professor;
 import it.polito.ai.virtuallabs.entities.Student;
 import it.polito.ai.virtuallabs.repositories.ProfessorRepository;
 import it.polito.ai.virtuallabs.repositories.StudentRepository;
+import it.polito.ai.virtuallabs.service.exceptions.TeamServiceException;
 import it.polito.ai.virtuallabs.service.exceptions.images.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -70,15 +71,26 @@ public class ImageUploadServiceImpl implements ImageUploadService{
         String imageName = String.format("%s-profile.%s", userId, extension);
 
         storeOnDisk(image, imageName);
-        storeRefOnDb(imageName, userId);
-
-        return String.format("http://localhost:8080/students/%s/photo", userId);
+        return storeRefOnDb(imageName, userId);
     }
 
     @Override
     public byte[] getImage(String userId) {
-        Student s = getter.getStudent(userId);
-        String photoName = s.getPhotoName() == null ? defaultImg : s.getPhotoName();
+        char prefix = userId.toLowerCase().toCharArray()[0];
+        String photoName;
+        switch (prefix){
+            case 's':
+                Student s = getter.getStudent(userId);
+                photoName = s.getPhotoName() == null ? defaultImg : s.getPhotoName();
+                break;
+            case 'd':
+                Professor p = getter.getProfessor(userId);
+                photoName = p.getPhotoName() == null ? defaultImg : p.getPhotoName();
+                break;
+            default:
+                throw new TeamServiceException(String.format("User %s not found", userId));
+        }
+
         String path = String.format("%s/%s", baseImagePath, photoName);
 
         try {
@@ -89,13 +101,15 @@ public class ImageUploadServiceImpl implements ImageUploadService{
         }
     }
 
-    private void storeRefOnDb(String imageName, String userId) {
+    private String storeRefOnDb(String imageName, String userId) {
         if(userId.toLowerCase().startsWith("d")){
             Professor p = getter.getProfessor(userId);
             p.setPhotoName(imageName);
+            return String.format("http://localhost:8080/API/professors/%s/photo", userId);
         }else if (userId.toLowerCase().startsWith("s")){
             Student s = getter.getStudent(userId);
             s.setPhotoName(imageName);
+            return String.format("http://localhost:8080/API/students/%s/photo", userId);
         }else{
             throw new IllegalStateException("User not found");
         }
