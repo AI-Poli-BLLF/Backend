@@ -29,7 +29,7 @@ public class UserInfoController {
     @Autowired
     private StudentRepository studentRepository;
 
-    @GetMapping("/me")
+    @GetMapping("/API/me")
     public ResponseEntity currentUser(@AuthenticationPrincipal UserDetails userDetails){
         User principal = (User)userDetails;
         Map<Object, Object> model = new HashMap<>();
@@ -38,6 +38,8 @@ public class UserInfoController {
             if(student != null){
                 model.put("name", student.getName());
                 model.put("firstName", student.getFirstName());
+                model.put("id", student.getId());
+                model.put("email", student.getEmail());
                 model.put("courses", studentRepository.getCourseNames(principal.getId()));
             }
         }else if(principal.getRoles().contains(Roles.ROLE_PROFESSOR.toString())){
@@ -45,6 +47,8 @@ public class UserInfoController {
             if(professor != null){
                 model.put("name", professor.getName());
                 model.put("firstName", professor.getFirstName());
+                model.put("id", professor.getId());
+                model.put("email", professor.getEmail());
                 model.put("courses", professorRepository.getCourseNames(principal.getId()));
             }
         }
