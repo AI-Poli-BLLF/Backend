@@ -1,4 +1,4 @@
-package it.polito.ai.virtuallabs.security.controllers;
+package it.polito.ai.virtuallabs.security.dtos;
 
 import lombok.Data;
 

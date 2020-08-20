@@ -89,13 +89,13 @@ public class TeamServiceImpl implements TeamService {
                 .collect(Collectors.toList());
     }
 
-    @PreAuthorize("hasAnyRole('PROFESSOR', 'ADMIN')")
+    //@PreAuthorize("hasAnyRole('PROFESSOR', 'ADMIN')")
     @Override
     public boolean addStudent(StudentDTO student) {
         if(studentRepository.findByIdIgnoreCase(student.getId()).isPresent())
             return false;
-        if(!managementService.createStudentUser(student))
-            return false;
+        /*if(!managementService.createStudentUser(student))
+            return false;*/
         studentRepository.save(mapper.map(student, Student.class));
         return true;
     }
@@ -432,13 +432,13 @@ public class TeamServiceImpl implements TeamService {
         return professor.map(p -> mapper.map(p, ProfessorDTO.class));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    //@PreAuthorize("hasRole('ADMIN')")
     @Override
     public boolean addProfessor(ProfessorDTO professorDTO) {
         if(professorRepository.findByIdIgnoreCase(professorDTO.getId()).isPresent())
             return false;
-        if(!managementService.createProfessorUser(professorDTO))
-            return false;
+        /*if(!managementService.createProfessorUser(professorDTO))
+            return false;*/
         professorRepository.save(mapper.map(professorDTO, Professor.class));
         return true;
     }

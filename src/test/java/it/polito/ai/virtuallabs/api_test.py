@@ -134,6 +134,18 @@ def deleteVM(course_name, team_id, vm_id, owner_id, token):
     return requests.delete(url, data=owner_id, headers=get_headers(token))
 
 
+def registerUser(first_name, name, user_id, password, email):
+    url = "http://localhost:8080/register"
+    json = {
+        "firstName": first_name,
+        "name": name,
+        "userId": user_id,
+        "password": password,
+        "email": email
+    }
+    print("POST TO: " + url)
+    return requests.post(url, json=json)
+
 if __name__ == '__main__':
     s1_account = {"username": "s1@studenti.polito.it", "password": "DmeJv.6f-0"}
     s2_account = {"username": "s2@studenti.polito.it", "password": "6SqP,t6D1%"}
@@ -145,9 +157,11 @@ if __name__ == '__main__':
     s2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzMkBzdHVkZW50aS5wb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1NUVURFTlQiXSwiaWF0IjoxNTk3MTU2NzUxLCJleHAiOjE1OTcxOTI3NTF9.D7NroRNyOThm9tMJOxfdrwXPhbj8teQXkVVeHlp8XUE"
     d2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMkBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1BST0ZFU1NPUiJdLCJpYXQiOjE1OTY2MzY3MTIsImV4cCI6MTU5NjY3MjcxMn0.adY9W4UVT7p1_BMtGMVIS3yXl8s5rpejham0yUeciJU"
 
-    res = authenticate(s2_account['username'], s2_account['password'])
+    res = authenticate("d123987@polito.it", "ciao123")
+    #res = authenticate(s1_account['username'], s1_account['password'])
     #res = deleteVM("AI", "1", 5, "s2", s2_token)
     #res = createVmInstance("ai", 1, "s2", 4, 1024*6, 16, s2_token)
+    #res = registerUser("Federico", "Gianluca", "s123987", "ciao123", "s123987@studenti.polito.it")
 
     print(res.status_code)
     print(res.text)
