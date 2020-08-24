@@ -337,7 +337,7 @@ public class TeamServiceImpl implements TeamService {
                     throw new StudentNotEnrolledException(m, courseName);
 
                 //Controlla che ogni studente non appartenga già ad un gruppo per il corso selezionato
-                if(s.getTeams().stream().map(Team::getCourse)
+                if(s.getTeams().stream().filter(t -> t.getStatus()== Team.Status.ACTIVE).map(Team::getCourse)
                         .collect(Collectors.toList()).contains(c))
                     throw new StudentAlreadyBelongsToTeam(s.getId(), courseName);
 
@@ -452,6 +452,37 @@ public class TeamServiceImpl implements TeamService {
             return false;*/
         professorRepository.save(mapper.map(professorDTO, Professor.class));
         return true;
+    }
+
+    @Override
+    public List<Long> evictPendingTeamsOfMembers(Long teamId) {
+        // 0. get team
+        Optional<Team> team = teamRepository.findById(teamId);
+        if (!team.isPresent()) {
+            throw new TeamNotFoundException();
+        }
+
+        // 1. get team members
+        List<Student> members = team.get().getMembers();
+
+        // 2. get members' teams referring to te same course
+        List<Long> teamsToEvict = new ArrayList<>();
+        for (Student s : members) {
+            List<Long> studentTeamsToEvict = s.getTeams().stream()
+                    .filter(t -> t.getId() != team.get().getId())
+                    .filter(t -> t.getCourse() == team.get().getCourse())
+                    .map(Team::getId)
+                    .collect(Collectors.toList());
+            teamsToEvict.addAll(studentTeamsToEvict);
+        }
+
+        // 3. delete pending teams
+        for (Long id : teamsToEvict) {
+            evictTeam(id);
+        }
+
+        // 4. delete tokens (done by the caller)
+        return teamsToEvict;
     }
 
     //Permit all authenticated

@@ -7,7 +7,6 @@ import it.polito.ai.virtuallabs.dtos.TeamDTO;
 import it.polito.ai.virtuallabs.entities.Team;
 
 import java.io.Reader;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,5 +39,5 @@ public interface TeamService {
     List<ProfessorDTO> getProfessors();
     Optional<ProfessorDTO> getProfessor(String professorId);
     boolean addProfessor(ProfessorDTO professorDTO);
-
+    List<Long> evictPendingTeamsOfMembers(Long teamId);
 }
