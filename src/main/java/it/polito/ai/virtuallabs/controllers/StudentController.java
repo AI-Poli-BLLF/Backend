@@ -15,10 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -70,6 +67,23 @@ public class StudentController {
             return teamService.getTeamsForStudent(studentId)
                     .stream().map(ModelHelper::enrich)
                     .collect(Collectors.toList());
+        }catch (TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @GetMapping("/{studentId}/teams/{courseName}")
+    private List<TeamDTO> getTeamsForStudentForCourse(@PathVariable String studentId, @PathVariable String courseName){
+        try {
+            List<TeamDTO> teamsForCourse = teamService.getTeamsForCourse(courseName)
+                    .stream().map(ModelHelper::enrich)
+                    .collect(Collectors.toList());
+            List<TeamDTO> teamsForStudent = teamService.getTeamsForStudent(studentId)
+                    .stream().map(ModelHelper::enrich)
+                    .collect(Collectors.toList());
+            // return only (inactive) teams of a student referring to the specified course
+            teamsForCourse.retainAll(teamsForStudent);
+            return teamsForCourse;
         }catch (TeamServiceException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }

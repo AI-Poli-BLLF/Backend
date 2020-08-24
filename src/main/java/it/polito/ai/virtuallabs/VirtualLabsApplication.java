@@ -29,7 +29,7 @@ public class VirtualLabsApplication {
         return args -> {
             try {
                 User admin = User.builder().id("a1").username("admin").password(passwordEncoder.encode("admin")).roles(Arrays.asList("ROLE_ADMIN")).build();
-                User test_front = User.builder().id("a2").username("test@front").password(passwordEncoder.encode("admin")).roles(Arrays.asList("ROLE_ADMIN")).build();
+                User test_front = User.builder().id("a2").username("test@studenti.polito.it").password(passwordEncoder.encode("test")).roles(Arrays.asList("ROLE_ADMIN")).build();
                 repository.saveAndFlush(admin);
                 repository.saveAndFlush(test_front);
                 System.out.println(repository.findAll());

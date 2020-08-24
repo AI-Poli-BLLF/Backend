@@ -326,7 +326,7 @@ public class TeamServiceImpl implements TeamService {
                     throw new StudentNotEnrolledException(m, courseName);
 
                 //Controlla che ogni studente non appartenga già ad un gruppo per il corso selezionato
-                if(s.getTeams().stream().map(Team::getCourse)
+                if(s.getTeams().stream().filter(t -> t.getStatus()== Team.Status.ACTIVE).map(Team::getCourse)
                         .collect(Collectors.toList()).contains(c))
                     throw new StudentAlreadyBelongsToTeam(s.getId(), courseName);
 
