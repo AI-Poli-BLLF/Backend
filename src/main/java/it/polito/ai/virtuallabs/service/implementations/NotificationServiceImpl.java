@@ -62,7 +62,7 @@ public class NotificationServiceImpl implements NotificationService {
             // del gruppo appena attivato
             List<Long> teamsToEvict = teamService.evictPendingTeamsOfMembers(teamId);
             for (Long id : teamsToEvict) {
-                tokenRepository.deleteAllByTeamId(teamId);
+                tokenRepository.deleteAllByTeamId(id);
             }
         }
     }

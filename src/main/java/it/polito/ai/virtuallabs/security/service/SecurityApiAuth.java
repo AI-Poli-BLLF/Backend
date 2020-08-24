@@ -45,10 +45,15 @@ public class SecurityApiAuth {
         if(!principal.getRoles().contains(Roles.ROLE_STUDENT.toString()))
             return false;
 
-        return studentRepository.getCourseNames(principal.getId())
+        boolean toReturn = studentRepository.getCourseNames(principal.getId())
                 .stream().map(String::toLowerCase)
                 .collect(Collectors.toSet())
                 .contains(courseName.toLowerCase());
+
+        if (!toReturn) {
+            System.out.println("User is not enrolled in the course");
+        }
+        return toReturn;
     }
 
     public boolean doesTeamBelongsToOwnedOrEnrolledCourses(Long teamId){
@@ -66,11 +71,18 @@ public class SecurityApiAuth {
 
     public boolean amIbelongToMembers(List<String> memberIds) {
         User principal = getPrincipal();
-        if(!principal.getRoles().contains(Roles.ROLE_STUDENT.toString()))
+        if(!principal.getRoles().contains(Roles.ROLE_STUDENT.toString())) {
+            System.out.println("User does not have the role STUDENT");
             return false;
-        return memberIds
+        }
+        boolean toReturn = memberIds
                 .stream().map(String::toLowerCase)
                 .collect(Collectors.toSet())
                 .contains(principal.getId().toLowerCase());
+
+        if (!toReturn) {
+            System.out.println("User does not appear among the proposed members");
+        }
+        return toReturn;
     }
 }

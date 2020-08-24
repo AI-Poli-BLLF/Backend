@@ -470,7 +470,7 @@ public class TeamServiceImpl implements TeamService {
             evictTeam(id);
         }
 
-        // 4. delete tokens
+        // 4. delete tokens (done by the caller)
         return teamsToEvict;
     }
 
