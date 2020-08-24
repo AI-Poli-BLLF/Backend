@@ -7,6 +7,7 @@ import it.polito.ai.virtuallabs.dtos.TeamDTO;
 import it.polito.ai.virtuallabs.entities.Team;
 
 import java.io.Reader;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +16,7 @@ public interface TeamService {
     Optional<CourseDTO> getCourse(String name);
     void deleteCourse(String name);
     List<CourseDTO> getAllCourses();
+    List<CourseDTO> getAllCoursesByProfessor(String professorId);
     boolean addStudent(StudentDTO student);
     Optional<StudentDTO> getStudent(String studentId);
     List<StudentDTO> getAllStudents();
@@ -38,4 +40,5 @@ public interface TeamService {
     List<ProfessorDTO> getProfessors();
     Optional<ProfessorDTO> getProfessor(String professorId);
     boolean addProfessor(ProfessorDTO professorDTO);
+
 }

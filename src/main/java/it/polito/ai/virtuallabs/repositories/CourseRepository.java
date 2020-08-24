@@ -1,6 +1,7 @@
 package it.polito.ai.virtuallabs.repositories;
 
 import it.polito.ai.virtuallabs.entities.Course;
+import it.polito.ai.virtuallabs.entities.Professor;
 import it.polito.ai.virtuallabs.entities.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,4 +20,6 @@ public interface CourseRepository extends JpaRepository<Course, String> {
     List<Student> getStudentsNotInTeams(String courseName);
 
     Optional<Course> findByNameIgnoreCase(String courseName);
+
+    List<Course> findByProfessor(Professor professor);
 }

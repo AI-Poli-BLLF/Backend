@@ -15,6 +15,7 @@ import it.polito.ai.virtuallabs.repositories.ProfessorRepository;
 import it.polito.ai.virtuallabs.repositories.StudentRepository;
 import it.polito.ai.virtuallabs.repositories.TeamRepository;
 import it.polito.ai.virtuallabs.security.service.SecurityApiAuth;
+import it.polito.ai.virtuallabs.service.EntityGetter;
 import it.polito.ai.virtuallabs.service.TeamService;
 import it.polito.ai.virtuallabs.service.exceptions.*;
 import org.modelmapper.ModelMapper;
@@ -43,6 +44,8 @@ public class TeamServiceImpl implements TeamService {
     private ModelMapper mapper;
     @Autowired
     private ManagementServiceImpl managementService;
+    @Autowired
+    private EntityGetter entityGetter;
 
     @PreAuthorize("hasRole('PROFESSOR')")
     @Override
@@ -86,6 +89,14 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public List<CourseDTO> getAllCourses() {
         return courseRepository.findAll().stream().map(c-> mapper.map(c, CourseDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    //Permit to Every authenticated user
+    @Override
+    public List<CourseDTO> getAllCoursesByProfessor(String professorId) {
+        Professor professor = entityGetter.getProfessor(professorId);
+        return courseRepository.findByProfessor(professor).stream().map(c-> mapper.map(c, CourseDTO.class))
                 .collect(Collectors.toList());
     }
 

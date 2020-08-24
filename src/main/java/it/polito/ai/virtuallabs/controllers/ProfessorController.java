@@ -1,8 +1,10 @@
 package it.polito.ai.virtuallabs.controllers;
 
+import it.polito.ai.virtuallabs.dtos.CourseDTO;
 import it.polito.ai.virtuallabs.dtos.ProfessorDTO;
 import it.polito.ai.virtuallabs.service.ImageUploadService;
 import it.polito.ai.virtuallabs.service.TeamService;
+import it.polito.ai.virtuallabs.service.exceptions.ProfessorNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.TeamServiceException;
 import it.polito.ai.virtuallabs.service.exceptions.images.ImageServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,15 @@ public class ProfessorController {
         return teamService.getProfessors().stream()
                 .map(ModelHelper::enrich)
                 .collect(Collectors.toList());
+    }
+
+    @GetMapping("/courses/{professorId}")
+    private List<CourseDTO> getCourses(@PathVariable String professorId){
+        try {
+            return teamService.getAllCoursesByProfessor(professorId).stream().map(ModelHelper::enrich).collect(Collectors.toList());
+        } catch (NoSuchElementException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Professor not found: %s", professorId));
+        }
     }
 
     @GetMapping("/{professorId}")
