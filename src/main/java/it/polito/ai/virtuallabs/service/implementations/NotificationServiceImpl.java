@@ -58,6 +58,12 @@ public class NotificationServiceImpl implements NotificationService {
         tokenRepository.delete(t);
         if(tokenRepository.countTokenByTeamId(teamId) == 0) {
             teamService.setTeamStatus(teamId, Team.Status.ACTIVE);
+            // cancella i team (inattivi) relativi allo stesso corso in cui compaiono membri
+            // del gruppo appena attivato
+            List<Long> teamsToEvict = teamService.evictPendingTeamsOfMembers(teamId);
+            for (Long id : teamsToEvict) {
+                tokenRepository.deleteAllByTeamId(teamId);
+            }
         }
     }
 

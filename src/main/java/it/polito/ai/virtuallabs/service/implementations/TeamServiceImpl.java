@@ -443,6 +443,37 @@ public class TeamServiceImpl implements TeamService {
         return true;
     }
 
+    @Override
+    public List<Long> evictPendingTeamsOfMembers(Long teamId) {
+        // 0. get team
+        Optional<Team> team = teamRepository.findById(teamId);
+        if (!team.isPresent()) {
+            throw new TeamNotFoundException();
+        }
+
+        // 1. get team members
+        List<Student> members = team.get().getMembers();
+
+        // 2. get members' teams referring to te same course
+        List<Long> teamsToEvict = new ArrayList<>();
+        for (Student s : members) {
+            List<Long> studentTeamsToEvict = s.getTeams().stream()
+                    .filter(t -> t.getId() != team.get().getId())
+                    .filter(t -> t.getCourse() == team.get().getCourse())
+                    .map(Team::getId)
+                    .collect(Collectors.toList());
+            teamsToEvict.addAll(studentTeamsToEvict);
+        }
+
+        // 3. delete pending teams
+        for (Long id : teamsToEvict) {
+            evictTeam(id);
+        }
+
+        // 4. delete tokens
+        return teamsToEvict;
+    }
+
     //Permit all authenticated
     @Override
     public List<ProfessorDTO> getProfessors() {
