@@ -35,7 +35,7 @@ public class ProfessorController {
                 .collect(Collectors.toList());
     }
 
-    @GetMapping("/courses/{professorId}")
+    @GetMapping("/{professorId}/courses")
     private List<CourseDTO> getCourses(@PathVariable String professorId){
         try {
             return teamService.getAllCoursesByProfessor(professorId).stream().map(ModelHelper::enrich).collect(Collectors.toList());
