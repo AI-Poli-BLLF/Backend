@@ -28,8 +28,9 @@ public interface TeamService {
     List<Boolean> addAndEnroll(Reader r, String courseName);
     List<CourseDTO> getCourses(String studentId);
     List<TeamDTO> getTeamsForStudent(String studentId);
-    List<StudentDTO>getMembers(String courseName, Long TeamId);
-    TeamDTO proposeTeam(String courseName, String teamName, List<String> memberIds);
+    List<StudentDTO> getMembers(String courseName, Long TeamId);
+    StudentDTO getProposer(String courseName, Long teamId);
+    TeamDTO proposeTeam(String courseName, String teamName, List<String> memberIds, String proposerId);
     List<TeamDTO> getTeamsForCourse(String courseName);
     List<StudentDTO> getStudentsInTeams(String courseName);
     List<StudentDTO> getAvailableStudents(String courseName);

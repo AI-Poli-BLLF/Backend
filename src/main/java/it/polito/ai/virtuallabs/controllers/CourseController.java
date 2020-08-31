@@ -123,8 +123,8 @@ public class CourseController {
     @ResponseStatus(value = HttpStatus.CREATED)
     private TeamDTO proposeTeam(@PathVariable String courseName, @RequestBody @Valid ModelHelper.TeamProposal proposal){
         try{
-            TeamDTO team = teamService.proposeTeam(courseName, proposal.getTeamName(), proposal.getMemberIds());
-            notificationService.notifyTeam(team, proposal.getMemberIds());
+            TeamDTO team = teamService.proposeTeam(courseName, proposal.getTeamName(), proposal.getMemberIds(), proposal.getProposerId());
+            notificationService.notifyTeam(team, proposal.getMemberIds(), proposal.getTimeout());
             return team;
         }catch (TeamServiceException e){
             String message = e.getMessage() == null ? "Error during team proposal" : e.getMessage();
@@ -180,6 +180,18 @@ public class CourseController {
             return teamService.getMembers(courseName, id).stream()
                     .map(ModelHelper::enrich)
                     .collect(Collectors.toList());
+        }catch (NumberFormatException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team");
+        }catch (TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @GetMapping("/{courseName}/teams/{teamId}/proposer")
+    private StudentDTO getProposer(@PathVariable String courseName, @PathVariable String teamId){
+        try{
+            Long id = Long.valueOf(teamId);
+            return ModelHelper.enrich(teamService.getProposer(courseName, id));
         }catch (NumberFormatException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team");
         }catch (TeamServiceException e){

@@ -19,6 +19,7 @@ public class Team {
     private static final String joinTable = "team_student";
     private static final String joinColumn = "team_id";
     private static final String inverseJoinCol = "student_id";
+    private static final String proposerId = "proposer_id";
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
@@ -37,6 +38,10 @@ public class Team {
             inverseJoinColumns = @JoinColumn(name = inverseJoinCol)
     )
     private List<Student> members = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = proposerId)
+    private Student proposer;
 
     @OneToOne(mappedBy = "team")
     private VMConfig vmConfig;

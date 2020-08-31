@@ -40,7 +40,7 @@ public class NotificationServiceImpl implements NotificationService {
     public void sendMessage(String address, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(from);
-        message.setTo("applicazioni.internet.test@gmail.com");
+        message.setTo("ma.borghe@gmail.com");
         message.setSubject(subject);
         message.setText(body);
         emailSender.send(message);
@@ -86,11 +86,11 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Async
-    public void notifyTeam(TeamDTO team, List<String> memberIds) {
+    public void notifyTeam(TeamDTO team, List<String> memberIds, Integer timeout) {
         if(team == null || team.getId() == null)
             throw new TeamNotFoundException();
 
-        Timestamp expiryDate = Timestamp.valueOf(LocalDateTime.now(ZoneId.systemDefault()).plusHours(1));
+        Timestamp expiryDate = Timestamp.valueOf(LocalDateTime.now(ZoneId.systemDefault()).plusHours(timeout));
 
         for(String id : memberIds){
             Token token = createAndSaveToken(UUID.randomUUID().toString(), team.getId(), expiryDate);

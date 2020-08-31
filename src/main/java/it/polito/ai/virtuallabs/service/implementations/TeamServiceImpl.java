@@ -305,12 +305,27 @@ public class TeamServiceImpl implements TeamService {
         return t.getMembers().stream()
                 .map(m->mapper.map(m, StudentDTO.class))
                 .collect(Collectors.toList());
-
     }
 
+    @Override
+    public StudentDTO getProposer(String courseName, Long teamId) {
+        Course c = courseRepository.findByNameIgnoreCase(courseName).orElseThrow(
+                () -> new CourseNotFoundException(courseName)
+        );
+        Team t = teamRepository.findById(teamId).orElseThrow(
+                () -> new TeamNotFoundException(teamId)
+        );
+
+        if (!t.getCourse().getName().equals(c.getName()))
+            throw new TeamNotBelongToCourseException(t.getName(), courseName);
+
+        return mapper.map(t.getProposer(), StudentDTO.class);
+    }
+
+    // TODO: invece che amIbelongToMembers si dovrebbe usare una amIProposer, giusto?
     @PreAuthorize("@securityApiAuth.isEnrolled(#courseName) && @securityApiAuth.amIbelongToMembers(#memberIds)")
     @Override
-    public TeamDTO proposeTeam(String courseName, String teamName, List<String> memberIds) {
+    public TeamDTO proposeTeam(String courseName, String teamName, List<String> memberIds, String proposerId) {
         //Controllo che non ci siano duplicati all'interno dei memberIds
         int diff = memberIds.size() - new HashSet<>(
                 memberIds.stream().map(String::toLowerCase).collect(Collectors.toList())
@@ -342,7 +357,7 @@ public class TeamServiceImpl implements TeamService {
                     throw new StudentAlreadyBelongsToTeam(s.getId(), courseName);
 
                 members.add(s);
-            }catch (NoSuchElementException e) {
+            } catch (NoSuchElementException e) {
                 throw new StudentNotFoundException(m);
             }
         });
@@ -353,6 +368,12 @@ public class TeamServiceImpl implements TeamService {
         if(teamSize < c.getMin() || teamSize > c.getMax())
             throw new TeamSizeOutOfBoundException(c.getMin(), c.getMax());
 
+        //Controllo che il proponente sia elencato fra i membri
+        if (!memberIds.contains(proposerId))
+            throw new TeamProposerIsNotMemberException(proposerId);
+
+        Student proposer = studentRepository.findByIdIgnoreCase(proposerId).get(); //Throw NoSuchElementException se lo student non esiste nel db
+
         try {
             //Se tutto è andato bene creo il team
             Team team = new Team();
@@ -360,6 +381,7 @@ public class TeamServiceImpl implements TeamService {
             team.setStatus(Team.Status.PENDING);
             team.setCourse(c);
             team.setMembers(members);
+            team.setProposer(proposer);
 
             return mapper.map(teamRepository.saveAndFlush(team), TeamDTO.class);
         }catch (DataIntegrityViolationException e){

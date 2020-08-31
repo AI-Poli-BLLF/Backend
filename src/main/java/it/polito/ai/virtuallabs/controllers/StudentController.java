@@ -75,15 +75,13 @@ public class StudentController {
     @GetMapping("/{studentId}/teams/{courseName}")
     private List<TeamDTO> getTeamsForStudentForCourse(@PathVariable String studentId, @PathVariable String courseName){
         try {
-            List<TeamDTO> teamsForCourse = teamService.getTeamsForCourse(courseName)
-                    .stream().map(ModelHelper::enrich)
-                    .collect(Collectors.toList());
-            List<TeamDTO> teamsForStudent = teamService.getTeamsForStudent(studentId)
-                    .stream().map(ModelHelper::enrich)
-                    .collect(Collectors.toList());
+            List<TeamDTO> teamsForCourse = teamService.getTeamsForCourse(courseName);
+            List<TeamDTO> teamsForStudent = teamService.getTeamsForStudent(studentId);
             // return only (inactive) teams of a student referring to the specified course
             teamsForCourse.retainAll(teamsForStudent);
-            return teamsForCourse;
+            return teamsForCourse
+                    .stream().map(ModelHelper::enrich)
+                    .collect(Collectors.toList());
         }catch (TeamServiceException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }

@@ -68,6 +68,10 @@ public class ModelHelper {
         @NotNull
         @NotEmpty
         private List<String> memberIds;
+        @NotEmpty
+        private String proposerId;
+        @NotNull
+        private Integer timeout;
     }
 
     @Data
