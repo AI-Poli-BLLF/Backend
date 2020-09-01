@@ -124,7 +124,7 @@ public class CourseController {
     private TeamDTO proposeTeam(@PathVariable String courseName, @RequestBody @Valid ModelHelper.TeamProposal proposal){
         try{
             TeamDTO team = teamService.proposeTeam(courseName, proposal.getTeamName(), proposal.getMemberIds(), proposal.getProposerId());
-            notificationService.notifyTeam(team, proposal.getMemberIds(), proposal.getTimeout());
+            notificationService.notifyTeam(team, proposal.getMemberIds(), proposal.getProposerId(), proposal.getTimeout());
             return team;
         }catch (TeamServiceException e){
             String message = e.getMessage() == null ? "Error during team proposal" : e.getMessage();

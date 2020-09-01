@@ -69,7 +69,7 @@ public class TeamServiceImpl implements TeamService {
 
     //Permit All authenticated
     @Override
-    @PreAuthorize("hasRole('PROFESSOR')")
+    @PreAuthorize("hasRole('PROFESSOR') || @securityApiAuth.isEnrolled(#courseName)")
     public Optional<CourseDTO> getCourse(String courseName) {
         // todo: aggiungere autorizzazioni, solo il professore del corso può eliminarlo
         Optional<Course> course = courseRepository.findByNameIgnoreCase(courseName);

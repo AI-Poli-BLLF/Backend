@@ -40,7 +40,7 @@ public class NotificationServiceImpl implements NotificationService {
     public void sendMessage(String address, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(from);
-        message.setTo("ma.borghe@gmail.com");
+        message.setTo("applicazioni.internet.test@gmail.com");
         message.setSubject(subject);
         message.setText(body);
         emailSender.send(message);
@@ -85,18 +85,31 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    @Async
-    public void notifyTeam(TeamDTO team, List<String> memberIds, Integer timeout) {
+    @Transactional
+    public void notifyTeam(TeamDTO team, List<String> memberIds, String proposerId, Integer timeout) {
         if(team == null || team.getId() == null)
             throw new TeamNotFoundException();
 
         Timestamp expiryDate = Timestamp.valueOf(LocalDateTime.now(ZoneId.systemDefault()).plusHours(timeout));
 
-        for(String id : memberIds){
-            Token token = createAndSaveToken(UUID.randomUUID().toString(), team.getId(), expiryDate);
-            String message = buildMessage(token.getId(), team.getName(), id);
-            String email = String.format("%s@studenti.polito.it", id); //The <s> is included in the id
-            sendMessage(email, "Gruppo Applicazioni Internet", message);
+        for (String id : memberIds){
+            if (!id.equals(proposerId)) {
+                Token token = createAndSaveToken(UUID.randomUUID().toString(), team.getId(), expiryDate);
+                String message = buildMessage(token.getId(), team.getName(), id);
+                String email = String.format("%s@studenti.polito.it", id); //The <s> is included in the id
+                sendMessage(email, "Gruppo Applicazioni Internet", message);
+            }
+        }
+
+        // Se nel gruppo c'è solo il proponente non vengono mandate mail e posso attivare il gruppo
+        if (memberIds.size() == 1) {
+            teamService.setTeamStatus(team.getId(), Team.Status.ACTIVE);
+            // cancella i team (inattivi) relativi allo stesso corso in cui compare il membro
+            // del gruppo appena attivato
+            List<Long> teamsToEvict = teamService.evictPendingTeamsOfMembers(team.getId());
+            for (Long id : teamsToEvict) {
+                tokenRepository.deleteAllByTeamId(id);
+            }
         }
 }
 
