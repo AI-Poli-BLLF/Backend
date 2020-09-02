@@ -1,5 +1,6 @@
 package it.polito.ai.virtuallabs.service.implementations;
 
+import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.dtos.TeamDTO;
 import it.polito.ai.virtuallabs.entities.Team;
 import it.polito.ai.virtuallabs.entities.Token;
@@ -94,7 +95,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         for (String id : memberIds){
             if (!id.equals(proposerId)) {
-                Token token = createAndSaveToken(UUID.randomUUID().toString(), team.getId(), expiryDate);
+                Token token = createAndSaveToken(UUID.randomUUID().toString(), team.getId(), id, expiryDate);
                 String message = buildMessage(token.getId(), team.getName(), id);
                 String email = String.format("%s@studenti.polito.it", id); //The <s> is included in the id
                 sendMessage(email, "Gruppo Applicazioni Internet", message);
@@ -113,8 +114,8 @@ public class NotificationServiceImpl implements NotificationService {
         }
 }
 
-    private Token createAndSaveToken(String tokenId, Long teamId, Timestamp expiryDate) {
-        Token token = new Token(tokenId, teamId, expiryDate);
+    private Token createAndSaveToken(String tokenId, Long teamId, String studentId, Timestamp expiryDate) {
+        Token token = new Token(tokenId, teamId, studentId, expiryDate);
         tokenRepository.save(token);
         return token;
     }
@@ -144,5 +145,12 @@ public class NotificationServiceImpl implements NotificationService {
         tokenRepository.deleteAll(toEliminate);
         if(!teams.isEmpty())
             teams.forEach(teamService::evictTeam);
+    }
+
+    @Override
+    public List<String> getPendingMemberIds(Long teamId) {
+        return tokenRepository.findAllByTeamId(teamId).stream()
+                .map(t -> t.getStudentId())
+                .collect(Collectors.toList());
     }
 }
