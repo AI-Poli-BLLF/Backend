@@ -1,7 +1,9 @@
 package it.polito.ai.virtuallabs.service.implementations;
 
+import it.polito.ai.virtuallabs.dtos.CourseDTO;
 import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.dtos.TeamDTO;
+import it.polito.ai.virtuallabs.dtos.TokenDTO;
 import it.polito.ai.virtuallabs.entities.Team;
 import it.polito.ai.virtuallabs.entities.Token;
 import it.polito.ai.virtuallabs.repositories.TokenRepository;
@@ -9,11 +11,14 @@ import it.polito.ai.virtuallabs.service.NotificationService;
 import it.polito.ai.virtuallabs.service.TeamService;
 import it.polito.ai.virtuallabs.service.exceptions.TeamNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.InvalidOrExpiredTokenException;
+import it.polito.ai.virtuallabs.service.exceptions.TokenNotFoundException;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,12 +40,15 @@ public class NotificationServiceImpl implements NotificationService {
     private TokenRepository tokenRepository;
     @Autowired
     private TeamService teamService;
+    @Autowired
+    private ModelMapper mapper;
 
     @Override
     @Async
     public void sendMessage(String address, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(from);
+        //message.setTo("ma.borghe@gmail.com");
         message.setTo("applicazioni.internet.test@gmail.com");
         message.setSubject(subject);
         message.setText(body);
@@ -152,5 +160,15 @@ public class NotificationServiceImpl implements NotificationService {
         return tokenRepository.findAllByTeamId(teamId).stream()
                 .map(t -> t.getStudentId())
                 .collect(Collectors.toList());
+    }
+
+    @PreAuthorize("@securityApiAuth.isMe(#memberId)")
+    @Override
+    public TokenDTO getPendingMemberToken(Long teamId, String memberId) {
+        Token token = tokenRepository
+                .findOneByTeamIdAndStudentId(teamId, memberId)
+                .orElseThrow(()-> new TokenNotFoundException(teamId, memberId));
+
+        return mapper.map(token, TokenDTO.class);
     }
 }

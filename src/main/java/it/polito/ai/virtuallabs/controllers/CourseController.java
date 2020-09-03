@@ -3,6 +3,7 @@ package it.polito.ai.virtuallabs.controllers;
 import it.polito.ai.virtuallabs.dtos.CourseDTO;
 import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.dtos.TeamDTO;
+import it.polito.ai.virtuallabs.dtos.TokenDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMConfigDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMInstanceDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMModelDTO;
@@ -224,6 +225,19 @@ public class CourseController {
         try{
             Long id = Long.valueOf(teamId);
             return ModelHelper.enrich(teamService.getProposer(courseName, id));
+        }catch (NumberFormatException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team");
+        }catch (TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @GetMapping("/{courseName}/teams/{teamId}/pendingMembers/{memberId}/token")
+    private TokenDTO getPendingMemberToken(@PathVariable String courseName, @PathVariable String teamId,
+                                           @PathVariable String memberId){
+        try{
+            Long id = Long.valueOf(teamId);
+            return notificationService.getPendingMemberToken(id, memberId);
         }catch (NumberFormatException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team");
         }catch (TeamServiceException e){
