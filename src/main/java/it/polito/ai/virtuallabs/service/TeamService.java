@@ -1,9 +1,7 @@
 package it.polito.ai.virtuallabs.service;
 
-import it.polito.ai.virtuallabs.dtos.CourseDTO;
-import it.polito.ai.virtuallabs.dtos.ProfessorDTO;
-import it.polito.ai.virtuallabs.dtos.StudentDTO;
-import it.polito.ai.virtuallabs.dtos.TeamDTO;
+import it.polito.ai.virtuallabs.dtos.*;
+import it.polito.ai.virtuallabs.entities.Assignment;
 import it.polito.ai.virtuallabs.entities.Team;
 
 import java.io.Reader;

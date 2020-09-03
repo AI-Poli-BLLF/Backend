@@ -1,9 +1,6 @@
 package it.polito.ai.virtuallabs.service;
 
-import it.polito.ai.virtuallabs.entities.Course;
-import it.polito.ai.virtuallabs.entities.Professor;
-import it.polito.ai.virtuallabs.entities.Student;
-import it.polito.ai.virtuallabs.entities.Team;
+import it.polito.ai.virtuallabs.entities.*;
 import it.polito.ai.virtuallabs.entities.vms.VMConfig;
 import it.polito.ai.virtuallabs.entities.vms.VMInstance;
 import it.polito.ai.virtuallabs.entities.vms.VMModel;
@@ -16,4 +13,6 @@ public interface EntityGetter {
     Student getStudent(String studentId);
     Professor getProfessor(String professorId);
     VMInstance getVMInstance(Long vmInstanceId);
+    Assignment getAssignment(String assignmentId);
+    Draft getDraft(String draftId);
 }

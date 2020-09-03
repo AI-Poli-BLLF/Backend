@@ -87,7 +87,7 @@ public class JwtController {
                 ProfessorDTO p = new ProfessorDTO(user.getUserId(), user.getName(), user.getFirstName(), new ArrayList<>());
                 if (!teamService.addProfessor(p))
                     throw new ResponseStatusException(HttpStatus.CONFLICT,
-                            "Student already exist");
+                            "Professor already exist");
                 break;
             default:
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Invalid User id");

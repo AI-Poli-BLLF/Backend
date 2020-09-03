@@ -28,7 +28,7 @@ public class VirtualLabsApplication {
                                     VMService vmService, TeamService teamService){
         return args -> {
             try {
-                User admin = User.builder().id("a1").username("admin").password(passwordEncoder.encode("admin")).roles(Arrays.asList("ROLE_ADMIN")).build();
+                User admin = User.builder().id("a1").username("admin@polito.it").password(passwordEncoder.encode("admin")).roles(Arrays.asList("ROLE_ADMIN")).build();
                 User test_front = User.builder().id("a2").username("test@polito.it").password(passwordEncoder.encode("test")).roles(Arrays.asList("ROLE_ADMIN")).build();
                 User test_student = User.builder().id("test").username("test@studenti.polito.it").password(passwordEncoder.encode("test")).roles(Arrays.asList("ROLE_STUDENT")).build();
                 repository.saveAndFlush(admin);
@@ -36,7 +36,9 @@ public class VirtualLabsApplication {
                 repository.saveAndFlush(test_student);
                 System.out.println(repository.findAll());
 
-            }catch (Exception ignored){}
+            }catch (Exception ignored){
+                System.out.println("fail");
+            }
 
         };
     }

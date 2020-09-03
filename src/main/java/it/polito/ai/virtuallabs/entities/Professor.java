@@ -3,6 +3,7 @@ package it.polito.ai.virtuallabs.entities;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.expression.spel.ast.Assign;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -25,6 +26,9 @@ public class Professor {
     @OneToMany(mappedBy = "professor")
     private List<Course> courses = new ArrayList<>();
 
+    @OneToMany(mappedBy = "professor")
+    private List<Assignment> assignments = new ArrayList<>();
+
     public void addCourse(Course course){
         if(course == null)
             return;
@@ -39,6 +43,20 @@ public class Professor {
 
         courses.remove(course);
         course.setProfessor(null);
+    }
+
+    public void addAssignment(Assignment assignment){
+        if(assignment == null)
+            return;
+        assignments.add(assignment);
+        assignment.setProfessor(this);
+    }
+
+    public void removeAssignment(Assignment assignment){
+        if(assignment == null)
+            return;
+        assignments.remove(assignment);
+        assignment.setProfessor(null);
     }
 
     public String getEmail(){

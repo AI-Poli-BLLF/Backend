@@ -34,6 +34,9 @@ public class Student {
     @ManyToMany(mappedBy = "owners")
     private List<VMInstance> vms = new ArrayList<>();
 
+    @OneToMany(mappedBy = "student")
+    private List<Draft> drafts = new ArrayList<>();
+
     public void addCourse(Course course){
         if(course == null)
             return;
@@ -64,6 +67,20 @@ public class Student {
 
         vms.add(vm);
         vm.getOwners().add(this);
+    }
+
+    public void addDraft(Draft draft){
+        if(draft == null)
+            return;
+        drafts.add(draft);
+        draft.setStudent(this);
+    }
+
+    public void removeDraft(Draft draft){
+        if(draft == null)
+            return;
+        drafts.remove(draft);
+        draft.setStudent(null);
     }
 
     public String getEmail(){

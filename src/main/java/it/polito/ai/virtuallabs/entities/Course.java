@@ -33,13 +33,8 @@ public class Course {
     @OneToOne(mappedBy = "course")
     private VMModel vmModel;
 
-    public void addStudent(Student student){
-        if(student == null)
-            return;
-
-        students.add(student);
-        student.getCourses().add(this);
-    }
+    @OneToMany(mappedBy = "course")
+    private List<Assignment> assignments = new ArrayList<>();
 
     public void addTeam(Team team){
         if(team == null)
@@ -47,6 +42,14 @@ public class Course {
 
         teams.add(team);
         team.setCourse(this);
+    }
+
+    public void addStudent(Student student){
+        if(student == null)
+            return;
+
+        students.add(student);
+        student.getCourses().add(this);
     }
 
     public void removeTeam(Team team){

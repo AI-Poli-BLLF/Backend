@@ -1,24 +1,15 @@
 package it.polito.ai.virtuallabs.service.implementations;
 
-import it.polito.ai.virtuallabs.entities.Course;
-import it.polito.ai.virtuallabs.entities.Professor;
-import it.polito.ai.virtuallabs.entities.Student;
-import it.polito.ai.virtuallabs.entities.Team;
+import it.polito.ai.virtuallabs.entities.*;
 import it.polito.ai.virtuallabs.entities.vms.VMConfig;
 import it.polito.ai.virtuallabs.entities.vms.VMInstance;
 import it.polito.ai.virtuallabs.entities.vms.VMModel;
-import it.polito.ai.virtuallabs.repositories.CourseRepository;
-import it.polito.ai.virtuallabs.repositories.ProfessorRepository;
-import it.polito.ai.virtuallabs.repositories.StudentRepository;
-import it.polito.ai.virtuallabs.repositories.TeamRepository;
+import it.polito.ai.virtuallabs.repositories.*;
 import it.polito.ai.virtuallabs.repositories.vms.VMConfigRepository;
 import it.polito.ai.virtuallabs.repositories.vms.VMInstanceRepository;
 import it.polito.ai.virtuallabs.repositories.vms.VMModelRepository;
 import it.polito.ai.virtuallabs.service.EntityGetter;
-import it.polito.ai.virtuallabs.service.exceptions.CourseNotFoundException;
-import it.polito.ai.virtuallabs.service.exceptions.ProfessorNotFoundException;
-import it.polito.ai.virtuallabs.service.exceptions.StudentNotFoundException;
-import it.polito.ai.virtuallabs.service.exceptions.TeamNotFoundException;
+import it.polito.ai.virtuallabs.service.exceptions.*;
 import it.polito.ai.virtuallabs.service.exceptions.vms.VMConfigNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.vms.VMInstanceNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.vms.VMModelNotFoundException;
@@ -45,6 +36,10 @@ public class EntityGetterImpl implements EntityGetter {
     private TeamRepository teamRepository;
     @Autowired
     private ProfessorRepository professorRepository;
+    @Autowired
+    private AssignmentRepository assignmentRepository;
+    @Autowired
+    private DraftRepository draftRepository;
 
     @Override
     public Course getCourse(String courseName){
@@ -92,6 +87,20 @@ public class EntityGetterImpl implements EntityGetter {
     public VMInstance getVMInstance(Long vmInstanceId){
         return vmInstanceRepository.findById(vmInstanceId).orElseThrow(
                 () -> new VMInstanceNotFoundException(vmInstanceId)
+        );
+    }
+
+    @Override
+    public Assignment getAssignment(String assignmentId) {
+        return assignmentRepository.findById(assignmentId).orElseThrow(
+                () -> new AssignmentNotFoundException(assignmentId)
+        );
+    }
+
+    @Override
+    public Draft getDraft(String draftId) {
+        return draftRepository.findById(draftId).orElseThrow(
+                () -> new DraftNotFoundException(draftId)
         );
     }
 }

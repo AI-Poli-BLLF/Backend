@@ -1,7 +1,11 @@
 package it.polito.ai.virtuallabs.service.implementations;
 
+import it.polito.ai.virtuallabs.entities.Assignment;
+import it.polito.ai.virtuallabs.entities.Draft;
 import it.polito.ai.virtuallabs.entities.Professor;
 import it.polito.ai.virtuallabs.entities.Student;
+import it.polito.ai.virtuallabs.repositories.AssignmentRepository;
+import it.polito.ai.virtuallabs.repositories.DraftRepository;
 import it.polito.ai.virtuallabs.repositories.ProfessorRepository;
 import it.polito.ai.virtuallabs.repositories.StudentRepository;
 import it.polito.ai.virtuallabs.service.EntityGetter;
@@ -39,15 +43,23 @@ public class ImageUploadServiceImpl implements ImageUploadService {
     private String baseImagePath;
     @Value("${app.default.image}")
     private String defaultImg;
+    @Value("src/main/resources/static/assignments/assignmentImages")
+    private String baseAssignmentImagePath;
+    @Value("src/main/resources/static/assignments/draftImages")
+    private String baseDraftImagePath;
 
     private final StudentRepository studentRepository;
     private final ProfessorRepository professorRepository;
+    private final AssignmentRepository assignmentRepository;
+    private final DraftRepository draftRepository;
     private final EntityGetter getter;
 
     @Autowired
-    public ImageUploadServiceImpl(StudentRepository studentRepository, ProfessorRepository professorRepository, EntityGetter getter) {
+    public ImageUploadServiceImpl(StudentRepository studentRepository, ProfessorRepository professorRepository, AssignmentRepository assignmentRepository, DraftRepository draftRepository, EntityGetter getter) {
         this.studentRepository = studentRepository;
         this.professorRepository = professorRepository;
+        this.assignmentRepository = assignmentRepository;
+        this.draftRepository = draftRepository;
         this.getter = getter;
 
         tika = new Tika();
@@ -56,7 +68,7 @@ public class ImageUploadServiceImpl implements ImageUploadService {
 
     @PreAuthorize("@securityApiAuth.isMe(#userId)")
     @Override
-    public String store(MultipartFile image, String userId){
+    public String store(MultipartFile image, String userId) {
         String type;
         String extension;
         try {
@@ -71,12 +83,54 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         } catch (IOException e) {
             throw new ImageDetectionException();
         }
-        
+
         String imageName = String.format("%s-profile.%s", userId, extension);
 
         storeOnDisk(image, imageName);
         return storeRefOnDb(imageName, userId);
     }
+
+    @PreAuthorize("@securityApiAuth.isMe(#professorId)")
+    @Override
+    public String storeAssignmentImage(MultipartFile image, String professorId, String assigmentId) {
+        String type;
+        String extension;
+        try {
+            String[] detection = tika.detect(image.getBytes()).split("/");
+            type = detection[0];
+            extension = detection[1];
+            if (!type.equals("image"))
+                throw new UnsupportedMediaTypeException(type);
+            if (!extensions.contains(extension))
+                throw new ImageExtensionUnsupported(extension);
+        } catch (IOException e) {
+            throw new ImageDetectionException();
+        }
+        String imageName = String.format("%s-assignment.%s", assigmentId, extension);
+        storeAssignmentOnDisk(image, imageName);
+        return storeAssignmentOnDb(imageName, assigmentId);
+    }
+
+    @Override
+    public String storeDraftImage(MultipartFile image, String draftId) {
+        String type;
+        String extension;
+        try {
+            String[] detection = tika.detect(image.getBytes()).split("/");
+            type = detection[0];
+            extension = detection[1];
+            if (!type.equals("image"))
+                throw new UnsupportedMediaTypeException(type);
+            if (!extensions.contains(extension))
+                throw new ImageExtensionUnsupported(extension);
+        } catch (IOException e) {
+            throw new ImageDetectionException();
+        }
+        String imageName = String.format("%s-draft.%s", draftId, extension);
+        storeDraftOnDisk(image, imageName);
+        return storeDraftOnDb(imageName, draftId);
+    }
+
 
     @Override
     public byte[] getImage(String userId) {
@@ -105,6 +159,34 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         }
     }
 
+    @Override
+    public byte[] getAssignmentImage(String assignmentId) {
+        String photoName;
+        Assignment assignment = getter.getAssignment(assignmentId);
+        photoName = assignment.getPhotoName() == null ? defaultImg : assignment.getPhotoName();
+        String path = String.format("%s/%s", baseAssignmentImagePath, photoName);
+        try {
+            File image = new File(path);
+            return FileUtils.readFileToByteArray(image);
+        }catch (IOException e){
+            throw new ImageConversionException();
+        }
+    }
+
+    @Override
+    public byte[] getDraftImage(String draftId) {
+        String photoName;
+        Draft draft = getter.getDraft(draftId);
+        photoName = draft.getPhotoName() == null ? defaultImg : draft.getPhotoName();
+        String path = String.format("%s/%s", baseDraftImagePath, photoName);
+        try {
+            File image = new File(path);
+            return FileUtils.readFileToByteArray(image);
+        }catch (IOException e){
+            throw new ImageConversionException();
+        }
+    }
+
     private String storeRefOnDb(String imageName, String userId) {
         if(userId.toLowerCase().startsWith("d")){
             Professor p = getter.getProfessor(userId);
@@ -119,6 +201,19 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         }
     }
 
+    private String storeAssignmentOnDb(String imageName, String assignmentId){
+        Assignment assignment = getter.getAssignment(assignmentId);
+        assignment.setPhotoName(imageName);
+        return String.format("http://localhost8080/API/professors/%s/photo", assignmentId);
+    }
+
+    //non mi piace la stringa di ritorno
+    private String storeDraftOnDb(String imageName, String draftId){
+        Draft draft = getter.getDraft(draftId);
+        draft.setPhotoName(imageName);
+        return String.format("http://localhost8080/API/%s/photo", draftId); //solo di questa riga non sono sicuro
+    }
+
     private void storeOnDisk(MultipartFile image, String imageName) {
         try {
             Path copyLocation = Paths
@@ -129,4 +224,27 @@ public class ImageUploadServiceImpl implements ImageUploadService {
             throw new ImageStorageException(imageName);
         }
     }
+
+    private void storeAssignmentOnDisk(MultipartFile image, String imageName) {
+        try{
+            Path copyLocation = Paths
+                    .get(baseAssignmentImagePath + File.separator + StringUtils.cleanPath(imageName));
+            Files.copy(image.getInputStream(), copyLocation, StandardCopyOption.REPLACE_EXISTING);
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new ImageStorageException(imageName);
+        }
+    }
+
+    private void storeDraftOnDisk(MultipartFile image, String imageName) {
+        try{
+            Path copyLocation = Paths
+                    .get(baseDraftImagePath + File.separator + StringUtils.cleanPath(imageName));
+            Files.copy(image.getInputStream(), copyLocation, StandardCopyOption.REPLACE_EXISTING);
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new ImageStorageException(imageName);
+        }
+    }
+
 }
