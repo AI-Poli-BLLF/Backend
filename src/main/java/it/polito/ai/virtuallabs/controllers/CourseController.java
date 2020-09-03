@@ -3,6 +3,7 @@ package it.polito.ai.virtuallabs.controllers;
 import it.polito.ai.virtuallabs.dtos.CourseDTO;
 import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.dtos.TeamDTO;
+import it.polito.ai.virtuallabs.dtos.TokenDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMConfigDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMInstanceDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMModelDTO;
@@ -187,11 +188,56 @@ public class CourseController {
         }
     }
 
+    @GetMapping("/{courseName}/teams/{teamId}/activeMembers")
+    private List<StudentDTO> getActiveMembers(@PathVariable String courseName, @PathVariable String teamId){
+        try{
+            Long id = Long.valueOf(teamId);
+            List<String> pendingMembers = notificationService
+                    .getPendingMemberIds(id);
+            return teamService.getMembers(courseName, id)
+                    .stream()
+                    .filter(m -> !pendingMembers.contains(m.getId()))
+                    .map(ModelHelper::enrich)
+                    .collect(Collectors.toList());
+        }catch (NumberFormatException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team");
+        }catch (TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @GetMapping("/{courseName}/teams/{teamId}/pendingMembers")
+    private List<StudentDTO> getPendingMembers(@PathVariable String courseName, @PathVariable String teamId){
+        try{
+            List<StudentDTO> activeMembers = getActiveMembers(courseName, teamId);
+            List<StudentDTO> pendingMembers = getMembers(courseName, teamId);
+            pendingMembers.removeAll(activeMembers);
+            return pendingMembers;
+        }catch (NumberFormatException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team");
+        }catch (TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
     @GetMapping("/{courseName}/teams/{teamId}/proposer")
     private StudentDTO getProposer(@PathVariable String courseName, @PathVariable String teamId){
         try{
             Long id = Long.valueOf(teamId);
             return ModelHelper.enrich(teamService.getProposer(courseName, id));
+        }catch (NumberFormatException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team");
+        }catch (TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @GetMapping("/{courseName}/teams/{teamId}/pendingMembers/{memberId}/token")
+    private TokenDTO getPendingMemberToken(@PathVariable String courseName, @PathVariable String teamId,
+                                           @PathVariable String memberId){
+        try{
+            Long id = Long.valueOf(teamId);
+            return notificationService.getPendingMemberToken(id, memberId);
         }catch (NumberFormatException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team");
         }catch (TeamServiceException e){

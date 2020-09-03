@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TokenRepository extends JpaRepository<Token, String> {
@@ -15,4 +16,5 @@ public interface TokenRepository extends JpaRepository<Token, String> {
     List<Token> findAllByTeamId(Long teamId);
     void deleteAllByTeamId(Long teamId);
     int countTokenByTeamId(Long TeamId);
+    Optional<Token> findOneByTeamIdAndStudentId(Long teamId, String studentId);
 }
