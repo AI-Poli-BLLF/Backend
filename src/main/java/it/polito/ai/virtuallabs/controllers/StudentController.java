@@ -101,6 +101,7 @@ public class StudentController {
 
     @PostMapping("/{studentId}/uploadPhoto")
     private Map<String, String> uploadPhoto(@PathVariable String studentId, @RequestParam("image") MultipartFile image){
+        // todo: imporre limiti dimensione file
         try {
             Map<String, String> map = new HashMap<>();
             map.put("imageRef", imageUploadService.store(image, studentId));

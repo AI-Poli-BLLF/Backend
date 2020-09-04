@@ -10,6 +10,7 @@ import java.util.Optional;
 
 public interface TeamService {
     boolean addCourse(CourseDTO course);
+    boolean updateCourse(CourseDTO coursee);
     Optional<CourseDTO> getCourse(String name);
     void deleteCourse(String name);
     List<CourseDTO> getAllCourses();
@@ -39,4 +40,5 @@ public interface TeamService {
     Optional<ProfessorDTO> getProfessor(String professorId);
     boolean addProfessor(ProfessorDTO professorDTO);
     List<Long> evictPendingTeamsOfMembers(Long teamId);
+
 }

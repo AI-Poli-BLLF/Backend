@@ -72,13 +72,25 @@ public class CourseController {
         }
     }
 
-    @PostMapping({"", "/"})
+    @PutMapping({"/{courseName}"})
     @ResponseStatus(value = HttpStatus.CREATED)
-    private CourseDTO addCourse(@RequestBody @Valid CourseDTO course){
-        if(course.getMin() <= course.getMax() && teamService.addCourse(course)){
+    private CourseDTO addCourse(@PathVariable String courseName, @RequestBody @Valid CourseDTO course){
+        // todo: il cambio di nome ci porta dietro casini
+        if(!courseName.equals(course.getName()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    String.format("Course name in path is not equal to course name: %s!=%s", course.getName(), courseName));
+        if(
+                (
+                        teamService.getCourse(courseName).isPresent()
+                                && course.getMin() <= course.getMax()
+                                && teamService.updateCourse(course)
+                ) || (
+                        course.getMin() <= course.getMax()
+                                && teamService.addCourse(course)
+                )
+        ) {
             return ModelHelper.enrich(course);
         }
-
         throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Course already exist: %s", course.getName()));
     }
 
@@ -405,7 +417,7 @@ public class CourseController {
 
     @PutMapping("/{courseName}/teams/{teamId}/vms/{vmId}/shutdown")
     private void shutdownVm(@PathVariable String courseName, @PathVariable String teamId,
-                        @PathVariable String vmId, @RequestBody String ownerId){
+                            @PathVariable String vmId, @RequestBody String ownerId){
         try{
             Long tId = Long.valueOf(teamId);
             Long vId = Long.valueOf(vmId);
@@ -419,7 +431,7 @@ public class CourseController {
 
     @DeleteMapping("/{courseName}/teams/{teamId}/vms/{vmId}")
     private void deleteVm(@PathVariable String courseName, @PathVariable String teamId,
-                        @PathVariable String vmId, @RequestBody String ownerId){
+                          @PathVariable String vmId, @RequestBody String ownerId){
         try{
             Long tId = Long.valueOf(teamId);
             Long vId = Long.valueOf(vmId);

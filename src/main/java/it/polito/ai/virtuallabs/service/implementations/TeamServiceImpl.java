@@ -58,6 +58,18 @@ public class TeamServiceImpl implements TeamService {
         return true;
     }
 
+    @PreAuthorize("hasRole('PROFESSOR')")
+    //todo: il professore che lo compie deve essere quello che ha creato il corso
+    @Override
+    public boolean updateCourse(CourseDTO courseDTO) {
+        Course course = entityGetter.getCourse(courseDTO.getName());
+        course.setName(courseDTO.getName());
+        course.setMin(courseDTO.getMin());
+        course.setMax(courseDTO.getMax());
+        course.setEnabled(courseDTO.isEnabled());
+        return true;
+    }
+
     //Permit All authenticated
     @Override
     @PreAuthorize("hasRole('PROFESSOR') || @securityApiAuth.isEnrolled(#courseName)")
@@ -67,13 +79,11 @@ public class TeamServiceImpl implements TeamService {
         return course.map(c -> mapper.map(c, CourseDTO.class));
     }
 
+    //todo: non funziona
     @Override
     public void deleteCourse(String courseName) {
-        try {
-            courseRepository.deleteById(courseName);
-        }catch (NoSuchElementException e){
-            throw new CourseNotFoundException(courseName);
-        }
+        Course course = entityGetter.getCourse(courseName);
+        courseRepository.delete(course);
     }
 
     //Permit to Every authenticated user
