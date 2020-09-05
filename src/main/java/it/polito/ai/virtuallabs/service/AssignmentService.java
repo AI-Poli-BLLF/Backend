@@ -12,6 +12,7 @@ public interface AssignmentService {
 
     boolean addAssignment(AssignmentDTO assignmentDTO, String courseId);
     List<AssignmentDTO> getAssignments();
+    List<AssignmentDTO> getAssignmentPerProfessorPerCourse(String professorId, String courseId);
     Optional<AssignmentDTO> getAssignment(String assignmentId);
     ProfessorDTO getAssignmentProfessor(String assignmentId);
 

@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+import javax.ws.rs.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -146,6 +147,15 @@ public class ProfessorController {
             return true;
         } catch (DraftNotFoundException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Draft not found %s", draftId));
+        }
+    }
+
+    @GetMapping("/{professorId}/{courseId}/assignments")
+    private List<AssignmentDTO> getAssignments(@PathVariable String professorId, @PathVariable String courseId){
+        try{
+            return assignmentService.getAssignmentPerProfessorPerCourse(professorId, courseId);
+        } catch (ProfessorNotFoundException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("getAssignmentPerProfessor failed"));
         }
     }
 }

@@ -62,6 +62,16 @@ public class AssignmentServiceImpl implements AssignmentService {
     }
 
     @Override
+    public List<AssignmentDTO> getAssignmentPerProfessorPerCourse(String professorId, String courseId) {
+        return assignmentRepository.findAll()
+                .stream()
+                .filter(a -> a.getProfessor().getId().equals(professorId))
+                .filter(a -> a.getCourse().getName().equals(courseId))
+                .map(a -> mapper.map(a, AssignmentDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public Optional<AssignmentDTO> getAssignment(String assignmentId) {
         Optional<Assignment> assignment = assignmentRepository.findById(assignmentId);
         return assignment.map(p -> mapper.map(p, AssignmentDTO.class));
