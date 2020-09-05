@@ -82,6 +82,7 @@ public class VMServiceImpl implements VMService {
         return mapper.map(vmModelRepository.save(vmModel), VMModelDTO.class);
     }
 
+    // todo: preauth
     //@PreAuthorize("hasRole('PROFESSOR') || @securityApiAuth.ownCourse(#courseName)")
     @Override
     public VMConfigDTO createVMConfiguration(VMConfigDTO vmConfigDTO, Long teamId, String courseName) {

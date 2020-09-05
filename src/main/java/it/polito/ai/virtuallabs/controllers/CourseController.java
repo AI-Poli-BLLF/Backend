@@ -307,23 +307,25 @@ public class CourseController {
         }
     }
 
-    @PostMapping("/{courseName}/teams/{teamId}/vm-config")
-    @ResponseStatus(value = HttpStatus.CREATED)
-    private VMConfigDTO createVMConfig(@PathVariable String courseName, @PathVariable String teamId,
-                                       @RequestBody @Valid VMConfigDTO config){
-        try {
-            Long id = Long.valueOf(teamId);
-            return vmService.createVMConfiguration(config, id, courseName);
-        }catch (NumberFormatException e){
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Invalid team");
-        }catch (VMServiceException | TeamServiceException e){
-            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
-        }
-    }
+//    @PostMapping("/{courseName}/teams/{teamId}/vm-config")
+//    @ResponseStatus(value = HttpStatus.CREATED)
+//    private VMConfigDTO createVMConfig(@PathVariable String courseName, @PathVariable String teamId,
+//                                       @RequestBody @Valid VMConfigDTO config){
+//        try {
+//            Long id = Long.valueOf(teamId);
+//            return vmService.createVMConfiguration(config, id, courseName);
+//        }catch (NumberFormatException e){
+//            throw new ResponseStatusException(HttpStatus.CONFLICT, "Invalid team");
+//        }catch (VMServiceException | TeamServiceException e){
+//            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+//        }
+//    }
 
-    @PutMapping("/{courseName}/teams/{teamId}/vm-config")
-    private VMConfigDTO updateVMConfig(@PathVariable String courseName, @PathVariable String teamId,
+    @PutMapping("/{courseName}/teams/{teamId}/vm-config/{vmId}")
+    private VMConfigDTO updateVMConfig(@PathVariable String courseName, @PathVariable String teamId, @PathVariable Long vmId,
                                        @RequestBody @Valid VMConfigDTO config){
+        if(!vmId.equals(config.getId()))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "ObjectId and path id are not equals.");
         try {
             Long id = Long.valueOf(teamId);
             return vmService.updateVMConfiguration(config, id, courseName);
