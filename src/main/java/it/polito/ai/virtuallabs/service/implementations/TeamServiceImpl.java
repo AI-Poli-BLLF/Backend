@@ -486,7 +486,12 @@ public class TeamServiceImpl implements TeamService {
                     .filter(t -> t.getCourse() == team.get().getCourse())
                     .map(Team::getId)
                     .collect(Collectors.toList());
-            teamsToEvict.addAll(studentTeamsToEvict);
+
+            for (Long teamIdToEvict : studentTeamsToEvict) {
+                if (!teamsToEvict.contains(teamIdToEvict)) {
+                    teamsToEvict.add(teamIdToEvict);
+                }
+            }
         }
 
         // 3. delete pending teams

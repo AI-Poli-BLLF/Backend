@@ -48,7 +48,6 @@ public class NotificationServiceImpl implements NotificationService {
     public void sendMessage(String address, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(from);
-        //message.setTo("ma.borghe@gmail.com");
         message.setTo("applicazioni.internet.test@gmail.com");
         message.setSubject(subject);
         message.setText(body);
@@ -104,9 +103,9 @@ public class NotificationServiceImpl implements NotificationService {
         for (String id : memberIds){
             if (!id.equals(proposerId)) {
                 Token token = createAndSaveToken(UUID.randomUUID().toString(), team.getId(), id, expiryDate);
-                String message = buildMessage(token.getId(), team.getName(), id);
-                String email = String.format("%s@studenti.polito.it", id); //The <s> is included in the id
-                sendMessage(email, "Gruppo Applicazioni Internet", message);
+                //String message = buildMessage(token.getId(), team.getName(), id);
+                //String email = String.format("%s@studenti.polito.it", id); //The <s> is included in the id
+                //sendMessage(email, "Gruppo Applicazioni Internet", message);
             }
         }
 
