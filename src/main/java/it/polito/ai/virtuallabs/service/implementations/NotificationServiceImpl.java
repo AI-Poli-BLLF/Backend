@@ -4,11 +4,14 @@ import it.polito.ai.virtuallabs.dtos.CourseDTO;
 import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.dtos.TeamDTO;
 import it.polito.ai.virtuallabs.dtos.TokenDTO;
+import it.polito.ai.virtuallabs.dtos.vms.VMConfigDTO;
 import it.polito.ai.virtuallabs.entities.Team;
 import it.polito.ai.virtuallabs.entities.Token;
 import it.polito.ai.virtuallabs.repositories.TokenRepository;
+import it.polito.ai.virtuallabs.service.EntityGetter;
 import it.polito.ai.virtuallabs.service.NotificationService;
 import it.polito.ai.virtuallabs.service.TeamService;
+import it.polito.ai.virtuallabs.service.VMService;
 import it.polito.ai.virtuallabs.service.exceptions.TeamNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.InvalidOrExpiredTokenException;
 import it.polito.ai.virtuallabs.service.exceptions.TokenNotFoundException;
@@ -41,7 +44,11 @@ public class NotificationServiceImpl implements NotificationService {
     @Autowired
     private TeamService teamService;
     @Autowired
+    private VMService vmService;
+    @Autowired
     private ModelMapper mapper;
+    @Autowired
+    private EntityGetter entityGetter;
 
     @Override
     @Async
@@ -66,6 +73,16 @@ public class NotificationServiceImpl implements NotificationService {
         tokenRepository.delete(t);
         if(tokenRepository.countTokenByTeamId(teamId) == 0) {
             teamService.setTeamStatus(teamId, Team.Status.ACTIVE);
+            Team team = entityGetter.getTeam(teamId);
+
+            // todo: vedere che eccezioni possono essere generate
+            //creo una configurazione di base per le vm
+            vmService.createVMConfiguration(
+                    new VMConfigDTO(0, 0, 0, 0, 0),
+                    teamId,
+                    team.getCourse().getName()
+            );
+
             // cancella i team (inattivi) relativi allo stesso corso in cui compaiono membri
             // del gruppo appena attivato
             List<Long> teamsToEvict = teamService.evictPendingTeamsOfMembers(teamId);

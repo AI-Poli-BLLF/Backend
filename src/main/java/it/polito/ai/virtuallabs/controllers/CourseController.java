@@ -350,11 +350,10 @@ public class CourseController {
 
     @PostMapping("/{courseName}/teams/{teamId}/vms")
     @ResponseStatus(value = HttpStatus.CREATED)
-    private VMInstanceDTO createVMInstance(@PathVariable String courseName, @PathVariable String teamId,
+    private VMInstanceDTO createVMInstance(@PathVariable String courseName, @PathVariable Long teamId,
                                            @RequestBody @Valid ModelHelper.VMInstanceData instanceData){
         try{
-            Long id = Long.valueOf(teamId);
-            return vmService.createVMInstance(instanceData.getInstance(), courseName, id, instanceData.getStudentId());
+            return vmService.createVMInstance(instanceData.getInstance(), courseName, teamId, instanceData.getStudentId());
         }catch (NumberFormatException e){
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Invalid team");
         }catch (VMServiceException | TeamServiceException e){
