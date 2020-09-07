@@ -14,8 +14,8 @@ public interface VMService {
     VMConfigDTO updateVMConfiguration(VMConfigDTO vmConfigDTO, Long teamId, String courseName);
     VMInstanceDTO createVMInstance(VMInstanceDTO vmInstanceDTO, String courseName, Long teamId, String studentId);
     void shareVMOwnership(Long vmInstanceId, String ownerId, String teammateId);
-    void bootVMInstance(String courseName, Long teamId, Long vmInstanceId, String ownerId);
-    void shutdownVMInstance(String courseName, Long teamId, Long vmInstanceId, String ownerId);
+    void bootVMInstance(String courseName, Long teamId, Long vmInstanceId);
+    void shutdownVMInstance(String courseName, Long teamId, Long vmInstanceId);
     void deleteVMInstance(String courseName, Long teamId, Long vmInstanceId);
 
     VMModelDTO getCourseVMModel(String courseName);

@@ -248,9 +248,9 @@ public class VMServiceImpl implements VMService {
         vmInstance.addOwner(teammate);
     }
 
-    //@PreAuthorize("@securityApiAuth.isMe(#ownerId)")
+    @PreAuthorize("@securityApiAuth.ownVm(#vmInstanceId)")
     @Override
-    public void bootVMInstance(String courseName, Long teamId, Long vmInstanceId, String ownerId) {
+    public void bootVMInstance(String courseName, Long teamId, Long vmInstanceId) {
         Course c = getCourse(courseName);
 
         Team t = getTeam(teamId);
@@ -262,11 +262,6 @@ public class VMServiceImpl implements VMService {
 
         if (!vmInstance.getTeam().equals(t))
             throw new VMInstanceNotBelongToTeamException(teamId, vmInstanceId);
-
-        Student owner = getStudent(ownerId);
-
-        if (!vmInstance.getOwners().contains(owner))
-            throw new StudentNotOwnerException(ownerId, vmInstanceId);
 
         //Se Ci sono già troppe VM attive, lancia una eccezione
         int maxActive = t.getVmConfig().getMaxActive();
@@ -278,9 +273,9 @@ public class VMServiceImpl implements VMService {
         vmInstance.setActive(true);
     }
 
-    //@PreAuthorize("@securityApiAuth.isMe(#ownerId)")
+    @PreAuthorize("@securityApiAuth.ownVm(#vmInstanceId)")
     @Override
-    public void shutdownVMInstance(String courseName, Long teamId, Long vmInstanceId, String ownerId) {
+    public void shutdownVMInstance(String courseName, Long teamId, Long vmInstanceId) {
         Course c = getCourse(courseName);
 
         Team t = getTeam(teamId);
@@ -293,10 +288,6 @@ public class VMServiceImpl implements VMService {
         if (!vmInstance.getTeam().equals(t))
             throw new VMInstanceNotBelongToTeamException(teamId, vmInstanceId);
 
-        Student owner = getStudent(ownerId);
-
-        if (!vmInstance.getOwners().contains(owner))
-            throw new StudentNotOwnerException(ownerId, vmInstanceId);
 
         vmInstance.setActive(false);
     }

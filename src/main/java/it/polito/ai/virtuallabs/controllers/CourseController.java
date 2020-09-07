@@ -404,11 +404,11 @@ public class CourseController {
 
     @PutMapping("/{courseName}/teams/{teamId}/vms/{vmId}/boot")
     private void bootVm(@PathVariable String courseName, @PathVariable String teamId,
-                        @PathVariable String vmId, @RequestBody String ownerId){
+                        @PathVariable String vmId){
         try{
             Long tId = Long.valueOf(teamId);
             Long vId = Long.valueOf(vmId);
-            vmService.bootVMInstance(courseName, tId, vId, ownerId);
+            vmService.bootVMInstance(courseName, tId, vId);
         }catch (NumberFormatException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team or vm");
         }catch (VMServiceException | TeamServiceException e){
@@ -418,11 +418,11 @@ public class CourseController {
 
     @PutMapping("/{courseName}/teams/{teamId}/vms/{vmId}/shutdown")
     private void shutdownVm(@PathVariable String courseName, @PathVariable String teamId,
-                            @PathVariable String vmId, @RequestBody String ownerId){
+                            @PathVariable String vmId){
         try{
             Long tId = Long.valueOf(teamId);
             Long vId = Long.valueOf(vmId);
-            vmService.shutdownVMInstance(courseName, tId, vId, ownerId);
+            vmService.shutdownVMInstance(courseName, tId, vId);
         }catch (NumberFormatException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team or vm");
         }catch (VMServiceException | TeamServiceException e){
