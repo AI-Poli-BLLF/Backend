@@ -2,11 +2,13 @@ package it.polito.ai.virtuallabs.security.service;
 
 import it.polito.ai.virtuallabs.entities.Student;
 import it.polito.ai.virtuallabs.entities.Team;
+import it.polito.ai.virtuallabs.entities.vms.VMInstance;
 import it.polito.ai.virtuallabs.repositories.ProfessorRepository;
 import it.polito.ai.virtuallabs.repositories.StudentRepository;
 import it.polito.ai.virtuallabs.repositories.TeamRepository;
 import it.polito.ai.virtuallabs.security.entities.Roles;
 import it.polito.ai.virtuallabs.security.entities.User;
+import it.polito.ai.virtuallabs.service.EntityGetter;
 import it.polito.ai.virtuallabs.service.exceptions.StudentNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.TeamNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,8 @@ public class SecurityApiAuth {
     private TeamRepository teamRepository;
     @Autowired
     private ProfessorRepository professorRepository;
+    @Autowired
+    private EntityGetter entityGetter;
 
     public static User getPrincipal(){
         return (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -84,5 +88,14 @@ public class SecurityApiAuth {
             System.out.println("User does not appear among the proposed members");
         }
         return toReturn;
+    }
+
+    public boolean ownVm(Long vmInstanceId){
+        VMInstance vmInstance = entityGetter.getVMInstance(vmInstanceId);
+
+        User principal = getPrincipal();
+        List<String> ownerIds = vmInstance.getOwners().stream().map(Student::getId).collect(Collectors.toList());
+
+        return ownerIds.contains(principal.getId());
     }
 }

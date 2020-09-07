@@ -21,6 +21,7 @@ import it.polito.ai.virtuallabs.service.exceptions.*;
 import it.polito.ai.virtuallabs.service.exceptions.vms.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -300,9 +301,9 @@ public class VMServiceImpl implements VMService {
         vmInstance.setActive(false);
     }
 
-    //@PreAuthorize("@securityApiAuth.isMe(#ownerId)")
+    @PreAuthorize("@securityApiAuth.ownVm(#vmInstanceId)")
     @Override
-    public void deleteVMInstance(String courseName, Long teamId, Long vmInstanceId, String ownerId) {
+    public void deleteVMInstance(String courseName, Long teamId, Long vmInstanceId) {
         Course c = getCourse(courseName);
 
         Team t = getTeam(teamId);
@@ -314,11 +315,6 @@ public class VMServiceImpl implements VMService {
 
         if (!vmInstance.getTeam().equals(t))
             throw new VMInstanceNotBelongToTeamException(teamId, vmInstanceId);
-
-        Student owner = getStudent(ownerId);
-
-        if (!vmInstance.getOwners().contains(owner))
-            throw new StudentNotOwnerException(ownerId, vmInstanceId);
 
         /*List<Student> owners = vmInstance.getOwners();
 

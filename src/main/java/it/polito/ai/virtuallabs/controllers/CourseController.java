@@ -432,11 +432,11 @@ public class CourseController {
 
     @DeleteMapping("/{courseName}/teams/{teamId}/vms/{vmId}")
     private void deleteVm(@PathVariable String courseName, @PathVariable String teamId,
-                          @PathVariable String vmId, @RequestBody String ownerId){
+                          @PathVariable String vmId){
         try{
             Long tId = Long.valueOf(teamId);
             Long vId = Long.valueOf(vmId);
-            vmService.deleteVMInstance(courseName, tId, vId, ownerId);
+            vmService.deleteVMInstance(courseName, tId, vId);
         }catch (NumberFormatException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team or vm");
         }catch (VMServiceException | TeamServiceException e){

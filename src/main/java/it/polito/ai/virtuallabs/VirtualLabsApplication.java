@@ -1,9 +1,5 @@
 package it.polito.ai.virtuallabs;
 
-import it.polito.ai.virtuallabs.dtos.vms.VMConfigDTO;
-import it.polito.ai.virtuallabs.dtos.vms.VMInstanceDTO;
-import it.polito.ai.virtuallabs.dtos.vms.VMModelDTO;
-import it.polito.ai.virtuallabs.entities.vms.VMModel;
 import it.polito.ai.virtuallabs.security.entities.User;
 import it.polito.ai.virtuallabs.security.repositories.UserRepository;
 import it.polito.ai.virtuallabs.service.TeamService;
@@ -21,8 +17,7 @@ import java.util.Arrays;
 @SpringBootApplication
 @EnableScheduling
 public class VirtualLabsApplication {
-
-    // todo: l'uso de repository qua non mi fa impazzire, non sarebbe meglio usare un service?
+    
     @Bean
     public CommandLineRunner runner(UserRepository repository, PasswordEncoder passwordEncoder,
                                     VMService vmService, TeamService teamService){
