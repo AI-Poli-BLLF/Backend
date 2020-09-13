@@ -1,9 +1,11 @@
 package it.polito.ai.virtuallabs.controllers;
-import it.polito.ai.virtuallabs.dtos.*;
+
+import it.polito.ai.virtuallabs.dtos.CourseDTO;
+import it.polito.ai.virtuallabs.dtos.ProfessorDTO;
+import it.polito.ai.virtuallabs.dtos.StudentDTO;
+import it.polito.ai.virtuallabs.dtos.TeamDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMInstanceDTO;
-import it.polito.ai.virtuallabs.entities.Student;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.hateoas.Link;
 
 import javax.validation.constraints.NotEmpty;
@@ -89,13 +91,5 @@ public class ModelHelper {
         private String studentId;
         @NotNull
         private VMInstanceDTO instance;
-    }
-
-    @Data
-    public static class ShareRequest{
-        @NotEmpty
-        private String ownerId;
-        @NotEmpty
-        private List<String> memberIds;
     }
 }

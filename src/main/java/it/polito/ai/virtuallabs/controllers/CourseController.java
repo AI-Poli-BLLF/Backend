@@ -403,6 +403,20 @@ public class CourseController {
         }
     }
 
+    @GetMapping("/{courseName}/teams/{teamId}/vms/{vmId}/creator")
+    private StudentDTO getVmCreator(@PathVariable String courseName, @PathVariable String teamId,
+                                         @PathVariable String vmId){
+        try{
+            Long tId = Long.valueOf(teamId);
+            Long vId = Long.valueOf(vmId);
+            return ModelHelper.enrich(vmService.getVMCreator(courseName, tId, vId));
+        }catch (NumberFormatException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team or vm");
+        }catch (VMServiceException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
     @PutMapping("/{courseName}/teams/{teamId}/vms/{vmId}/boot")
     private void bootVm(@PathVariable String courseName, @PathVariable String teamId,
                         @PathVariable String vmId){
@@ -451,7 +465,31 @@ public class CourseController {
         try{
             Long tId = Long.valueOf(teamId);
             Long vId = Long.valueOf(vmId);
-            vmService.shareVMOwnership(courseName, tId, vId, memberIds);
+            vmService.setVMOwners(courseName, tId, vId, memberIds);
+        }catch (NumberFormatException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team or vm");
+        }catch (VMServiceException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @GetMapping("/{courseName}/teams/{teamId}/active-vms")
+    private List<VMInstanceDTO> getActiveTeamVm(@PathVariable String courseName, @PathVariable String teamId){
+        try{
+            Long tId = Long.valueOf(teamId);
+            return vmService.getActiveTeamVms(courseName, tId);
+        }catch (NumberFormatException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team or vm");
+        }catch (VMServiceException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @GetMapping("/{courseName}/teams/{teamId}/offline-vms")
+    private List<VMInstanceDTO> getOfflineTeamVm(@PathVariable String courseName, @PathVariable String teamId){
+        try{
+            Long tId = Long.valueOf(teamId);
+            return vmService.getOfflineTeamVms(courseName, tId);
         }catch (NumberFormatException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team or vm");
         }catch (VMServiceException | TeamServiceException e){

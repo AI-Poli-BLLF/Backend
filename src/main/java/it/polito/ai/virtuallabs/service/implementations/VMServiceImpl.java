@@ -161,7 +161,7 @@ public class VMServiceImpl implements VMService {
         return mapper.map(vmConfig, VMConfigDTO.class);
     }
 
-    //@PreAuthorize("@securityApiAuth.isMe(#studentId)")
+    @PreAuthorize("@securityApiAuth.isMe(#studentId)")
     @Override
     public VMInstanceDTO createVMInstance(VMInstanceDTO vmInstanceDTO, String courseName, Long teamId, String studentId) {
         Course c = getter.getCourse(courseName);
@@ -220,49 +220,40 @@ public class VMServiceImpl implements VMService {
         VMInstance vmInstance = mapper.map(vmInstanceDTO, VMInstance.class);
         vmInstance.setVmModel(vmModel);
         vmInstance.setTeam(courseTeam);
-        vmInstance.addOwner(s);
+        vmInstance.setCreator(s);
 
         return mapper.map(vmInstanceRepository.save(vmInstance), VMInstanceDTO.class);
     }
 
     @PreAuthorize("@securityApiAuth.ownVm(#vmInstanceId)")
     @Override
-    public void shareVMOwnership(String courseName, Long teamId, Long vmInstanceId, List<String> teammateIds) {
+    public void setVMOwners(String courseName, Long teamId, Long vmInstanceId, List<String> ownerIds){
         Course c = getter.getCourse(courseName);
-
-        VMInstance vmInstance = getter.getVMInstance(vmInstanceId);
 
         Team t = getter.getTeam(teamId);
 
+        VMInstance vm = getter.getVMInstance(vmInstanceId);
 
-        Set<Student> teammates = teammateIds.stream().map(id -> getter.getStudent(id)).collect(Collectors.toSet());
+        Set<Student> owners = ownerIds.stream().map(o -> getter.getStudent(o)).collect(Collectors.toSet());
 
-        //Controllo se ci sono duplicati all'interno della lista dei membri
-        if(teammateIds.size() != teammates.size())
-            throw new DuplicateStudentException(teammateIds.size() - teammates.size());
 
-        //Se il team non corrisponde con il team della VM lancia una eccezione
-        if(!t.equals(vmInstance.getTeam()))
-            throw new VMInstanceNotBelongToTeamException(teamId, vmInstanceId);
-
-        //Se i due studenti non appartengono allo stesso team, lancia una eccezione
-        if (!t.getMembers().containsAll(teammates))
-            throw new StudentsNotInSameTeamException();
-
-        //Verifico che il team sia associato al corso
+        //Controllo che il team appartenga al corso
         if(!teamBelongToCourse(t, c))
             throw new TeamNotBelongToCourseException(t.getName(), c.getName());
 
-        //Verifico che il corso sia ancora attivo
-        if (!c.isEnabled())
-            throw new CourseNotEnabledException(c.getName());
+        //Controllo che il corso sia attivo
+        if(!c.isEnabled())
+            throw new CourseNotEnabledException(courseName);
 
-        vmInstance.getOwners().forEach(o -> {
-            if(teammates.contains(o))
-                throw new StudentAlreadyOwnVm(o.getId(), vmInstanceId);
-        });
+        //Controllo che la VM appartiene al team
+        if(!vm.getTeam().equals(t))
+            throw new VMInstanceNotBelongToTeamException(teamId, vmInstanceId);
 
-        vmInstance.addOwners(teammates);
+        //Controllo che non ci siano membri duplicati
+        if(ownerIds.size() != owners.size())
+            throw new DuplicateStudentException();
+
+        vm.setOwners(new ArrayList<>(owners));
     }
 
     @PreAuthorize("@securityApiAuth.ownVm(#vmInstanceId)")
@@ -364,6 +355,25 @@ public class VMServiceImpl implements VMService {
     }
 
     @Override
+    public StudentDTO getVMCreator(String courseName, Long teamId, Long vmInstanceId){
+        Course c = getter.getCourse(courseName);
+
+        Team t = getter.getTeam(teamId);
+
+        VMInstance vm = getter.getVMInstance(vmInstanceId);
+
+        //Controllo che il team appartenga al corso
+        if(!teamBelongToCourse(t, c))
+            throw new TeamNotBelongToCourseException(t.getName(), c.getName());
+
+        //Controllo che la VM appartiene al team
+        if(!vm.getTeam().equals(t))
+            throw new VMInstanceNotBelongToTeamException(teamId, vmInstanceId);
+
+        return mapper.map(vm.getCreator(), StudentDTO.class);
+    }
+
+    @Override
     public VMModelDTO getVMModelOfInstance(Long vmInstanceId) {
         VMInstance vmInstance =  getter.getVMInstance(vmInstanceId);
         return mapper.map(vmInstance, VMModelDTO.class);
@@ -427,9 +437,13 @@ public class VMServiceImpl implements VMService {
     }
 
     @Override
-    public List<VMInstanceDTO> getActiveTeamVms(Long teamId) {
-        if (!teamRepository.findById(teamId).isPresent())
-            throw new TeamNotFoundException(teamId);
+    public List<VMInstanceDTO> getActiveTeamVms(String courseName, Long teamId) {
+        Course c = getter.getCourse(courseName);
+        Team t = getter.getTeam(teamId);
+
+        if(!teamBelongToCourse(t, c))
+            throw new TeamNotBelongToCourseException(t.getName(), courseName);
+
         return vmInstanceRepository.findAllByTeamIdAndActiveTrue(teamId)
                 .stream().map(vm-> mapper.map(vm, VMInstanceDTO.class))
                 .collect(Collectors.toList());
@@ -443,9 +457,13 @@ public class VMServiceImpl implements VMService {
     }
 
     @Override
-    public List<VMInstanceDTO> getOfflineTeamVms(Long teamId) {
-        if (!teamRepository.findById(teamId).isPresent())
-            throw new TeamNotFoundException(teamId);
+    public List<VMInstanceDTO> getOfflineTeamVms(String courseName, Long teamId) {
+        Course c = getter.getCourse(courseName);
+        Team t = getter.getTeam(teamId);
+
+        if(!teamBelongToCourse(t, c))
+            throw new TeamNotBelongToCourseException(t.getName(), courseName);
+
         return vmInstanceRepository.findAllByTeamIdAndActiveFalse(teamId)
                 .stream().map(vm-> mapper.map(vm, VMInstanceDTO.class))
                 .collect(Collectors.toList());

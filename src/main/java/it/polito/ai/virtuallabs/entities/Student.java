@@ -34,6 +34,9 @@ public class Student {
     @ManyToMany(mappedBy = "owners")
     private List<VMInstance> vms = new ArrayList<>();
 
+    @OneToMany(mappedBy = "creator")
+    private List<VMInstance> createdVms = new ArrayList<>();
+
     @OneToMany(mappedBy = "student")
     private List<Draft> drafts = new ArrayList<>();
 

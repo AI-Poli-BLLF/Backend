@@ -33,6 +33,10 @@ public class VMInstance {
     //Tramite team è possibile risalire al modello della VM, al corso ed alla configurazione
     private Team team;
 
+    @ManyToOne
+    @JoinColumn(name = "creator_id")
+    private Student creator;
+
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "student_owner_vm",
             joinColumns = @JoinColumn(name = "vm_id"),
@@ -40,28 +44,37 @@ public class VMInstance {
     )
     private List<Student> owners = new ArrayList<>();
 
-    public void addOwner(Student student){
-        if (student == null)
-            return;
 
-        owners.add(student);
-        student.getVms().add(this);
+    public void setOwners(List<Student> owners) {
+        //Tolgo sempre se è presente il creator
+        owners.remove(creator);
+        //Se owners non è vuoto cancello la VM dagli owners
+        if(!this.owners.isEmpty())
+            this.owners.forEach(o-> o.getVms().remove(this));
+
+        //Setto gli owner correnti
+        this.owners = owners;
+        //Aggiungo la VM a tutti gli owner
+        owners.forEach(o->o.getVms().add(this));
+
     }
 
-    public void addOwners(Collection<Student> students){
-        if(students == null || students.isEmpty())
-            return;
-
-        owners.addAll(students);
-        students.forEach(s -> s.getVms().add(this));
+    public List<Student> getOwners() {
+        List<Student> owners = new ArrayList<>(this.owners);
+        owners.add(creator);
+        return owners;
     }
 
-    public void removeOwner(Student student){
-        if(student == null)
-            return;
-
-        owners.remove(student);
-        student.getVms().remove(this);
+    public void setCreator(Student creator) {
+        if(this.creator != null){
+            if( this.creator.equals(creator))
+                return;
+            this.creator.getCreatedVms().remove(this);
+        }
+        this.creator = creator;
+        List<VMInstance> createdVms = creator.getCreatedVms();
+        if(!createdVms.contains(this))
+            createdVms.add(this);
     }
 
     public void setVmModel(VMModel vmModel) {

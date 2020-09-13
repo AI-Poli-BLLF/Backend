@@ -13,20 +13,21 @@ public interface VMService {
     VMConfigDTO createVMConfiguration(VMConfigDTO vmConfigDTO, Long teamId, String courseName);
     VMConfigDTO updateVMConfiguration(VMConfigDTO vmConfigDTO, Long teamId, String courseName);
     VMInstanceDTO createVMInstance(VMInstanceDTO vmInstanceDTO, String courseName, Long teamId, String studentId);
-    void shareVMOwnership(String courseName, Long teamId, Long vmInstanceId, List<String> teammateIds);
+    void setVMOwners(String courseName, Long teamId, Long vmInstanceId, List<String> ownerIds);
     void bootVMInstance(String courseName, Long teamId, Long vmInstanceId);
     void shutdownVMInstance(String courseName, Long teamId, Long vmInstanceId);
     void deleteVMInstance(String courseName, Long teamId, Long vmInstanceId);
 
     VMModelDTO getCourseVMModel(String courseName);
     List<StudentDTO> getVMOwners(String courseName, Long teamId, Long vmInstanceId);
+    StudentDTO getVMCreator(String courseName, Long teamId, Long vmInstanceId);
     VMModelDTO getVMModelOfInstance(Long vmInstanceId);
     List<VMInstanceDTO> getTeamVMs(String courseName, Long teamId);
     VMInstanceDTO getSingleTeamVm(String courseName, Long teamId, Long vmInstanceId);
     VMConfigDTO getTeamConfig(String courseName, Long teamId);
     List<VMInstanceDTO> getAllVms();
     List<VMInstanceDTO> getActiveVms();
-    List<VMInstanceDTO> getActiveTeamVms(Long teamId);
+    List<VMInstanceDTO> getActiveTeamVms(String courseName, Long teamId);
     List<VMInstanceDTO> getOfflineVms();
-    List<VMInstanceDTO> getOfflineTeamVms(Long teamId);
+    List<VMInstanceDTO> getOfflineTeamVms(String courseName, Long teamId);
 }
