@@ -5,4 +5,7 @@ public class StudentsNotInSameTeamException extends TeamServiceException {
         super(String.format("Students %s and %s are not in the same team (%s)",
                 studentId1, studentId2, teamName));
     }
+    public StudentsNotInSameTeamException(){
+        super("Students are not in the same team");
+    }
 }

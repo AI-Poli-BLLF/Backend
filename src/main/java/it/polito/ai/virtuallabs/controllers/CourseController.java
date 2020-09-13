@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
+import static it.polito.ai.virtuallabs.controllers.ModelHelper.*;
 
 @RestController
 @RequestMapping("/API/courses")
@@ -437,6 +438,20 @@ public class CourseController {
             Long tId = Long.valueOf(teamId);
             Long vId = Long.valueOf(vmId);
             vmService.deleteVMInstance(courseName, tId, vId);
+        }catch (NumberFormatException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team or vm");
+        }catch (VMServiceException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @PutMapping("/{courseName}/teams/{teamId}/vms/{vmId}")
+    private void shareVmOwnership(@PathVariable String courseName, @PathVariable String teamId,
+                                  @PathVariable String vmId, @RequestBody List<String> memberIds){
+        try{
+            Long tId = Long.valueOf(teamId);
+            Long vId = Long.valueOf(vmId);
+            vmService.shareVMOwnership(courseName, tId, vId, memberIds);
         }catch (NumberFormatException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team or vm");
         }catch (VMServiceException | TeamServiceException e){

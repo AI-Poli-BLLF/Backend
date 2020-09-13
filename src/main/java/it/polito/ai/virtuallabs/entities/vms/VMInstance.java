@@ -6,10 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Data
 @Entity
@@ -49,6 +46,14 @@ public class VMInstance {
 
         owners.add(student);
         student.getVms().add(this);
+    }
+
+    public void addOwners(Collection<Student> students){
+        if(students == null || students.isEmpty())
+            return;
+
+        owners.addAll(students);
+        students.forEach(s -> s.getVms().add(this));
     }
 
     public void removeOwner(Student student){

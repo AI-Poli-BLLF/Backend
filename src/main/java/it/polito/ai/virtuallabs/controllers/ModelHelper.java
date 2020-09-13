@@ -84,11 +84,18 @@ public class ModelHelper {
     }
 
     @Data
-    @NoArgsConstructor
     public static class VMInstanceData{
         @NotEmpty
         private String studentId;
         @NotNull
         private VMInstanceDTO instance;
+    }
+
+    @Data
+    public static class ShareRequest{
+        @NotEmpty
+        private String ownerId;
+        @NotEmpty
+        private List<String> memberIds;
     }
 }
