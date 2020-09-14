@@ -381,7 +381,7 @@ public class CourseController {
         if(!vmId.equals(instanceData.getInstance().getId()))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Path id and object id are not equals");
         try{
-            return vmService.createVMInstance(instanceData.getInstance(), courseName, teamId, instanceData.getStudentId());
+            return vmService.editVMInstance(instanceData.getInstance(), courseName, teamId, instanceData.getStudentId());
         }catch (NumberFormatException e){
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Invalid team");
         }catch (VMServiceException | TeamServiceException e){
