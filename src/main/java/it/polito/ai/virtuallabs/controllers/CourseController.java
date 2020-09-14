@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -308,20 +309,21 @@ public class CourseController {
         }
     }
 
-//    @PostMapping("/{courseName}/teams/{teamId}/vm-config")
-//    @ResponseStatus(value = HttpStatus.CREATED)
-//    private VMConfigDTO createVMConfig(@PathVariable String courseName, @PathVariable String teamId,
-//                                       @RequestBody @Valid VMConfigDTO config){
-//        try {
-//            Long id = Long.valueOf(teamId);
-//            return vmService.createVMConfiguration(config, id, courseName);
-//        }catch (NumberFormatException e){
-//            throw new ResponseStatusException(HttpStatus.CONFLICT, "Invalid team");
-//        }catch (VMServiceException | TeamServiceException e){
-//            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
-//        }
-//    }
+    @PostMapping("/{courseName}/teams/{teamId}/vm-config")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    private VMConfigDTO createVMConfig(@PathVariable String courseName, @PathVariable String teamId,
+                                       @RequestBody @Valid VMConfigDTO config){
+        try {
+            Long id = Long.valueOf(teamId);
+            return vmService.createVMConfiguration(config, id, courseName);
+        }catch (NumberFormatException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Invalid team");
+        }catch (VMServiceException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
 
+    //PATH CHE NON HA SENSO?! LA VM CONFIG SI RIFERISCE AD UN TEAM NON AD UNA VM IN PARTICOLARE
     @PutMapping("/{courseName}/teams/{teamId}/vm-config/{vmId}")
     private VMConfigDTO updateVMConfig(@PathVariable String courseName, @PathVariable String teamId, @PathVariable Long vmId,
                                        @RequestBody @Valid VMConfigDTO config){
@@ -459,9 +461,9 @@ public class CourseController {
         }
     }
 
-    @PutMapping("/{courseName}/teams/{teamId}/vms/{vmId}")
-    private void shareVmOwnership(@PathVariable String courseName, @PathVariable String teamId,
-                                  @PathVariable String vmId, @RequestBody List<String> memberIds){
+    @PutMapping("/{courseName}/teams/{teamId}/vms/{vmId}/owners")
+    private void setVmOwners(@PathVariable String courseName, @PathVariable String teamId,
+                             @PathVariable String vmId, @RequestBody @Valid @NotEmpty List<String> memberIds){
         try{
             Long tId = Long.valueOf(teamId);
             Long vId = Long.valueOf(vmId);
@@ -490,6 +492,20 @@ public class CourseController {
         try{
             Long tId = Long.valueOf(teamId);
             return vmService.getOfflineTeamVms(courseName, tId);
+        }catch (NumberFormatException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team or vm");
+        }catch (VMServiceException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @GetMapping("/{courseName}/teams/{teamId}/vms/{vmId}/vm-model")
+    private VMModelDTO getVMModelOfInstance(@PathVariable String courseName, @PathVariable String teamId,
+                                            @PathVariable String vmId){
+        try{
+            Long tId = Long.valueOf(teamId);
+            Long vId = Long.valueOf(vmId);
+            return vmService.getVMModelOfInstance(courseName, tId, vId);
         }catch (NumberFormatException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team or vm");
         }catch (VMServiceException | TeamServiceException e){

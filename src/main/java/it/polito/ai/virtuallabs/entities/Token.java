@@ -16,10 +16,12 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Token {
+    public enum TokenType{REGISTRATION, TEAM_PROPOSAL, COURSE_ENROLLING}
     @Id
     @EqualsAndHashCode.Include
     private String id;
     private Long teamId;
     private String studentId;
     private Timestamp expiryDate;
+    private TokenType type;
 }

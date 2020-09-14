@@ -1,7 +1,5 @@
 package it.polito.ai.virtuallabs.service.implementations;
 
-import it.polito.ai.virtuallabs.dtos.CourseDTO;
-import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.dtos.TeamDTO;
 import it.polito.ai.virtuallabs.dtos.TokenDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMConfigDTO;
@@ -12,8 +10,8 @@ import it.polito.ai.virtuallabs.service.EntityGetter;
 import it.polito.ai.virtuallabs.service.NotificationService;
 import it.polito.ai.virtuallabs.service.TeamService;
 import it.polito.ai.virtuallabs.service.VMService;
-import it.polito.ai.virtuallabs.service.exceptions.TeamNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.InvalidOrExpiredTokenException;
+import it.polito.ai.virtuallabs.service.exceptions.TeamNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.TokenNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +26,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
@@ -139,7 +140,7 @@ public class NotificationServiceImpl implements NotificationService {
 }
 
     private Token createAndSaveToken(String tokenId, Long teamId, String studentId, Timestamp expiryDate) {
-        Token token = new Token(tokenId, teamId, studentId, expiryDate);
+        Token token = new Token(tokenId, teamId, studentId, expiryDate, Token.TokenType.TEAM_PROPOSAL);
         tokenRepository.save(token);
         return token;
     }

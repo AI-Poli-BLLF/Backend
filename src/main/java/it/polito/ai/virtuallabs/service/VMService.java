@@ -21,7 +21,7 @@ public interface VMService {
     VMModelDTO getCourseVMModel(String courseName);
     List<StudentDTO> getVMOwners(String courseName, Long teamId, Long vmInstanceId);
     StudentDTO getVMCreator(String courseName, Long teamId, Long vmInstanceId);
-    VMModelDTO getVMModelOfInstance(Long vmInstanceId);
+    VMModelDTO getVMModelOfInstance(String courseName, Long teamId, Long vmInstanceId);
     List<VMInstanceDTO> getTeamVMs(String courseName, Long teamId);
     VMInstanceDTO getSingleTeamVm(String courseName, Long teamId, Long vmInstanceId);
     VMConfigDTO getTeamConfig(String courseName, Long teamId);

@@ -374,9 +374,20 @@ public class VMServiceImpl implements VMService {
     }
 
     @Override
-    public VMModelDTO getVMModelOfInstance(Long vmInstanceId) {
+    public VMModelDTO getVMModelOfInstance(String courseName, Long teamId, Long vmInstanceId) {
+        Course c = getter.getCourse(courseName);
+
+        Team t = getter.getTeam(teamId);
+
         VMInstance vmInstance =  getter.getVMInstance(vmInstanceId);
-        return mapper.map(vmInstance, VMModelDTO.class);
+
+        if (!teamBelongToCourse(t, c))
+            throw new TeamNotBelongToCourseException(t.getName(), courseName);
+
+        if(!vmInstance.getTeam().equals(t))
+            throw new VMInstanceNotBelongToTeamException(teamId, vmInstanceId);
+
+        return mapper.map(vmInstance.getVmModel(), VMModelDTO.class);
     }
 
     @Override
