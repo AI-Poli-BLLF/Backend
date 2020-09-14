@@ -330,8 +330,8 @@ public class CourseController {
         if(!vmId.equals(config.getId()))
             throw new ResponseStatusException(HttpStatus.CONFLICT, "ObjectId and path id are not equals.");
         try {
-            Long id = Long.valueOf(teamId);
-            return vmService.updateVMConfiguration(config, id, courseName);
+            Long tId = Long.valueOf(teamId);
+            return vmService.updateVMConfiguration(config, tId, courseName);
         }catch (NumberFormatException e){
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Invalid team");
         }catch (VMServiceException | TeamServiceException e){
