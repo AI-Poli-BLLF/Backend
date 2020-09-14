@@ -323,12 +323,10 @@ public class CourseController {
         }
     }
 
-    //PATH CHE NON HA SENSO?! LA VM CONFIG SI RIFERISCE AD UN TEAM NON AD UNA VM IN PARTICOLARE
-    @PutMapping("/{courseName}/teams/{teamId}/vm-config/{vmId}")
-    private VMConfigDTO updateVMConfig(@PathVariable String courseName, @PathVariable String teamId, @PathVariable Long vmId,
+
+    @PutMapping("/{courseName}/teams/{teamId}/vm-config/")
+    private VMConfigDTO updateVMConfig(@PathVariable String courseName, @PathVariable String teamId,
                                        @RequestBody @Valid VMConfigDTO config){
-        if(!vmId.equals(config.getId()))
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "ObjectId and path id are not equals.");
         try {
             Long tId = Long.valueOf(teamId);
             return vmService.updateVMConfiguration(config, tId, courseName);
