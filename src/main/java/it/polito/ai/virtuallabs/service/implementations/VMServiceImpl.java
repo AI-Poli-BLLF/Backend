@@ -225,6 +225,67 @@ public class VMServiceImpl implements VMService {
         return mapper.map(vmInstanceRepository.save(vmInstance), VMInstanceDTO.class);
     }
 
+    // todo: controllare correttezza
+    @PreAuthorize("@securityApiAuth.isMe(#studentId)")
+    @Override
+    public VMInstanceDTO editVMInstance(VMInstanceDTO vmInstanceDTO, String courseName, Long teamId, String studentId) {
+        Course c = getter.getCourse(courseName);
+
+        //Se il corso non è attivo lancia una eccezione
+        if (!c.isEnabled())
+            throw new CourseNotEnabledException(courseName);
+
+        Student s = getter.getStudent(studentId);
+
+        //Controllo se lo studente è iscritto al corso
+        Set<String> enrolledCourses = studentRepository.getCourseNames(studentId)
+                .stream().map(String::toLowerCase).collect(Collectors.toSet());
+        if (!enrolledCourses.contains(courseName.toLowerCase()))
+            throw new StudentNotEnrolledException(studentId, courseName);
+
+        Team courseTeam = getter.getTeam(teamId);
+
+        //Controllo se il team appartiene a quel corso
+        if (!teamBelongToCourse(courseTeam, c))
+            throw new TeamNotBelongToCourseException(courseTeam.getName(), courseName);
+
+        //Controllo se lo studente appartiene al team
+        if (!courseTeam.getMembers().contains(s))
+            throw new StudentNotBelongToTeamException(studentId, teamId);
+
+        //Controllo se è stato settato un modello di VM per il corso
+        VMModel vmModel = getter.getVMModel(courseName);
+
+        //Controllo se è stata settata una configurazione per il team
+        VMConfig config = courseTeam.getVmConfig();
+        if (config == null)
+            throw new NoVMConfigException(courseTeam.getName(), courseName);
+
+        //Controllo delle specifiche settate
+        Map<String, Integer> limits = config.config();
+        Map<String, Integer> allocatedRes = courseTeam.getVms().stream().map(vm-> vm.config().entrySet())
+                .flatMap(Collection::stream)
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
+        Map<String, Integer> vmConfig = vmInstanceDTO.config();
+        Map<String, Integer> vmPrevConfig = getter.getVMInstance(vmInstanceDTO.getId()).config();
+
+        vmConfig.forEach((key, value) -> {
+            int limit = limits.get(key);
+            int alreadyUsed = vmPrevConfig.get(key);
+            int allocated = allocatedRes.getOrDefault(key, 0);
+            if (value + allocated > limit + alreadyUsed)
+                throw new VMLimitExceedException(courseTeam.getName(), courseName, key, limit, value);
+        });
+
+        //Create VMInstance
+        VMInstance vmInstance = mapper.map(vmInstanceDTO, VMInstance.class);
+        vmInstance.setVmModel(vmModel);
+        vmInstance.setTeam(courseTeam);
+        vmInstance.setCreator(s);
+
+        return mapper.map(vmInstanceRepository.save(vmInstance), VMInstanceDTO.class);
+    }
+
     @PreAuthorize("@securityApiAuth.ownVm(#vmInstanceId)")
     @Override
     public void setVMOwners(String courseName, Long teamId, Long vmInstanceId, List<String> ownerIds){

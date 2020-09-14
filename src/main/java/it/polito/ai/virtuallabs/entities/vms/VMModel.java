@@ -11,7 +11,7 @@ import java.util.List;
 @Table(name = "vm_model", uniqueConstraints = @UniqueConstraint(columnNames = {"course_name"}))
 public class VMModel {
 
-    public enum OS{Windows, Ubuntu, Debian}
+    public enum OS{Windows, Ubuntu, MacOS, Android}
 
     @Id
     private String id;

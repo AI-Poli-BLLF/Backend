@@ -281,6 +281,7 @@ public class CourseController {
         }
     }
 
+    // todo: inviare insieme vm model al corso sia durante la creazione che la modifica
     @PostMapping("/{courseName}/vm-model")
     @ResponseStatus(value = HttpStatus.CREATED)
     private VMModelDTO createVMModel(@PathVariable String courseName, @RequestBody @Valid VMModelDTO vmModel){
@@ -371,6 +372,20 @@ public class CourseController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team");
         }catch (VMServiceException | TeamServiceException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @PutMapping("/{courseName}/teams/{teamId}/vms/{vmId}")
+    private VMInstanceDTO editVMInstance(@PathVariable String courseName, @PathVariable Long teamId, @PathVariable Long vmId,
+                                           @RequestBody @Valid ModelHelper.VMInstanceData instanceData){
+        if(!vmId.equals(instanceData.getInstance().getId()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Path id and object id are not equals");
+        try{
+            return vmService.createVMInstance(instanceData.getInstance(), courseName, teamId, instanceData.getStudentId());
+        }catch (NumberFormatException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Invalid team");
+        }catch (VMServiceException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }
 

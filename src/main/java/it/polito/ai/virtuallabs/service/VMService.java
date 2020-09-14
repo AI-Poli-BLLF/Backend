@@ -13,6 +13,7 @@ public interface VMService {
     VMConfigDTO createVMConfiguration(VMConfigDTO vmConfigDTO, Long teamId, String courseName);
     VMConfigDTO updateVMConfiguration(VMConfigDTO vmConfigDTO, Long teamId, String courseName);
     VMInstanceDTO createVMInstance(VMInstanceDTO vmInstanceDTO, String courseName, Long teamId, String studentId);
+    VMInstanceDTO editVMInstance(VMInstanceDTO vmInstanceDTO, String courseName, Long teamId, String studentId);
     void setVMOwners(String courseName, Long teamId, Long vmInstanceId, List<String> ownerIds);
     void bootVMInstance(String courseName, Long teamId, Long vmInstanceId);
     void shutdownVMInstance(String courseName, Long teamId, Long vmInstanceId);
