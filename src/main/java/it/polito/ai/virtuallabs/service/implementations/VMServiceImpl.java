@@ -236,7 +236,6 @@ public class VMServiceImpl implements VMService {
 
         Set<Student> owners = ownerIds.stream().map(o -> getter.getStudent(o)).collect(Collectors.toSet());
 
-
         //Controllo che il team appartenga al corso
         if(!teamBelongToCourse(t, c))
             throw new TeamNotBelongToCourseException(t.getName(), c.getName());
@@ -253,6 +252,7 @@ public class VMServiceImpl implements VMService {
         if(ownerIds.size() != owners.size())
             throw new DuplicateStudentException();
 
+        owners.remove(vm.getCreator());
         vm.setOwners(new ArrayList<>(owners));
     }
 
