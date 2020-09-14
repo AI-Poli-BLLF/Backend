@@ -34,7 +34,7 @@ public class VMInstance {
     private Team team;
 
     @ManyToOne
-    @JoinColumn(name = "creator_id")
+    @JoinColumn(name = "creator_id", nullable = false)
     private Student creator;
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})

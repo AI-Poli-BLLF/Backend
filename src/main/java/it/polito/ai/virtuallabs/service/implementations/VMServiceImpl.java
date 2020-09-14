@@ -53,14 +53,10 @@ public class VMServiceImpl implements VMService {
     @Autowired
     private EntityGetter getter;
 
-    //@PreAuthorize("hasRole('PROFESSOR') || @securityApiAuth.ownCourse(#courseName)")
+    @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
     @Override
     public VMModelDTO createVMModel(VMModelDTO vmModelDTO, String courseName) {
         Course c = getter.getCourse(courseName);
-
-        //Se il corso non è attivo lancia una eccezione
-        if (!c.isEnabled())
-            throw new CourseNotEnabledException(courseName);
 
         //Se è già stata creata un VMModel associato al corso lancia una eccezione
         if (vmModelRepository.findByIdIgnoreCase(courseName).isPresent() || c.getVmModel() != null)
@@ -68,6 +64,7 @@ public class VMServiceImpl implements VMService {
 
         VMModel vmModel = mapper.map(vmModelDTO, VMModel.class);
         vmModel.setCourse(c);
+        c.setVmModel(vmModel);
         return mapper.map(vmModelRepository.save(vmModel), VMModelDTO.class);
     }
 
@@ -113,6 +110,7 @@ public class VMServiceImpl implements VMService {
 
         VMConfig vmConfig = mapper.map(vmConfigDTO, VMConfig.class);
         vmConfig.setTeam(t);
+        t.setVmConfig(vmConfig);
         return mapper.map(vmConfigRepository.save(vmConfig), VMConfigDTO.class);
     }
 
@@ -190,6 +188,8 @@ public class VMServiceImpl implements VMService {
 
         //Controllo se è stato settato un modello di VM per il corso
         VMModel vmModel = getter.getVMModel(courseName);
+        if(vmModel == null)
+            throw new NoVMModelException(courseName);
 
         //Controllo se è stata settata una configurazione per il team
         VMConfig config = courseTeam.getVmConfig();
@@ -206,7 +206,7 @@ public class VMServiceImpl implements VMService {
         List<VMInstance> instances = courseTeam.getVms();
         int totalVms = instances.size();
 
-        if (totalVms >= config.getMaxVm())
+        if (totalVms+1 > config.getMaxVm())
             throw new VMNumberExceedException(courseTeam.getName(), courseName, config.getMaxVm());
 
         vmConfig.forEach((key, value) -> {
@@ -235,6 +235,8 @@ public class VMServiceImpl implements VMService {
         if (!c.isEnabled())
             throw new CourseNotEnabledException(courseName);
 
+        VMInstance vmInstance = getter.getVMInstance(vmInstanceDTO.getId());
+
         Student s = getter.getStudent(studentId);
 
         //Controllo se lo studente è iscritto al corso
@@ -242,6 +244,10 @@ public class VMServiceImpl implements VMService {
                 .stream().map(String::toLowerCase).collect(Collectors.toSet());
         if (!enrolledCourses.contains(courseName.toLowerCase()))
             throw new StudentNotEnrolledException(studentId, courseName);
+
+        //Controllo se lo studente è owner della vm
+        if(!vmInstance.getOwners().contains(s))
+            throw new StudentNotOwnerException(studentId, vmInstance.getId());
 
         Team courseTeam = getter.getTeam(teamId);
 
@@ -255,6 +261,8 @@ public class VMServiceImpl implements VMService {
 
         //Controllo se è stato settato un modello di VM per il corso
         VMModel vmModel = getter.getVMModel(courseName);
+        if(vmModel == null)
+            throw new NoVMModelException(courseName);
 
         //Controllo se è stata settata una configurazione per il team
         VMConfig config = courseTeam.getVmConfig();
@@ -267,7 +275,7 @@ public class VMServiceImpl implements VMService {
                 .flatMap(Collection::stream)
                 .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.summingInt(Map.Entry::getValue)));
         Map<String, Integer> vmConfig = vmInstanceDTO.config();
-        Map<String, Integer> vmPrevConfig = getter.getVMInstance(vmInstanceDTO.getId()).config();
+        Map<String, Integer> vmPrevConfig = vmInstance.config();
 
         vmConfig.forEach((key, value) -> {
             int limit = limits.get(key);
@@ -277,13 +285,11 @@ public class VMServiceImpl implements VMService {
                 throw new VMLimitExceedException(courseTeam.getName(), courseName, key, limit, value);
         });
 
-        //Create VMInstance
-        VMInstance vmInstance = mapper.map(vmInstanceDTO, VMInstance.class);
-        vmInstance.setVmModel(vmModel);
-        vmInstance.setTeam(courseTeam);
-        vmInstance.setCreator(s);
+        vmInstance.setCpu(vmInstanceDTO.getCpu());
+        vmInstance.setDiskSize(vmInstanceDTO.getDiskSize());
+        vmInstance.setRamSize(vmInstanceDTO.getRamSize());
 
-        return mapper.map(vmInstanceRepository.save(vmInstance), VMInstanceDTO.class);
+        return mapper.map(vmInstance, VMInstanceDTO.class);
     }
 
     @PreAuthorize("@securityApiAuth.ownVm(#vmInstanceId)")

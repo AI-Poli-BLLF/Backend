@@ -34,40 +34,34 @@ public class TeamServiceImpl implements TeamService {
     @Autowired
     private ModelMapper mapper;
     @Autowired
-    private ManagementServiceImpl managementService;
-    @Autowired
     private EntityGetter entityGetter;
 
-    @PreAuthorize("hasRole('PROFESSOR')")
+    @PreAuthorize("hasRole('PROFESSOR') && @securityApiAuth.isMe(#professorId)")
     @Override
-    public boolean addCourse(CourseDTO courseDTO) {
+    public CourseDTO addCourse(CourseDTO courseDTO, String professorId) {
+        if(courseDTO.getMin() > courseDTO.getMax())
+            throw new InconsistentCourseLimits(courseDTO.getMin(), courseDTO.getMax());
+
         if(courseRepository.findByNameIgnoreCase(courseDTO.getName()).isPresent())
-            return false;
+            throw new CourseAlreadyExistException(courseDTO.getName());
+
         Course course = courseRepository.save(mapper.map(courseDTO, Course.class));
 
-        String professorId = SecurityApiAuth.getPrincipal().getId();
-        Professor professor = professorRepository.findByIdIgnoreCase(professorId)
-                .orElseThrow(() -> new ProfessorNotFoundException(professorId));
-
-        //Se il corso è non esiste ed è stato creato con successo allora è impossibile che
-        //un professore abbia nella sua lista un corso con lo stesso nome o che il corso abbia già
-        //assegnato un professore
-        assert (professor.getCourses().contains(course) || course.getProfessor() != null);
+        Professor professor = entityGetter.getProfessor(professorId);
 
         course.setProfessor(professor);
-        return true;
+        return mapper.map(course, CourseDTO.class);
     }
 
-    @PreAuthorize("hasRole('PROFESSOR')")
-    //todo: il professore che lo compie deve essere quello che ha creato il corso
+    @PreAuthorize("@securityApiAuth.ownCourse(#oldCourseName)")
     @Override
-    public boolean updateCourse(CourseDTO courseDTO) {
-        Course course = entityGetter.getCourse(courseDTO.getName());
-        course.setName(courseDTO.getName());
-        course.setMin(courseDTO.getMin());
-        course.setMax(courseDTO.getMax());
-        course.setEnabled(courseDTO.isEnabled());
-        return true;
+    public CourseDTO updateCourse(String oldCourseName, CourseDTO newCourse) {
+        Course course = entityGetter.getCourse(oldCourseName);
+        course.setName(newCourse.getName());
+        course.setMin(newCourse.getMin());
+        course.setMax(newCourse.getMax());
+        course.setEnabled(newCourse.isEnabled());
+        return mapper.map(course, CourseDTO.class);
     }
 
     //Permit All authenticated
@@ -80,6 +74,7 @@ public class TeamServiceImpl implements TeamService {
     }
 
     //todo: non funziona
+    @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
     @Override
     public void deleteCourse(String courseName) {
         Course course = entityGetter.getCourse(courseName);

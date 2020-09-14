@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TeamService {
-    boolean addCourse(CourseDTO course);
-    boolean updateCourse(CourseDTO coursee);
+    CourseDTO addCourse(CourseDTO course, String professorId);
+    CourseDTO updateCourse(String oldCourseName, CourseDTO newCourse);
     Optional<CourseDTO> getCourse(String name);
     void deleteCourse(String name);
     List<CourseDTO> getAllCourses();

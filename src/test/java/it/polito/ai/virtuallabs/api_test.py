@@ -11,8 +11,10 @@ def addStudent(id, firstName, name, token):
     return requests.post(students, json=json, headers=get_headers(token))
 
 
-def addCourse(name, min, max, token):
-    json = {"name": name, "min": min, "max": max}
+def addCourse(name, min, max, os, version, professor_id, token):
+    course = {"name": name, "min": min, "max": max}
+    vm_model = {"os": os, "version": version}
+    json = {"course": course, "vmModel": vm_model, "professorId": professor_id}
     print("POST TO: " + courses)
     return requests.post(courses, json=json, headers=get_headers(token))
 
@@ -146,18 +148,27 @@ def registerUser(first_name, name, user_id, password, email):
     print("POST TO: " + url)
     return requests.post(url, json=json)
 
+
+def deleteCourse(course_name, token):
+    url = f"{courses}{course_name}"
+    print("DELETE TO: " + url)
+    return requests.delete(url, headers=get_headers(token))
+
 if __name__ == '__main__':
     s1_account = {"username": "s1@studenti.polito.it", "password": "DmeJv.6f-0"}
     s2_account = {"username": "s2@studenti.polito.it", "password": "6SqP,t6D1%"}
     d1_account = {"username": "d1@polito.it", "password": "DfC&O3N0-l"}
     d2_account = {"username": "d2@polito.it", "password": '2%Ts1N"sRa'}
-    admin_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaWF0IjoxNTk2NjM2MzY1LCJleHAiOjE1OTY2NzIzNjV9.ekAVceJSjCsvMTHA02QVoDmyGUfPnvRUC2JVB3-kukg"
-    d1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMUBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1BST0ZFU1NPUiJdLCJpYXQiOjE1OTY3MjMzODUsImV4cCI6MTU5Njc1OTM4NX0.CB2UIP1C-Ru2whr0K0O6f3WaqSeoIqd6rnb94wbsEzw"
+    admin_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX0FETUlOIl0sImlhdCI6MTYwMDEwMDgxOSwiZXhwIjoxNjAwMTM2ODE5fQ.txv6pw9X0y4ag9rpB7_lgwWfpEv8NXzslzSDk9LZzsQ"
+    d1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMjY3NTQxQHBvbGl0by5pdCIsInJvbGVzIjpbIlJPTEVfUFJPRkVTU09SIl0sImlhdCI6MTYwMDEwMDk2OSwiZXhwIjoxNjAwMTM2OTY5fQ.JAJn-7RW2DW6OXv_0n8V-6PvCOZ_kLVrA-0WaBZXmZU"
     s1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzMUBzdHVkZW50aS5wb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1NUVURFTlQiXSwiaWF0IjoxNTk3MTU2NzA5LCJleHAiOjE1OTcxOTI3MDl9.uEd9KB1tKc0BR4xnOIdooB2W422HDzwl979r-tBcRpE"
     s2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzMkBzdHVkZW50aS5wb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1NUVURFTlQiXSwiaWF0IjoxNTk3MTU2NzUxLCJleHAiOjE1OTcxOTI3NTF9.D7NroRNyOThm9tMJOxfdrwXPhbj8teQXkVVeHlp8XUE"
     d2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMkBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1BST0ZFU1NPUiJdLCJpYXQiOjE1OTY2MzY3MTIsImV4cCI6MTU5NjY3MjcxMn0.adY9W4UVT7p1_BMtGMVIS3yXl8s5rpejham0yUeciJU"
 
-    res = authenticate("d123987@polito.it", "ciao123")
+
+    res = deleteCourse("PDS", d1_token)
+    #res = createVMModel("Windows", "10", "AI", d1_token)
+    #res = addCourse("PDS", 1, 2, "Ubuntu", "19.10", "d267541", d1_token)
     #res = authenticate(s1_account['username'], s1_account['password'])
     #res = deleteVM("AI", "1", 5, "s2", s2_token)
     #res = createVmInstance("ai", 1, "s2", 4, 1024*6, 16, s2_token)

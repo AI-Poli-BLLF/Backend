@@ -1,5 +1,7 @@
 package it.polito.ai.virtuallabs.controllers;
 
+import it.polito.ai.virtuallabs.controllers.utility.ModelHelper;
+import it.polito.ai.virtuallabs.controllers.utility.TransactionChain;
 import it.polito.ai.virtuallabs.dtos.CourseDTO;
 import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.dtos.TeamDTO;
@@ -16,10 +18,7 @@ import it.polito.ai.virtuallabs.service.exceptions.TeamServiceException;
 import it.polito.ai.virtuallabs.service.exceptions.vms.VMServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -29,12 +28,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
-import static it.polito.ai.virtuallabs.controllers.ModelHelper.*;
 
 @RestController
 @RequestMapping("/API/courses")
@@ -46,6 +42,8 @@ public class CourseController {
     private NotificationService notificationService;
     @Autowired
     private VMService vmService;
+    @Autowired
+    private TransactionChain transactionChain;
 
     @GetMapping({"", "/"})
     private List<CourseDTO> all(){
@@ -65,35 +63,31 @@ public class CourseController {
     }
 
     @DeleteMapping("/{courseName}")
-    private void delete(@PathVariable String courseName){
-        // todo: gestire eccezioni => errore 500 se il corso non è presente
+    private void deleteCourse(@PathVariable String courseName){
         try{
             teamService.deleteCourse(courseName);
-        }catch (NoSuchElementException e){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("Course not found: %s", courseName));
+        }catch (TeamServiceException | VMServiceException e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
 
-    @PutMapping({"/{courseName}"})
+    @PostMapping({"/"})
     @ResponseStatus(value = HttpStatus.CREATED)
-    private CourseDTO addCourse(@PathVariable String courseName, @RequestBody @Valid CourseDTO course){
-        // todo: il cambio di nome ci porta dietro casini
-        if(!courseName.equals(course.getName()))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    String.format("Course name in path is not equal to course name: %s!=%s", course.getName(), courseName));
-        if(
-                (
-                        teamService.getCourse(courseName).isPresent()
-                                && course.getMin() <= course.getMax()
-                                && teamService.updateCourse(course)
-                ) || (
-                        course.getMin() <= course.getMax()
-                                && teamService.addCourse(course)
-                )
-        ) {
-            return ModelHelper.enrich(course);
+    private CourseDTO addCourse(@RequestBody @Valid ModelHelper.AddCourseRequest courseRequest){
+        try{
+            return ModelHelper.enrich(transactionChain.createCourseWithModel(courseRequest));
+        }catch (TeamServiceException | VMServiceException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
-        throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Course already exist: %s", course.getName()));
+    }
+
+    @PutMapping("/{oldCourseName}")
+    private CourseDTO editCourse(@PathVariable String oldCourseName, @RequestBody @Valid CourseDTO course){
+        try{
+            return ModelHelper.enrich(teamService.updateCourse(oldCourseName, course));
+        }catch (TeamServiceException | VMServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
     }
 
     @GetMapping("/{courseName}/enrolled")
@@ -281,8 +275,8 @@ public class CourseController {
         }
     }
 
-    // todo: inviare insieme vm model al corso sia durante la creazione che la modifica
-    @PostMapping("/{courseName}/vm-model")
+
+    /*@PostMapping("/{courseName}/vm-model")
     @ResponseStatus(value = HttpStatus.CREATED)
     private VMModelDTO createVMModel(@PathVariable String courseName, @RequestBody @Valid VMModelDTO vmModel){
         try{
@@ -290,7 +284,7 @@ public class CourseController {
         }catch (VMServiceException e){
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
-    }
+    }*/
 
     @PutMapping("/{courseName}/vm-model")
     private VMModelDTO updateVMModel(@PathVariable String courseName, @RequestBody @Valid VMModelDTO vmModel){

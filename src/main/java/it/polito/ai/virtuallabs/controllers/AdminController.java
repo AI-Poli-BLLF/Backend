@@ -16,12 +16,12 @@ public class AdminController {
     @Autowired
     private TeamService teamService;
 
-    @PostMapping("/addProfessor")
+    /*@PostMapping("/addProfessor")
     @ResponseStatus(value = HttpStatus.CREATED)
     private ProfessorDTO addProfessor(@RequestBody @Valid ProfessorDTO professor){
         if(teamService.addProfessor(professor))
             return professor;
 
         throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Professor already exist: %s", professor.getId()));
-    }
+    }*/
 }

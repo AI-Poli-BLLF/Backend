@@ -5,6 +5,8 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.springframework.hateoas.RepresentationModel;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 
 @Data
@@ -17,9 +19,11 @@ public class CourseDTO extends RepresentationModel<CourseDTO> {
     private String name;
 
     @EqualsAndHashCode.Include
+    @Min(0)
     private int min;
 
     @EqualsAndHashCode.Include
+    @Max(0)
     private int max;
 
     private boolean enabled;

@@ -1,10 +1,14 @@
-package it.polito.ai.virtuallabs.controllers;
+package it.polito.ai.virtuallabs.controllers.utility;
 
+import it.polito.ai.virtuallabs.controllers.CourseController;
+import it.polito.ai.virtuallabs.controllers.ProfessorController;
+import it.polito.ai.virtuallabs.controllers.StudentController;
 import it.polito.ai.virtuallabs.dtos.CourseDTO;
 import it.polito.ai.virtuallabs.dtos.ProfessorDTO;
 import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.dtos.TeamDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMInstanceDTO;
+import it.polito.ai.virtuallabs.dtos.vms.VMModelDTO;
 import lombok.Data;
 import org.springframework.hateoas.Link;
 
@@ -91,5 +95,15 @@ public class ModelHelper {
         private String studentId;
         @NotNull
         private VMInstanceDTO instance;
+    }
+
+    @Data
+    public static class AddCourseRequest{
+        @NotNull
+        private CourseDTO course;
+        @NotNull
+        private VMModelDTO vmModel;
+        @NotEmpty
+        private String professorId;
     }
 }
