@@ -1,5 +1,6 @@
 package it.polito.ai.virtuallabs.security.controllers;
 
+import it.polito.ai.virtuallabs.controllers.utility.TransactionChain;
 import it.polito.ai.virtuallabs.dtos.ProfessorDTO;
 import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.security.JwtTokenProvider;
@@ -39,7 +40,7 @@ public class JwtController {
     @Autowired
     private UserRepository repository;
     @Autowired
-    private TeamService teamService;
+    private TransactionChain transactionChain;
     @Autowired
     private UserManagementService userManagementService;
 
@@ -66,30 +67,9 @@ public class JwtController {
     @ResponseStatus(value = HttpStatus.CREATED)
     private void registerUser(@RequestBody @Valid UserRegistration user){
         try{
-            UserDTO userDTO = new UserDTO(user.getUserId(), user.getEmail(), user.getPassword(), new ArrayList<>());
-            userManagementService.createUser(userDTO);
+            transactionChain.registerUser(userManagementService, user);
         }catch (UserServiceException e){
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
-        }
-
-        /*
-        TODO: gestire il chaining di transazioni
-         */
-        switch (user.getUserId().toLowerCase().toCharArray()[0]){
-            case 's':
-                StudentDTO s = new StudentDTO(user.getUserId(), user.getName(), user.getFirstName());
-                if (!teamService.addStudent(s))
-                    throw new ResponseStatusException(HttpStatus.CONFLICT,
-                            "Student already exist");
-                break;
-            case 'd':
-                ProfessorDTO p = new ProfessorDTO(user.getUserId(), user.getName(), user.getFirstName(), new ArrayList<>());
-                if (!teamService.addProfessor(p))
-                    throw new ResponseStatusException(HttpStatus.CONFLICT,
-                            "Professor already exist");
-                break;
-            default:
-                throw new ResponseStatusException(HttpStatus.CONFLICT, "Invalid User id");
         }
     }
 }

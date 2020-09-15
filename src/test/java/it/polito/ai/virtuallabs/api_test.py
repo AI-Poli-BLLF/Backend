@@ -166,7 +166,7 @@ if __name__ == '__main__':
     d2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMkBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1BST0ZFU1NPUiJdLCJpYXQiOjE1OTY2MzY3MTIsImV4cCI6MTU5NjY3MjcxMn0.adY9W4UVT7p1_BMtGMVIS3yXl8s5rpejham0yUeciJU"
 
 
-
+    res = registerUser("Giovanni", "Muciaccia", "d258369", "ciao", "d258369@polito.it")
     #res = addCourse("AI", 1, 2, "Ubuntu", "19.10", "d267541", d1_token)
     #res = enableDisableCourse("AI", True, d1_token)
     #res = enrollOne("AI", "s123456", d1_token)
@@ -174,8 +174,7 @@ if __name__ == '__main__':
     #res = createVmConfiguration("AI", 1, 4, 4096, 30, 2, 2, d1_token)
     #res = createVmInstance("AI", 1, "s123456", 2, 2048, 10, s1_token)
     #res = createVmInstance("AI", 1, "s147258", 1, 1024, 15, s2_token)
-    res = deleteCourse("AI", d1_token)
-
+    #res = deleteCourse("AI", d1_token)
 
     print(res.status_code)
     print(res.text)
