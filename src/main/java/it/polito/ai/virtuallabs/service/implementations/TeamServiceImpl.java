@@ -5,9 +5,10 @@ import com.opencsv.bean.CsvToBeanBuilder;
 import it.polito.ai.virtuallabs.dtos.*;
 import it.polito.ai.virtuallabs.entities.*;
 import it.polito.ai.virtuallabs.repositories.*;
-import it.polito.ai.virtuallabs.security.service.SecurityApiAuth;
+import it.polito.ai.virtuallabs.service.AssignmentService;
 import it.polito.ai.virtuallabs.service.EntityGetter;
 import it.polito.ai.virtuallabs.service.TeamService;
+import it.polito.ai.virtuallabs.service.VMService;
 import it.polito.ai.virtuallabs.service.exceptions.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,10 @@ public class TeamServiceImpl implements TeamService {
     private TeamRepository teamRepository;
     @Autowired
     private ProfessorRepository professorRepository;
+    @Autowired
+    private VMService vmService;
+    @Autowired
+    private AssignmentService assignmentService;
     @Autowired
     private ModelMapper mapper;
     @Autowired
@@ -68,17 +73,19 @@ public class TeamServiceImpl implements TeamService {
     @Override
     @PreAuthorize("hasRole('PROFESSOR') || @securityApiAuth.isEnrolled(#courseName)")
     public Optional<CourseDTO> getCourse(String courseName) {
-        // todo: aggiungere autorizzazioni, solo il professore del corso può eliminarlo
         Optional<Course> course = courseRepository.findByNameIgnoreCase(courseName);
         return course.map(c -> mapper.map(c, CourseDTO.class));
     }
 
-    //todo: non funziona
+
     @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
     @Override
     public void deleteCourse(String courseName) {
-        Course course = entityGetter.getCourse(courseName);
-        courseRepository.delete(course);
+        Course c = entityGetter.getCourse(courseName);
+        assignmentService.deleteAssignmentAndDraftsByCourseName(courseName);
+        vmService.deleteVmsByCourseName(courseName);
+        teamRepository.deleteByCourse(c);
+        courseRepository.delete(c);
     }
 
     //Permit to Every authenticated user

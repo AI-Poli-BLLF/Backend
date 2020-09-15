@@ -20,7 +20,12 @@ public class Course {
     private int max;
     private boolean enabled;
 
-    @ManyToMany(mappedBy = "courses")
+
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "student_course",
+            joinColumns = @JoinColumn(name = "course_name"),
+            inverseJoinColumns = @JoinColumn(name = "student_id")
+    )
     private List<Student> students = new ArrayList<>();
 
     @OneToMany(mappedBy = "course")

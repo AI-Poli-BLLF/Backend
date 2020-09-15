@@ -10,4 +10,5 @@ import java.util.Optional;
 @Repository
 public interface VMModelRepository extends JpaRepository<VMModel, String> {
     Optional<VMModel> findByIdIgnoreCase(String courseName);
+    void deleteByIdIgnoreCase(String courseName);
 }

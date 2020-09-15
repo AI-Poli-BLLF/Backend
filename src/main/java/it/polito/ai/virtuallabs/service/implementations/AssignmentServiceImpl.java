@@ -14,7 +14,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.swing.plaf.nimbus.State;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
@@ -130,5 +129,11 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .stream()
                 .filter(d -> d.getAssignment().getExpiryDate().before(new Timestamp(System.currentTimeMillis())))
                 .forEach(d -> d.setStatus(Draft.State.SUBMITTED));
+    }
+
+    @Override
+    public void deleteAssignmentAndDraftsByCourseName(String courseName) {
+        draftRepository.deleteByAssignmentCourseNameIgnoreCase(courseName);
+        assignmentRepository.deleteByCourseNameIgnoreCase(courseName);
     }
 }

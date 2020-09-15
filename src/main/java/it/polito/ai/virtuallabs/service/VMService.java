@@ -20,6 +20,7 @@ public interface VMService {
     void deleteVMInstance(String courseName, Long teamId, Long vmInstanceId);
 
     VMModelDTO getCourseVMModel(String courseName);
+    void deleteVmsByCourseName(String courseName);
     List<StudentDTO> getVMOwners(String courseName, Long teamId, Long vmInstanceId);
     StudentDTO getVMCreator(String courseName, Long teamId, Long vmInstanceId);
     VMModelDTO getVMModelOfInstance(String courseName, Long teamId, Long vmInstanceId);

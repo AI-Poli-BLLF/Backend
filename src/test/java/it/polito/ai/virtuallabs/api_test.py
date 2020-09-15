@@ -160,19 +160,22 @@ if __name__ == '__main__':
     d1_account = {"username": "d1@polito.it", "password": "DfC&O3N0-l"}
     d2_account = {"username": "d2@polito.it", "password": '2%Ts1N"sRa'}
     admin_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX0FETUlOIl0sImlhdCI6MTYwMDEwMDgxOSwiZXhwIjoxNjAwMTM2ODE5fQ.txv6pw9X0y4ag9rpB7_lgwWfpEv8NXzslzSDk9LZzsQ"
-    d1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMjY3NTQxQHBvbGl0by5pdCIsInJvbGVzIjpbIlJPTEVfUFJPRkVTU09SIl0sImlhdCI6MTYwMDEwMDk2OSwiZXhwIjoxNjAwMTM2OTY5fQ.JAJn-7RW2DW6OXv_0n8V-6PvCOZ_kLVrA-0WaBZXmZU"
-    s1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzMUBzdHVkZW50aS5wb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1NUVURFTlQiXSwiaWF0IjoxNTk3MTU2NzA5LCJleHAiOjE1OTcxOTI3MDl9.uEd9KB1tKc0BR4xnOIdooB2W422HDzwl979r-tBcRpE"
-    s2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzMkBzdHVkZW50aS5wb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1NUVURFTlQiXSwiaWF0IjoxNTk3MTU2NzUxLCJleHAiOjE1OTcxOTI3NTF9.D7NroRNyOThm9tMJOxfdrwXPhbj8teQXkVVeHlp8XUE"
+    d1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMjY3NTQxQHBvbGl0by5pdCIsInJvbGVzIjpbIlJPTEVfUFJPRkVTU09SIl0sImlhdCI6MTYwMDE2OTg4NywiZXhwIjoxNjAwMjA1ODg3fQ.VgEG0cfhDzFEv-OuTzdtCDtBov4heerd5tVUG2fv7as"
+    s1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzMTIzNDU2QHN0dWRlbnRpLnBvbGl0by5pdCIsInJvbGVzIjpbIlJPTEVfU1RVREVOVCJdLCJpYXQiOjE2MDAxNzAyMTYsImV4cCI6MTYwMDIwNjIxNn0.SYYPRa7efjI8YAWs1ghe6_1LhRztoquUFpaCBN66Hu0"
+    s2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzMTQ3MjU4QHN0dWRlbnRpLnBvbGl0by5pdCIsInJvbGVzIjpbIlJPTEVfU1RVREVOVCJdLCJpYXQiOjE2MDAxNzAyMzEsImV4cCI6MTYwMDIwNjIzMX0.8nfdtrjv7phLl50SUm8MKuqYO779RnecPgZTI_tn5C0"
     d2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMkBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1BST0ZFU1NPUiJdLCJpYXQiOjE1OTY2MzY3MTIsImV4cCI6MTU5NjY3MjcxMn0.adY9W4UVT7p1_BMtGMVIS3yXl8s5rpejham0yUeciJU"
 
 
-    res = deleteCourse("PDS", d1_token)
-    #res = createVMModel("Windows", "10", "AI", d1_token)
-    #res = addCourse("PDS", 1, 2, "Ubuntu", "19.10", "d267541", d1_token)
-    #res = authenticate(s1_account['username'], s1_account['password'])
-    #res = deleteVM("AI", "1", 5, "s2", s2_token)
-    #res = createVmInstance("ai", 1, "s2", 4, 1024*6, 16, s2_token)
-    #res = registerUser("Federico", "Gianluca", "s123987", "ciao123", "s123987@studenti.polito.it")
+
+    #res = addCourse("AI", 1, 2, "Ubuntu", "19.10", "d267541", d1_token)
+    #res = enableDisableCourse("AI", True, d1_token)
+    #res = enrollOne("AI", "s123456", d1_token)
+    #res = enrollOne("AI", "s147258", d1_token)
+    #res = createVmConfiguration("AI", 1, 4, 4096, 30, 2, 2, d1_token)
+    #res = createVmInstance("AI", 1, "s123456", 2, 2048, 10, s1_token)
+    #res = createVmInstance("AI", 1, "s147258", 1, 1024, 15, s2_token)
+    res = deleteCourse("AI", d1_token)
+
 
     print(res.status_code)
     print(res.text)

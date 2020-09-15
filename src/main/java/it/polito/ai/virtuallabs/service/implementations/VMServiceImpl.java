@@ -547,6 +547,14 @@ public class VMServiceImpl implements VMService {
                 .collect(Collectors.toList());
     }
 
+    @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
+    @Override
+    public void deleteVmsByCourseName(String courseName){
+        vmInstanceRepository.deleteByTeamCourseNameIgnoreCase(courseName);
+        vmConfigRepository.deleteByTeamCourseNameIgnoreCase(courseName);
+        vmModelRepository.deleteByIdIgnoreCase(courseName);
+    }
+
     private boolean teamBelongToCourse(Team t, Course c){
         return t.getCourse().equals(c);
     }

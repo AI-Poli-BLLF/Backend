@@ -22,5 +22,7 @@ public interface AssignmentService {
     void setDraftStatus(String draftId, Draft.State state);
 
     void passiveDraftSubmit();
+
+    void deleteAssignmentAndDraftsByCourseName(String courseName);
 }
 

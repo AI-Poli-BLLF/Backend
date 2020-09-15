@@ -11,21 +11,13 @@ import java.util.List;
 @Data
 public class Student {
 
-    private static final String joinTable = "student_course";
-    private static final String joinColumn = "student_id";
-    private static final String inverseJoinCol = "course_name";
-
     @Id //Starts with s + matricola
     private String id;
     private String name;
     private String firstName;
     private String photoName;
 
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JoinTable(name = joinTable,
-            joinColumns = @JoinColumn(name = joinColumn),
-            inverseJoinColumns = @JoinColumn(name = inverseJoinCol)
-    )
+    @ManyToMany(mappedBy = "students")
     private List<Course> courses = new ArrayList<>();
 
     @ManyToMany(mappedBy = "members")
@@ -46,6 +38,14 @@ public class Student {
 
         courses.add(course);
         course.getStudents().add(this);
+    }
+
+    public void removeCourse(Course course){
+        if(course == null)
+            return;
+
+        courses.remove(course);
+        course.getStudents().remove(this);
     }
 
     public void addTeam(Team team){

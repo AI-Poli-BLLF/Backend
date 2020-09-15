@@ -4,5 +4,5 @@ import it.polito.ai.virtuallabs.entities.Assignment;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AssignmentRepository extends JpaRepository<Assignment, String> {
-
+    void deleteByCourseNameIgnoreCase(String courseName);
 }
