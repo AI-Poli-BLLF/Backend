@@ -72,4 +72,6 @@ public class JwtController {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }
+
+    //todo: creare api per conferma registrazione
 }

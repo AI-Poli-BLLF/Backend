@@ -7,13 +7,12 @@ import it.polito.ai.virtuallabs.security.dtos.UserDTO;
 import it.polito.ai.virtuallabs.security.dtos.UserRegistration;
 import it.polito.ai.virtuallabs.security.service.UserManagementService;
 import it.polito.ai.virtuallabs.security.service.exceptions.UserAlreadyExistException;
+import it.polito.ai.virtuallabs.service.NotificationService;
 import it.polito.ai.virtuallabs.service.TeamService;
 import it.polito.ai.virtuallabs.service.VMService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 
@@ -27,6 +26,8 @@ public class TransactionChain {
     private TeamService teamService;
     @Autowired
     private VMService vmService;
+    @Autowired
+    private NotificationService notificationService;
 
     public CourseDTO createCourseWithModel(AddCourseRequest addCourseRequest){
         CourseDTO courseDTO = teamService.addCourse(addCourseRequest.getCourse(), addCourseRequest.getProfessorId());
@@ -53,5 +54,7 @@ public class TransactionChain {
                 //non dovrebbe mai arrivarci perchè c'è il controllo del pattern su userId
                 throw new UserAlreadyExistException();
         }
+
+        notificationService.sendConfirmEmailRegistration(user.getEmail(), user.getFirstName());
     }
 }

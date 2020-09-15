@@ -159,7 +159,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void deleteExpiredToken() {
         List<Token> expiredTokens = tokenRepository
-                .findAllByExpiryDateBefore(Timestamp.valueOf(LocalDateTime.now(ZoneId.systemDefault())));
+                .findAllByExpiryDateBefore(Timestamp.valueOf(LocalDateTime.now()));
         if(expiredTokens.isEmpty())
             return;
 
@@ -175,7 +175,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public List<String> getPendingMemberIds(Long teamId) {
         return tokenRepository.findAllByTeamId(teamId).stream()
-                .map(t -> t.getStudentId())
+                .map(Token::getStudentId)
                 .collect(Collectors.toList());
     }
 
@@ -188,4 +188,34 @@ public class NotificationServiceImpl implements NotificationService {
 
         return mapper.map(token, TokenDTO.class);
     }
+
+
+    /* REGISTRATION EMAIL */
+    @Override
+    @Transactional
+    public void sendConfirmEmailRegistration(String email, String userFirstName){
+        if(!email.matches("[sSdD][0-9]{6}@(studenti\\.)?polito\\.it"))
+            return;
+
+        String userId = email.split("@")[0];
+        Token t = new Token(userId, Token.TokenType.REGISTRATION);
+        tokenRepository.save(t);
+        buildAndSendMessage(email, userFirstName, t.getId());
+    }
+
+    @Async
+    public void buildAndSendMessage(String email, String userFirstName, String tokenId){
+        String subject = "[Virtual Labs] Conferma la tua registrazione";
+        String body = String.format(
+                "Benvenuto %s,\n" +
+                "ti confermiamo che il tuo account è stato creato con successo nella piattaforma Virtual Labs.\n\n" +
+                "Per cominciare ad usare la piattaforma clicca su link qui sotto per confermare la tua registrazione:\n\n" +
+                "https://localhost:4200/confirm-registration/%s\n\n" +
+                "Se non sei stato tu a registrarti tra 10 ore l'account verrà automaticamente cancellato.\n",
+                userFirstName,
+                tokenId
+        );
+        sendMessage(email, subject, body);
+    }
+
 }

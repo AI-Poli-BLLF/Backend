@@ -166,7 +166,7 @@ if __name__ == '__main__':
     d2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMkBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1BST0ZFU1NPUiJdLCJpYXQiOjE1OTY2MzY3MTIsImV4cCI6MTU5NjY3MjcxMn0.adY9W4UVT7p1_BMtGMVIS3yXl8s5rpejham0yUeciJU"
 
 
-    res = registerUser("Giovanni", "Muciaccia", "d258369", "ciao", "d258369@polito.it")
+    res = registerUser("Giovanni", "Malnati", "d267541", "ciao", "d267541@polito.it")
     #res = addCourse("AI", 1, 2, "Ubuntu", "19.10", "d267541", d1_token)
     #res = enableDisableCourse("AI", True, d1_token)
     #res = enrollOne("AI", "s123456", d1_token)

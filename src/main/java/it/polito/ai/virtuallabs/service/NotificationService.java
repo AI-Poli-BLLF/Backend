@@ -14,4 +14,5 @@ public interface NotificationService {
     void deleteExpiredToken();
     List<String> getPendingMemberIds(Long teamId);
     TokenDTO getPendingMemberToken(Long teamId, String memberId);
+    void sendConfirmEmailRegistration(String email, String userFirstName);
 }

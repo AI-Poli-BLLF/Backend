@@ -8,6 +8,7 @@ import it.polito.ai.virtuallabs.security.service.UserManagementService;
 import it.polito.ai.virtuallabs.security.service.exceptions.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,9 +35,6 @@ public class UserManagementServiceImpl implements UserManagementService {
         if (!idFromMail.equalsIgnoreCase(user.getId()))
             throw new UserIdAndMailConflictException(user.getId(), idFromMail);
 
-        /*
-        TODO: inserire la logica di funzionamento per token e email di conferma
-         */
         switch (user.getId().toLowerCase().toCharArray()[0]){
             case 's':
                 if (!domain.equalsIgnoreCase("studenti.polito.it"))
