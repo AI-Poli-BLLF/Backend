@@ -2,6 +2,7 @@ package it.polito.ai.virtuallabs.controllers;
 
 import it.polito.ai.virtuallabs.service.NotificationService;
 import it.polito.ai.virtuallabs.service.exceptions.NotificationException;
+import it.polito.ai.virtuallabs.service.exceptions.TeamServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -38,4 +39,15 @@ public class NotificationController {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }
+
+    @PostMapping("/confirm-registration")
+    @ResponseStatus(value = HttpStatus.OK)
+    private void confirmRegistration(@RequestBody String token){
+        try{
+            notificationService.confirmRegistration(token);
+        }catch (TeamServiceException | NotificationException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
 }

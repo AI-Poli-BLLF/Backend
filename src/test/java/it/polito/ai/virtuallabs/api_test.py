@@ -154,6 +154,11 @@ def deleteCourse(course_name, token):
     print("DELETE TO: " + url)
     return requests.delete(url, headers=get_headers(token))
 
+def confirmRegistration(token_id):
+    url = f"http://localhost:8080/notification/confirm-registration"
+    print("DELETE TO: " + url)
+    return requests.post(url, data=token_id)
+
 if __name__ == '__main__':
     s1_account = {"username": "s1@studenti.polito.it", "password": "DmeJv.6f-0"}
     s2_account = {"username": "s2@studenti.polito.it", "password": "6SqP,t6D1%"}
@@ -166,7 +171,8 @@ if __name__ == '__main__':
     d2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMkBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1BST0ZFU1NPUiJdLCJpYXQiOjE1OTY2MzY3MTIsImV4cCI6MTU5NjY3MjcxMn0.adY9W4UVT7p1_BMtGMVIS3yXl8s5rpejham0yUeciJU"
 
 
-    res = registerUser("Giovanni", "Malnati", "d267541", "ciao", "d267541@polito.it")
+    #res = registerUser("Gianpiero", "Cabodi", "d123456", "ciao", "d123456@polito.it")
+    res = confirmRegistration("eb051f00-54b5-43bc-b3b0-90fd9e47908a")
     #res = addCourse("AI", 1, 2, "Ubuntu", "19.10", "d267541", d1_token)
     #res = enableDisableCourse("AI", True, d1_token)
     #res = enrollOne("AI", "s123456", d1_token)

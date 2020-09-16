@@ -325,8 +325,8 @@ public class TeamServiceImpl implements TeamService {
         return mapper.map(t.getProposer(), StudentDTO.class);
     }
 
-    // TODO: invece che amIbelongToMembers si dovrebbe usare una amIProposer, giusto?
-    @PreAuthorize("@securityApiAuth.isEnrolled(#courseName) && @securityApiAuth.amIbelongToMembers(#memberIds)")
+
+    @PreAuthorize("@securityApiAuth.isMe(#proposerId)")
     @Override
     public TeamDTO proposeTeam(String courseName, String teamName, List<String> memberIds, String proposerId) {
         //Controllo che non ci siano duplicati all'interno dei memberIds
@@ -375,7 +375,7 @@ public class TeamServiceImpl implements TeamService {
         if (!memberIds.contains(proposerId))
             throw new TeamProposerIsNotMemberException(proposerId);
 
-        Student proposer = studentRepository.findByIdIgnoreCase(proposerId).get(); //Throw NoSuchElementException se lo student non esiste nel db
+        Student proposer = entityGetter.getStudent(proposerId);
 
         try {
             //Se tutto è andato bene creo il team

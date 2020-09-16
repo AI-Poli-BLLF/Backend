@@ -1,15 +1,17 @@
 package it.polito.ai.virtuallabs.service.implementations;
 
+import it.polito.ai.virtuallabs.dtos.ProfessorDTO;
+import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.dtos.TeamDTO;
 import it.polito.ai.virtuallabs.dtos.TokenDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMConfigDTO;
 import it.polito.ai.virtuallabs.entities.Team;
-import it.polito.ai.virtuallabs.entities.Token;
+import it.polito.ai.virtuallabs.entities.tokens.RegistrationToken;
+import it.polito.ai.virtuallabs.entities.tokens.Token;
 import it.polito.ai.virtuallabs.repositories.TokenRepository;
-import it.polito.ai.virtuallabs.service.EntityGetter;
-import it.polito.ai.virtuallabs.service.NotificationService;
-import it.polito.ai.virtuallabs.service.TeamService;
-import it.polito.ai.virtuallabs.service.VMService;
+import it.polito.ai.virtuallabs.repositories.tokens.RegistrationTokenRepository;
+import it.polito.ai.virtuallabs.security.service.exceptions.UserAlreadyExistException;
+import it.polito.ai.virtuallabs.service.*;
 import it.polito.ai.virtuallabs.service.exceptions.InvalidOrExpiredTokenException;
 import it.polito.ai.virtuallabs.service.exceptions.TeamNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.TokenNotFoundException;
@@ -26,10 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -37,11 +36,13 @@ import java.util.stream.Collectors;
 public class NotificationServiceImpl implements NotificationService {
 
     public static final String from = "applicazioni.internet.test@gmail.com";
-    public static final String baseURL = "http://localhost:8080";
+    public static final String baseURL = "https://localhost:4200";
     @Autowired
     private JavaMailSender emailSender;
     @Autowired
     private TokenRepository tokenRepository;
+    @Autowired
+    private RegistrationTokenRepository registrationTokenRepository;
     @Autowired
     private TeamService teamService;
     @Autowired
@@ -50,6 +51,8 @@ public class NotificationServiceImpl implements NotificationService {
     private ModelMapper mapper;
     @Autowired
     private EntityGetter entityGetter;
+    @Autowired
+    private ManagementService managementService;
 
     @Override
     @Async
@@ -65,7 +68,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public void confirm(String token) {
-        Token t = tokenRepository.findById(token).orElseThrow(()-> new InvalidOrExpiredTokenException(token));
+        Token t = entityGetter.getToken(token);
         Long teamId = t.getTeamId();
         //Se il token è scaduto non può confermare
         if(Timestamp.valueOf(LocalDateTime.now(ZoneId.systemDefault())).compareTo(t.getExpiryDate()) >= 0)
@@ -118,31 +121,27 @@ public class NotificationServiceImpl implements NotificationService {
 
         Timestamp expiryDate = Timestamp.valueOf(LocalDateTime.now(ZoneId.systemDefault()).plusHours(timeout));
 
-        for (String id : memberIds){
-            if (!id.equals(proposerId)) {
-                Token token = createAndSaveToken(UUID.randomUUID().toString(), team.getId(), id, expiryDate);
-                //String message = buildMessage(token.getId(), team.getName(), id);
-                //String email = String.format("%s@studenti.polito.it", id); //The <s> is included in the id
-                //sendMessage(email, "Gruppo Applicazioni Internet", message);
-            }
-        }
-
-        // Se nel gruppo c'è solo il proponente non vengono mandate mail e posso attivare il gruppo
+        // Se nel gruppo c'è solo il proponente non vengono creati token e mandate mail e posso attivare il gruppo
         if (memberIds.size() == 1) {
             teamService.setTeamStatus(team.getId(), Team.Status.ACTIVE);
             // cancella i team (inattivi) relativi allo stesso corso in cui compare il membro
             // del gruppo appena attivato
             List<Long> teamsToEvict = teamService.evictPendingTeamsOfMembers(team.getId());
-            for (Long id : teamsToEvict) {
+            /*for (Long id : teamsToEvict) {
                 tokenRepository.deleteAllByTeamId(id);
-            }
+            }*/
+            return;
         }
-}
 
-    private Token createAndSaveToken(String tokenId, Long teamId, String studentId, Timestamp expiryDate) {
-        Token token = new Token(tokenId, teamId, studentId, expiryDate, Token.TokenType.TEAM_PROPOSAL);
+        //todo: inviare mail di notifica per i membri invitati
+        memberIds.stream().filter(id -> !id.equals(proposerId))
+                .forEach(memberId -> createAndSaveToken(team.getId(), memberId, expiryDate));
+
+    }
+
+    private void createAndSaveToken(Long teamId, String studentId, Timestamp expiryDate) {
+        Token token = new Token(UUID.randomUUID().toString(), teamId, studentId, expiryDate);
         tokenRepository.save(token);
-        return token;
     }
 
     private String buildMessage(String tokenId, String teamName, String memberId){
@@ -193,29 +192,54 @@ public class NotificationServiceImpl implements NotificationService {
     /* REGISTRATION EMAIL */
     @Override
     @Transactional
-    public void sendConfirmEmailRegistration(String email, String userFirstName){
+    @Async
+    public void sendConfirmEmailRegistration(String email, String userFirstName, String userLastName){
         if(!email.matches("[sSdD][0-9]{6}@(studenti\\.)?polito\\.it"))
             return;
 
-        String userId = email.split("@")[0];
-        Token t = new Token(userId, Token.TokenType.REGISTRATION);
-        tokenRepository.save(t);
-        buildAndSendMessage(email, userFirstName, t.getId());
+        RegistrationToken t = new RegistrationToken(email, userFirstName, userLastName);
+        registrationTokenRepository.save(t);
+        buildAndSendRegistrationMessage(email, userFirstName, userLastName, t.getId());
     }
 
-    @Async
-    public void buildAndSendMessage(String email, String userFirstName, String tokenId){
+    public void buildAndSendRegistrationMessage(String email, String userFirstName, String userLastName, String tokenId){
         String subject = "[Virtual Labs] Conferma la tua registrazione";
         String body = String.format(
-                "Benvenuto %s,\n" +
+                "Benvenuto %s %s,\n" +
                 "ti confermiamo che il tuo account è stato creato con successo nella piattaforma Virtual Labs.\n\n" +
                 "Per cominciare ad usare la piattaforma clicca su link qui sotto per confermare la tua registrazione:\n\n" +
-                "https://localhost:4200/confirm-registration/%s\n\n" +
+                "%s/confirm-registration/%s\n\n" +
                 "Se non sei stato tu a registrarti tra 10 ore l'account verrà automaticamente cancellato.\n",
                 userFirstName,
+                userLastName,
+                baseURL,
                 tokenId
         );
         sendMessage(email, subject, body);
     }
 
+    @Override
+    @Transactional
+    public void confirmRegistration(String token) {
+        RegistrationToken t = entityGetter.getRegistrationToken(token);
+
+        switch (t.getUserId().toLowerCase().toCharArray()[0]){
+            case 's':
+                StudentDTO s = new StudentDTO(t.getUserId(), t.getUserLastName(), t.getUserFirstName());
+                if (!teamService.addStudent(s))
+                    throw new UserAlreadyExistException();
+                break;
+            case 'd':
+                ProfessorDTO p = new ProfessorDTO(t.getUserId(), t.getUserLastName(), t.getUserFirstName(), new ArrayList<>());
+                if (!teamService.addProfessor(p))
+                    throw new UserAlreadyExistException();
+                break;
+            default:
+                //non dovrebbe mai arrivarci perchè c'è il controllo del pattern su userId
+                throw new UserAlreadyExistException();
+        }
+
+        managementService.enableUser(t.getUserId());
+        registrationTokenRepository.delete(t);
+    }
 }

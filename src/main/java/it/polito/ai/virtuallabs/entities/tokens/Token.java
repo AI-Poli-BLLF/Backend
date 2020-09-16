@@ -1,4 +1,4 @@
-package it.polito.ai.virtuallabs.entities;
+package it.polito.ai.virtuallabs.entities.tokens;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,20 +19,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Token {
-    public enum TokenType{REGISTRATION, TEAM_PROPOSAL, COURSE_ENROLLING}
     @Id
     @EqualsAndHashCode.Include
     private String id;
-    private Long teamId = -1L;
+    private Long teamId;
     private String studentId;
     private Timestamp expiryDate;
-    private TokenType type;
-
-    //USED TO CREATE REGISTRATION TOKEN
-    public Token(String userId, TokenType type){
-        this.id = UUID.randomUUID().toString();
-        this.studentId = userId;
-        this.expiryDate = Timestamp.valueOf(LocalDateTime.now().plusHours(24));
-        this.type = type;
-    }
 }

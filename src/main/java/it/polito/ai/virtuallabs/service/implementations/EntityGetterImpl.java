@@ -1,10 +1,13 @@
 package it.polito.ai.virtuallabs.service.implementations;
 
 import it.polito.ai.virtuallabs.entities.*;
+import it.polito.ai.virtuallabs.entities.tokens.RegistrationToken;
+import it.polito.ai.virtuallabs.entities.tokens.Token;
 import it.polito.ai.virtuallabs.entities.vms.VMConfig;
 import it.polito.ai.virtuallabs.entities.vms.VMInstance;
 import it.polito.ai.virtuallabs.entities.vms.VMModel;
 import it.polito.ai.virtuallabs.repositories.*;
+import it.polito.ai.virtuallabs.repositories.tokens.RegistrationTokenRepository;
 import it.polito.ai.virtuallabs.repositories.vms.VMConfigRepository;
 import it.polito.ai.virtuallabs.repositories.vms.VMInstanceRepository;
 import it.polito.ai.virtuallabs.repositories.vms.VMModelRepository;
@@ -40,6 +43,10 @@ public class EntityGetterImpl implements EntityGetter {
     private AssignmentRepository assignmentRepository;
     @Autowired
     private DraftRepository draftRepository;
+    @Autowired
+    private TokenRepository tokenRepository;
+    @Autowired
+    private RegistrationTokenRepository registrationTokenRepository;
 
     @Override
     public Course getCourse(String courseName){
@@ -101,6 +108,20 @@ public class EntityGetterImpl implements EntityGetter {
     public Draft getDraft(String draftId) {
         return draftRepository.findById(draftId).orElseThrow(
                 () -> new DraftNotFoundException(draftId)
+        );
+    }
+
+    @Override
+    public Token getToken(String tokenId) {
+        return tokenRepository.findById(tokenId).orElseThrow(
+                () -> new InvalidOrExpiredTokenException(tokenId)
+        );
+    }
+
+    @Override
+    public RegistrationToken getRegistrationToken(String tokenId) {
+        return registrationTokenRepository.findById(tokenId).orElseThrow(
+                () -> new InvalidOrExpiredTokenException(tokenId)
         );
     }
 }

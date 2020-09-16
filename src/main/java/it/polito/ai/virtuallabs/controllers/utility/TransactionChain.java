@@ -1,12 +1,9 @@
 package it.polito.ai.virtuallabs.controllers.utility;
 
 import it.polito.ai.virtuallabs.dtos.CourseDTO;
-import it.polito.ai.virtuallabs.dtos.ProfessorDTO;
-import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.security.dtos.UserDTO;
 import it.polito.ai.virtuallabs.security.dtos.UserRegistration;
 import it.polito.ai.virtuallabs.security.service.UserManagementService;
-import it.polito.ai.virtuallabs.security.service.exceptions.UserAlreadyExistException;
 import it.polito.ai.virtuallabs.service.NotificationService;
 import it.polito.ai.virtuallabs.service.TeamService;
 import it.polito.ai.virtuallabs.service.VMService;
@@ -38,23 +35,6 @@ public class TransactionChain {
     public void registerUser(UserManagementService userManagementService, UserRegistration user){
         UserDTO userDTO = new UserDTO(user.getUserId(), user.getEmail(), user.getPassword(), new ArrayList<>());
         userManagementService.createUser(userDTO);
-
-        switch (user.getUserId().toLowerCase().toCharArray()[0]){
-            case 's':
-                StudentDTO s = new StudentDTO(user.getUserId(), user.getName(), user.getFirstName());
-                if (!teamService.addStudent(s))
-                    throw new UserAlreadyExistException();
-                break;
-            case 'd':
-                ProfessorDTO p = new ProfessorDTO(user.getUserId(), user.getName(), user.getFirstName(), new ArrayList<>());
-                if (!teamService.addProfessor(p))
-                    throw new UserAlreadyExistException();
-                break;
-            default:
-                //non dovrebbe mai arrivarci perchè c'è il controllo del pattern su userId
-                throw new UserAlreadyExistException();
-        }
-
-        notificationService.sendConfirmEmailRegistration(user.getEmail(), user.getFirstName());
+        notificationService.sendConfirmEmailRegistration(user.getEmail(), user.getFirstName(), user.getName());
     }
 }
