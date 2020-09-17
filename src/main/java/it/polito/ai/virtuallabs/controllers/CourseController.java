@@ -313,7 +313,7 @@ public class CourseController {
         }
     }
 
-    @PostMapping("/{courseName}/teams/{teamId}/vm-config")
+    /*@PostMapping("/{courseName}/teams/{teamId}/vm-config")
     @ResponseStatus(value = HttpStatus.CREATED)
     private VMConfigDTO createVMConfig(@PathVariable String courseName, @PathVariable String teamId,
                                        @RequestBody @Valid VMConfigDTO config){
@@ -325,7 +325,7 @@ public class CourseController {
         }catch (VMServiceException | TeamServiceException e){
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
-    }
+    }*/
 
 
     @PutMapping("/{courseName}/teams/{teamId}/vm-config/")

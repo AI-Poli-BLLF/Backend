@@ -87,7 +87,7 @@ public class VMServiceImpl implements VMService {
     }
 
 
-    @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
+    //Permessa a tutti solo perchè viene usata internamente alla conferma del TEAM
     @Override
     public VMConfigDTO createVMConfiguration(VMConfigDTO vmConfigDTO, Long teamId, String courseName) {
         Course c = getter.getCourse(courseName);
@@ -227,7 +227,7 @@ public class VMServiceImpl implements VMService {
         return mapper.map(vmInstanceRepository.save(vmInstance), VMInstanceDTO.class);
     }
 
-    // todo: controllare correttezza
+
     @PreAuthorize("@securityApiAuth.isMe(#studentId)")
     @Override
     public VMInstanceDTO editVMInstance(VMInstanceDTO vmInstanceDTO, String courseName, Long teamId, String studentId) {

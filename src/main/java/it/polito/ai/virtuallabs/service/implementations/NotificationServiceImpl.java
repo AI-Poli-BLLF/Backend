@@ -8,8 +8,9 @@ import it.polito.ai.virtuallabs.dtos.vms.VMConfigDTO;
 import it.polito.ai.virtuallabs.entities.Team;
 import it.polito.ai.virtuallabs.entities.tokens.RegistrationToken;
 import it.polito.ai.virtuallabs.entities.tokens.Token;
-import it.polito.ai.virtuallabs.repositories.tokens.TokenRepository;
 import it.polito.ai.virtuallabs.repositories.tokens.RegistrationTokenRepository;
+import it.polito.ai.virtuallabs.repositories.tokens.TokenRepository;
+import it.polito.ai.virtuallabs.repositories.vms.VMConfigRepository;
 import it.polito.ai.virtuallabs.security.service.exceptions.UserAlreadyExistException;
 import it.polito.ai.virtuallabs.service.*;
 import it.polito.ai.virtuallabs.service.exceptions.InvalidOrExpiredTokenException;
@@ -53,6 +54,8 @@ public class NotificationServiceImpl implements NotificationService {
     private EntityGetter entityGetter;
     @Autowired
     private ManagementService managementService;
+    @Autowired
+    private VMConfigRepository vmConfigRepository;
 
     @Override
     @Async
@@ -79,7 +82,7 @@ public class NotificationServiceImpl implements NotificationService {
             teamService.setTeamStatus(teamId, Team.Status.ACTIVE);
             Team team = entityGetter.getTeam(teamId);
 
-            // todo: vedere che eccezioni possono essere generate
+
             //creo una configurazione di base per le vm
             vmService.createVMConfiguration(
                     new VMConfigDTO(0, 0, 0, 0, 0),
