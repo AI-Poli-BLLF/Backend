@@ -13,7 +13,7 @@ import java.util.Set;
 
 @Data
 @Entity
-@Table(name = "vm_os", uniqueConstraints = @UniqueConstraint(columnNames = "os_name"))
+@Table(name = "vm_os")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

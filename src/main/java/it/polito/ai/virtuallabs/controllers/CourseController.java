@@ -100,6 +100,15 @@ public class CourseController {
         }
     }
 
+    @DeleteMapping("/{courseName}/enrolled/{studentId}")
+    private void deleteStudentFromCourse(@PathVariable String courseName, @PathVariable String studentId){
+        try {
+            teamService.deleteStudentFromCourse(courseName, studentId);
+        }catch (TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
     @PostMapping("/{courseName}/enrollOne")
     @ResponseStatus(value = HttpStatus.CREATED)
     private void enrollOneStudent(@PathVariable String courseName, @RequestBody @Valid String studentID){

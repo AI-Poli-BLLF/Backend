@@ -169,6 +169,18 @@ public class TeamServiceImpl implements TeamService {
         return true;
     }
 
+    @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
+    @Override
+    public void deleteStudentFromCourse(String courseName, String studentId) {
+        Course c = entityGetter.getCourse(courseName);
+        Student student = entityGetter.getStudent(studentId);
+
+        if(!c.getStudents().contains(student))
+            throw new StudentNotEnrolledException();
+
+        student.removeCourse(c);
+    }
+
     @PreAuthorize("hasRole('ADMIN') || @securityApiAuth.ownCourse(#courseName)")
     @Override
     public void enableCourse(String courseName) {

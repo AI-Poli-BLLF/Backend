@@ -20,6 +20,7 @@ public interface TeamService {
     List<StudentDTO> getAllStudents();
     List<StudentDTO> getEnrolledStudents(String courseName);
     boolean addStudentToCourse(String studentId, String courseName);
+    void deleteStudentFromCourse(String courseName, String studentId);
     void enableCourse(String courseName);
     void disableCourse(String courseName);
     List<Boolean> addAll(List<StudentDTO> students);

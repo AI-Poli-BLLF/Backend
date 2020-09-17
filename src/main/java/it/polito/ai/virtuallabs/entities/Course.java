@@ -31,6 +31,7 @@ public class Course {
     @OneToMany(mappedBy = "course")
     private List<Team> teams = new ArrayList<>();
 
+    //todo: modificare relazione molti a molti
     @ManyToOne
     @JoinColumn(name = "professor_id")
     private Professor professor;
