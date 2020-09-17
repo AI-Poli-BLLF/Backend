@@ -86,8 +86,8 @@ public class VMServiceImpl implements VMService {
         return vmModelDTO;
     }
 
-    // todo: preauth
-    //@PreAuthorize("hasRole('PROFESSOR') || @securityApiAuth.ownCourse(#courseName)")
+
+    @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
     @Override
     public VMConfigDTO createVMConfiguration(VMConfigDTO vmConfigDTO, Long teamId, String courseName) {
         Course c = getter.getCourse(courseName);
@@ -602,6 +602,14 @@ public class VMServiceImpl implements VMService {
     public List<VMOsDTO> getAvailableVmOs() {
         return vmOsRepository.findAll().stream()
                 .filter(vmOs -> !vmOs.getVersions().isEmpty())
+                .map(vmOs -> mapper.map(vmOs, VMOsDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @Override
+    public List<VMOsDTO> getAllVmOs() {
+        return vmOsRepository.findAll().stream()
                 .map(vmOs -> mapper.map(vmOs, VMOsDTO.class))
                 .collect(Collectors.toList());
     }

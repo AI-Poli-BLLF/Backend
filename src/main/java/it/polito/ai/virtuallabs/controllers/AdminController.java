@@ -26,6 +26,15 @@ public class AdminController {
         }
     }
 
+    @GetMapping("/all")
+    private List<VMOsDTO> getAllVmOs(){
+        try {
+            return vmService.getAllVmOs();
+        }catch (VMServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
     @PostMapping({"","/"})
     @ResponseStatus(value = HttpStatus.CREATED)
     private VMOsDTO createVmOs(@RequestBody VMOsDTO vmOsDTO){

@@ -59,7 +59,7 @@ public class JwtController {
             model.put("token", token);
             return ResponseEntity.ok(model);
         }catch (AuthenticationException e){
-            throw new BadCredentialsException("Invalid username/password");
+            throw new BadCredentialsException(e.getMessage());
         }
     }
 
@@ -72,6 +72,4 @@ public class JwtController {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }
-
-    //todo: creare api per conferma registrazione
 }

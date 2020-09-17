@@ -187,8 +187,8 @@ if __name__ == '__main__':
     s2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzMTQ3MjU4QHN0dWRlbnRpLnBvbGl0by5pdCIsInJvbGVzIjpbIlJPTEVfU1RVREVOVCJdLCJpYXQiOjE2MDAxNzAyMzEsImV4cCI6MTYwMDIwNjIzMX0.8nfdtrjv7phLl50SUm8MKuqYO779RnecPgZTI_tn5C0"
     d2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMkBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1BST0ZFU1NPUiJdLCJpYXQiOjE1OTY2MzY3MTIsImV4cCI6MTU5NjY3MjcxMn0.adY9W4UVT7p1_BMtGMVIS3yXl8s5rpejham0yUeciJU"
 
-    #res = authenticate("d123456@polito.it", "ciao")
-    #res = registerUser("Stefano", "Loscalzo", "s123456", "ciao")
+    res = authenticate("d123456@polito.it", "ciaoa")
+    #res = registerUser("Giovanni", "Malnati", "d267541", "ciao")
     #res = confirmRegistration("4993505f-4e8a-41d8-9c66-64e5d0925321")
     #res = createVmOs("Ubuntu", admin_token)
     #res = addOsVersion("Ubuntu", "20.04", admin_token)
@@ -199,7 +199,7 @@ if __name__ == '__main__':
     #res = enableDisableCourse("PDS", True, d1_token)
     #res = enrollOne("PDS", "s123456", d1_token)
     #res = enrollOne("PDS", "s267541", d1_token)
-    res = deleteStudentFromCourse("PDS", "s123456", d1_token)
+    #res = deleteStudentFromCourse("PDS", "s123456", d1_token)
     #res = createVmConfiguration("AI", 1, 4, 4096, 30, 2, 2, d1_token)
     #res = createVmInstance("AI", 1, "s123456", 2, 2048, 10, s1_token)
     #res = createVmInstance("AI", 1, "s147258", 1, 1024, 15, s2_token)

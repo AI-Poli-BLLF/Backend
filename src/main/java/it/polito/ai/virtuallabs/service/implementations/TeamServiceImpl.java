@@ -176,7 +176,7 @@ public class TeamServiceImpl implements TeamService {
         Student student = entityGetter.getStudent(studentId);
 
         if(!c.getStudents().contains(student))
-            throw new StudentNotEnrolledException();
+            throw new StudentNotEnrolledException(studentId, courseName);
 
         student.removeCourse(c);
     }

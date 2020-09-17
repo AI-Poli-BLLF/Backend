@@ -40,4 +40,5 @@ public interface VMService {
     VMOsDTO addOsVersion(String osName, String version);
     void deleteOsVersion(String osName, String version);
     List<VMOsDTO> getAvailableVmOs();
+    List<VMOsDTO> getAllVmOs();
 }

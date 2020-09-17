@@ -105,7 +105,7 @@ public class CourseController {
         try {
             teamService.deleteStudentFromCourse(courseName, studentId);
         }catch (TeamServiceException e){
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }
 
