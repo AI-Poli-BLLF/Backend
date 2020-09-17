@@ -8,7 +8,7 @@ import it.polito.ai.virtuallabs.dtos.vms.VMConfigDTO;
 import it.polito.ai.virtuallabs.entities.Team;
 import it.polito.ai.virtuallabs.entities.tokens.RegistrationToken;
 import it.polito.ai.virtuallabs.entities.tokens.Token;
-import it.polito.ai.virtuallabs.repositories.TokenRepository;
+import it.polito.ai.virtuallabs.repositories.tokens.TokenRepository;
 import it.polito.ai.virtuallabs.repositories.tokens.RegistrationTokenRepository;
 import it.polito.ai.virtuallabs.security.service.exceptions.UserAlreadyExistException;
 import it.polito.ai.virtuallabs.service.*;
@@ -209,7 +209,7 @@ public class NotificationServiceImpl implements NotificationService {
                 "ti confermiamo che il tuo account è stato creato con successo nella piattaforma Virtual Labs.\n\n" +
                 "Per cominciare ad usare la piattaforma clicca su link qui sotto per confermare la tua registrazione:\n\n" +
                 "%s/confirm-registration/%s\n\n" +
-                "Se non sei stato tu a registrarti tra 10 ore l'account verrà automaticamente cancellato.\n",
+                "Se non sei stato tu a registrarti tra 5 ore l'account verrà automaticamente cancellato.\n",
                 userFirstName,
                 userLastName,
                 baseURL,

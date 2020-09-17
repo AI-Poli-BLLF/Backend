@@ -4,18 +4,19 @@ import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMConfigDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMInstanceDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMModelDTO;
+import it.polito.ai.virtuallabs.dtos.vms.VMOsDTO;
 import it.polito.ai.virtuallabs.entities.Course;
 import it.polito.ai.virtuallabs.entities.Student;
 import it.polito.ai.virtuallabs.entities.Team;
 import it.polito.ai.virtuallabs.entities.vms.VMConfig;
 import it.polito.ai.virtuallabs.entities.vms.VMInstance;
 import it.polito.ai.virtuallabs.entities.vms.VMModel;
-import it.polito.ai.virtuallabs.repositories.CourseRepository;
+import it.polito.ai.virtuallabs.entities.vms.VMOs;
 import it.polito.ai.virtuallabs.repositories.StudentRepository;
-import it.polito.ai.virtuallabs.repositories.TeamRepository;
 import it.polito.ai.virtuallabs.repositories.vms.VMConfigRepository;
 import it.polito.ai.virtuallabs.repositories.vms.VMInstanceRepository;
 import it.polito.ai.virtuallabs.repositories.vms.VMModelRepository;
+import it.polito.ai.virtuallabs.repositories.vms.VMOsRepository;
 import it.polito.ai.virtuallabs.service.EntityGetter;
 import it.polito.ai.virtuallabs.service.VMService;
 import it.polito.ai.virtuallabs.service.exceptions.*;
@@ -39,17 +40,12 @@ public class VMServiceImpl implements VMService {
     private VMConfigRepository vmConfigRepository;
     @Autowired
     private VMInstanceRepository vmInstanceRepository;
-
     @Autowired
-    private CourseRepository courseRepository;
+    private VMOsRepository vmOsRepository;
     @Autowired
     private StudentRepository studentRepository;
     @Autowired
-    private TeamRepository teamRepository;
-
-    @Autowired
     private ModelMapper mapper;
-
     @Autowired
     private EntityGetter getter;
 
@@ -62,7 +58,10 @@ public class VMServiceImpl implements VMService {
         if (vmModelRepository.findByIdIgnoreCase(courseName).isPresent() || c.getVmModel() != null)
             throw new VMModelAlreadyExistException(courseName);
 
-        VMModel vmModel = mapper.map(vmModelDTO, VMModel.class);
+        VMOs vmOs = getter.getVmOsVersion(vmModelDTO.getOs(), vmModelDTO.getVersion());
+        VMModel vmModel = new VMModel();
+        vmModel.setOs(vmOs);
+        vmModel.setVersion(vmModelDTO.getVersion());
         vmModel.setCourse(c);
         c.setVmModel(vmModel);
         return mapper.map(vmModelRepository.save(vmModel), VMModelDTO.class);
@@ -78,10 +77,13 @@ public class VMServiceImpl implements VMService {
 
         //Se è già stata creata un VMModel associato al corso lancia una eccezione
         VMModel vmModel = getter.getVMModel(courseName);
-
-        vmModel.setOs(VMModel.OS.valueOf(vmModelDTO.getOs()));
+        VMOs vmOs = getter.getVmOsVersion(vmModelDTO.getOs(), vmModelDTO.getVersion());
+        vmModel.setOs(vmOs);
         vmModel.setVersion(vmModelDTO.getVersion());
-        return mapper.map(vmModelRepository.save(vmModel), VMModelDTO.class);
+
+        vmModel = vmModelRepository.save(vmModel);
+        vmModelDTO.setId(vmModel.getId());
+        return vmModelDTO;
     }
 
     // todo: preauth
@@ -559,4 +561,48 @@ public class VMServiceImpl implements VMService {
         return t.getCourse().equals(c);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @Override
+    public VMOsDTO createVMOs(VMOsDTO vmOsDTO) {
+        if(vmOsRepository.findByOsNameIgnoreCase(vmOsDTO.getOsName()).isPresent())
+            throw new VMOsAlreadyExistException(vmOsDTO.getOsName());
+
+        VMOs vmOs = mapper.map(vmOsDTO, VMOs.class);
+        vmOs = vmOsRepository.save(vmOs);
+        vmOsDTO.setId(vmOs.getId());
+        return vmOsDTO;
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @Override
+    public void deleteVMOs(String osName) {
+        vmOsRepository.deleteByOsNameIgnoreCase(osName);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @Override
+    public VMOsDTO addOsVersion(String osName, String version) {
+        VMOs vmOs = getter.getVmOs(osName);
+        if(vmOs.getVersions().contains(version))
+            throw new VMOsAlreadyExistException(osName, version);
+
+        vmOs.addVersion(version);
+        return mapper.map(vmOs, VMOsDTO.class);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @Override
+    public void deleteOsVersion(String osName, String version) {
+        VMOs vmOs = getter.getVmOs(osName);
+        vmOs.removeVersion(version);
+    }
+
+    @PreAuthorize("hasRole('PROFESSOR')")
+    @Override
+    public List<VMOsDTO> getAvailableVmOs() {
+        return vmOsRepository.findAll().stream()
+                .filter(vmOs -> !vmOs.getVersions().isEmpty())
+                .map(vmOs -> mapper.map(vmOs, VMOsDTO.class))
+                .collect(Collectors.toList());
+    }
 }

@@ -11,12 +11,12 @@ import java.util.List;
 @Table(name = "vm_model", uniqueConstraints = @UniqueConstraint(columnNames = {"course_name"}))
 public class VMModel {
 
-    public enum OS{Windows, Ubuntu, MacOS, Android}
-
     @Id
     private String id;
 
-    private String os;
+    @ManyToOne
+    @JoinColumn(name = "os")
+    private VMOs os;
 
     private String version;
 
@@ -28,7 +28,13 @@ public class VMModel {
     @OneToMany(mappedBy = "vmModel")
     private List<VMInstance> vmInstances;
 
-    public void setOs(OS os) {
-        this.os = os.toString();
+    public void setOs(VMOs os) {
+        if(this.os != null)
+            this.os.getVmModels().remove(this);
+
+        this.os = os;
+        if(os == null)
+            return;
+        os.getVmModels().add(this);
     }
 }

@@ -1,6 +1,6 @@
 package it.polito.ai.virtuallabs.dtos.vms;
 
-import it.polito.ai.virtuallabs.entities.vms.VMModel.OS;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,12 +17,8 @@ public class VMModelDTO {
     private String version;
 
 
-    public VMModelDTO(OS os, String version) {
-        this.os = os.toString();
+    public VMModelDTO(String os, String version) {
+        this.os = os;
         this.version = version;
-    }
-
-    public void setOs(OS os) {
-        this.os = os.toString();
     }
 }

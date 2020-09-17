@@ -4,6 +4,8 @@ import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMConfigDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMInstanceDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMModelDTO;
+import it.polito.ai.virtuallabs.dtos.vms.VMOsDTO;
+import it.polito.ai.virtuallabs.entities.vms.VMOs;
 
 import java.util.List;
 
@@ -32,4 +34,10 @@ public interface VMService {
     List<VMInstanceDTO> getActiveTeamVms(String courseName, Long teamId);
     List<VMInstanceDTO> getOfflineVms();
     List<VMInstanceDTO> getOfflineTeamVms(String courseName, Long teamId);
+
+    VMOsDTO createVMOs(VMOsDTO vmOsDTO);
+    void deleteVMOs(String osName);
+    VMOsDTO addOsVersion(String osName, String version);
+    void deleteOsVersion(String osName, String version);
+    List<VMOsDTO> getAvailableVmOs();
 }

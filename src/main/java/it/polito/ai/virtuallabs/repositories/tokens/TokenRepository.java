@@ -1,4 +1,4 @@
-package it.polito.ai.virtuallabs.repositories;
+package it.polito.ai.virtuallabs.repositories.tokens;
 
 import it.polito.ai.virtuallabs.entities.tokens.Token;
 import org.springframework.data.jpa.repository.JpaRepository;

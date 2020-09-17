@@ -1,6 +1,7 @@
 package it.polito.ai.virtuallabs.entities.tokens;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
@@ -12,8 +13,9 @@ import java.util.UUID;
 @Data
 @Entity
 @NoArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class RegistrationToken{
-
+    @EqualsAndHashCode.Include
     @Id
     private String id;
     private String userId;

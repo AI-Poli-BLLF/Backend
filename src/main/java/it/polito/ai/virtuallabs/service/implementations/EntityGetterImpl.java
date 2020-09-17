@@ -6,20 +6,25 @@ import it.polito.ai.virtuallabs.entities.tokens.Token;
 import it.polito.ai.virtuallabs.entities.vms.VMConfig;
 import it.polito.ai.virtuallabs.entities.vms.VMInstance;
 import it.polito.ai.virtuallabs.entities.vms.VMModel;
+import it.polito.ai.virtuallabs.entities.vms.VMOs;
 import it.polito.ai.virtuallabs.repositories.*;
 import it.polito.ai.virtuallabs.repositories.tokens.RegistrationTokenRepository;
+import it.polito.ai.virtuallabs.repositories.tokens.TokenRepository;
 import it.polito.ai.virtuallabs.repositories.vms.VMConfigRepository;
 import it.polito.ai.virtuallabs.repositories.vms.VMInstanceRepository;
 import it.polito.ai.virtuallabs.repositories.vms.VMModelRepository;
+import it.polito.ai.virtuallabs.repositories.vms.VMOsRepository;
 import it.polito.ai.virtuallabs.service.EntityGetter;
 import it.polito.ai.virtuallabs.service.exceptions.*;
 import it.polito.ai.virtuallabs.service.exceptions.vms.VMConfigNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.vms.VMInstanceNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.vms.VMModelNotFoundException;
+import it.polito.ai.virtuallabs.service.exceptions.vms.VMOsNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -47,6 +52,8 @@ public class EntityGetterImpl implements EntityGetter {
     private TokenRepository tokenRepository;
     @Autowired
     private RegistrationTokenRepository registrationTokenRepository;
+    @Autowired
+    private VMOsRepository vmOsRepository;
 
     @Override
     public Course getCourse(String courseName){
@@ -122,6 +129,24 @@ public class EntityGetterImpl implements EntityGetter {
     public RegistrationToken getRegistrationToken(String tokenId) {
         return registrationTokenRepository.findById(tokenId).orElseThrow(
                 () -> new InvalidOrExpiredTokenException(tokenId)
+        );
+    }
+
+    @Override
+    public VMOs getVmOsVersion(String osName, String version){
+        VMOs vmOs =  vmOsRepository.findByOsNameIgnoreCase(osName).orElseThrow(
+                () -> new VMOsNotFoundException(osName)
+        );
+        if(!vmOs.getVersions().contains(version))
+            throw new VMOsNotFoundException(osName, version);
+
+        return vmOs;
+    }
+
+    @Override
+    public VMOs getVmOs(String osName) {
+        return vmOsRepository.findByOsNameIgnoreCase(osName).orElseThrow(
+                () -> new VMOsNotFoundException(osName)
         );
     }
 }

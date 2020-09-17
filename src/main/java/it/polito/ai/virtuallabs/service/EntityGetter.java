@@ -6,6 +6,7 @@ import it.polito.ai.virtuallabs.entities.tokens.Token;
 import it.polito.ai.virtuallabs.entities.vms.VMConfig;
 import it.polito.ai.virtuallabs.entities.vms.VMInstance;
 import it.polito.ai.virtuallabs.entities.vms.VMModel;
+import it.polito.ai.virtuallabs.entities.vms.VMOs;
 
 public interface EntityGetter {
     Course getCourse(String courseName);
@@ -19,4 +20,6 @@ public interface EntityGetter {
     Draft getDraft(String draftId);
     Token getToken(String tokenId);
     RegistrationToken getRegistrationToken(String tokenId);
+    VMOs getVmOsVersion(String osName, String version);
+    VMOs getVmOs(String osName);
 }
