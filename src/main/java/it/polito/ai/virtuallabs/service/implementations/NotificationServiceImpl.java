@@ -222,15 +222,15 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void confirmRegistration(String token) {
         RegistrationToken t = entityGetter.getRegistrationToken(token);
-
+        String id = t.getUserId().split("@")[0];
         switch (t.getUserId().toLowerCase().toCharArray()[0]){
             case 's':
-                StudentDTO s = new StudentDTO(t.getUserId(), t.getUserLastName(), t.getUserFirstName());
+                StudentDTO s = new StudentDTO(id, t.getUserLastName(), t.getUserFirstName());
                 if (!teamService.addStudent(s))
                     throw new UserAlreadyExistException();
                 break;
             case 'd':
-                ProfessorDTO p = new ProfessorDTO(t.getUserId(), t.getUserLastName(), t.getUserFirstName(), new ArrayList<>());
+                ProfessorDTO p = new ProfessorDTO(id, t.getUserLastName(), t.getUserFirstName(), new ArrayList<>());
                 if (!teamService.addProfessor(p))
                     throw new UserAlreadyExistException();
                 break;

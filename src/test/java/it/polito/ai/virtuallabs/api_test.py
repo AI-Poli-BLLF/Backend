@@ -156,7 +156,7 @@ def deleteCourse(course_name, token):
 
 def confirmRegistration(token_id):
     url = f"http://localhost:8080/notification/confirm-registration"
-    print("DELETE TO: " + url)
+    print("POST TO: " + url)
     return requests.post(url, data=token_id)
 
 if __name__ == '__main__':
@@ -165,14 +165,15 @@ if __name__ == '__main__':
     d1_account = {"username": "d1@polito.it", "password": "DfC&O3N0-l"}
     d2_account = {"username": "d2@polito.it", "password": '2%Ts1N"sRa'}
     admin_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX0FETUlOIl0sImlhdCI6MTYwMDEwMDgxOSwiZXhwIjoxNjAwMTM2ODE5fQ.txv6pw9X0y4ag9rpB7_lgwWfpEv8NXzslzSDk9LZzsQ"
-    d1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMjY3NTQxQHBvbGl0by5pdCIsInJvbGVzIjpbIlJPTEVfUFJPRkVTU09SIl0sImlhdCI6MTYwMDE2OTg4NywiZXhwIjoxNjAwMjA1ODg3fQ.VgEG0cfhDzFEv-OuTzdtCDtBov4heerd5tVUG2fv7as"
+    d1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMTIzNDU2QHBvbGl0by5pdCIsInJvbGVzIjpbIlJPTEVfUFJPRkVTU09SIl0sImlhdCI6MTYwMDMzNzAxNSwiZXhwIjoxNjAwMzczMDE1fQ.DkaP51kqmXWQtvTTH44hMEEDfjmaB7-ReuweukysFDc"
     s1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzMTIzNDU2QHN0dWRlbnRpLnBvbGl0by5pdCIsInJvbGVzIjpbIlJPTEVfU1RVREVOVCJdLCJpYXQiOjE2MDAxNzAyMTYsImV4cCI6MTYwMDIwNjIxNn0.SYYPRa7efjI8YAWs1ghe6_1LhRztoquUFpaCBN66Hu0"
     s2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzMTQ3MjU4QHN0dWRlbnRpLnBvbGl0by5pdCIsInJvbGVzIjpbIlJPTEVfU1RVREVOVCJdLCJpYXQiOjE2MDAxNzAyMzEsImV4cCI6MTYwMDIwNjIzMX0.8nfdtrjv7phLl50SUm8MKuqYO779RnecPgZTI_tn5C0"
     d2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMkBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1BST0ZFU1NPUiJdLCJpYXQiOjE1OTY2MzY3MTIsImV4cCI6MTU5NjY3MjcxMn0.adY9W4UVT7p1_BMtGMVIS3yXl8s5rpejham0yUeciJU"
 
 
+    #res = authenticate("d123456@polito.it", "ciao")
     #res = registerUser("Gianpiero", "Cabodi", "d123456", "ciao", "d123456@polito.it")
-    res = confirmRegistration("eb051f00-54b5-43bc-b3b0-90fd9e47908a")
+    res = confirmRegistration("0cc869e9-8622-4e71-bc57-bfdfca87e334")
     #res = addCourse("AI", 1, 2, "Ubuntu", "19.10", "d267541", d1_token)
     #res = enableDisableCourse("AI", True, d1_token)
     #res = enrollOne("AI", "s123456", d1_token)
