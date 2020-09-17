@@ -136,8 +136,9 @@ def deleteVM(course_name, team_id, vm_id, owner_id, token):
     return requests.delete(url, data=owner_id, headers=get_headers(token))
 
 
-def registerUser(first_name, name, user_id, password, email):
+def registerUser(first_name, name, user_id, password):
     url = "http://localhost:8080/register"
+    email = f"{user_id}@studenti.polito.it" if user_id[0].lower() == "s" else f"{user_id}@polito.it"
     json = {
         "firstName": first_name,
         "name": name,
@@ -159,25 +160,46 @@ def confirmRegistration(token_id):
     print("POST TO: " + url)
     return requests.post(url, data=token_id)
 
+
+def createVmOs(os_name, token):
+    url = f"http://localhost:8080/API/vm-os"
+    json = {"osName": os_name}
+    print("POST TO: " + url)
+    return requests.post(url, json=json, headers=get_headers(token))
+
+
+def addOsVersion(os_name, version, token):
+    url = f"http://localhost:8080/API/vm-os/{os_name}"
+    print("POST TO: " + url)
+    return requests.post(url, data=version, headers=get_headers(token))
+
+
+def deleteStudentFromCourse(course_name, student_id, token):
+    url = f"{courses}{course_name}/enrolled/{student_id}"
+    print("DELETE TO: "+ url)
+    return requests.delete(url, headers=get_headers(token))
+
+
 if __name__ == '__main__':
-    s1_account = {"username": "s1@studenti.polito.it", "password": "DmeJv.6f-0"}
-    s2_account = {"username": "s2@studenti.polito.it", "password": "6SqP,t6D1%"}
-    d1_account = {"username": "d1@polito.it", "password": "DfC&O3N0-l"}
-    d2_account = {"username": "d2@polito.it", "password": '2%Ts1N"sRa'}
-    admin_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX0FETUlOIl0sImlhdCI6MTYwMDEwMDgxOSwiZXhwIjoxNjAwMTM2ODE5fQ.txv6pw9X0y4ag9rpB7_lgwWfpEv8NXzslzSDk9LZzsQ"
-    d1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMTIzNDU2QHBvbGl0by5pdCIsInJvbGVzIjpbIlJPTEVfUFJPRkVTU09SIl0sImlhdCI6MTYwMDMzNzAxNSwiZXhwIjoxNjAwMzczMDE1fQ.DkaP51kqmXWQtvTTH44hMEEDfjmaB7-ReuweukysFDc"
+    admin_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX0FETUlOIl0sImlhdCI6MTYwMDMzNzQ4OCwiZXhwIjoxNjAwMzczNDg4fQ.F-II8zNHxkk-8pXZYfHjUAGjDgtd45fjZNz-0ZRWbkY"
+    d1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMTIzNDU2QHBvbGl0by5pdCIsInJvbGVzIjpbIlJPTEVfUFJPRkVTU09SIl0sImlhdCI6MTYwMDMzODg2MCwiZXhwIjoxNjAwMzc0ODYwfQ.0DykoEan8ZtBAiKKMc_jdaoU_FYJ0S0ek_3SlfkDfk0"
     s1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzMTIzNDU2QHN0dWRlbnRpLnBvbGl0by5pdCIsInJvbGVzIjpbIlJPTEVfU1RVREVOVCJdLCJpYXQiOjE2MDAxNzAyMTYsImV4cCI6MTYwMDIwNjIxNn0.SYYPRa7efjI8YAWs1ghe6_1LhRztoquUFpaCBN66Hu0"
     s2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzMTQ3MjU4QHN0dWRlbnRpLnBvbGl0by5pdCIsInJvbGVzIjpbIlJPTEVfU1RVREVOVCJdLCJpYXQiOjE2MDAxNzAyMzEsImV4cCI6MTYwMDIwNjIzMX0.8nfdtrjv7phLl50SUm8MKuqYO779RnecPgZTI_tn5C0"
     d2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMkBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1BST0ZFU1NPUiJdLCJpYXQiOjE1OTY2MzY3MTIsImV4cCI6MTU5NjY3MjcxMn0.adY9W4UVT7p1_BMtGMVIS3yXl8s5rpejham0yUeciJU"
 
-
+    #res = authenticate("d123456@polito.it", "ciao")
+    #res = registerUser("Stefano", "Loscalzo", "s123456", "ciao")
+    #res = confirmRegistration("4993505f-4e8a-41d8-9c66-64e5d0925321")
+    #res = createVmOs("Ubuntu", admin_token)
+    #res = addOsVersion("Ubuntu", "20.04", admin_token)
     #res = authenticate("d123456@polito.it", "ciao")
     #res = registerUser("Gianpiero", "Cabodi", "d123456", "ciao", "d123456@polito.it")
-    res = confirmRegistration("0cc869e9-8622-4e71-bc57-bfdfca87e334")
-    #res = addCourse("AI", 1, 2, "Ubuntu", "19.10", "d267541", d1_token)
-    #res = enableDisableCourse("AI", True, d1_token)
-    #res = enrollOne("AI", "s123456", d1_token)
-    #res = enrollOne("AI", "s147258", d1_token)
+    #res = confirmRegistration("0cc869e9-8622-4e71-bc57-bfdfca87e334")
+    #res = addCourse("PDS", 1, 2, "Ubuntu", "19.10", "d123456", d1_token)
+    #res = enableDisableCourse("PDS", True, d1_token)
+    #res = enrollOne("PDS", "s123456", d1_token)
+    #res = enrollOne("PDS", "s267541", d1_token)
+    res = deleteStudentFromCourse("PDS", "s123456", d1_token)
     #res = createVmConfiguration("AI", 1, 4, 4096, 30, 2, 2, d1_token)
     #res = createVmInstance("AI", 1, "s123456", 2, 2048, 10, s1_token)
     #res = createVmInstance("AI", 1, "s147258", 1, 1024, 15, s2_token)

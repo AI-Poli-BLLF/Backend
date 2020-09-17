@@ -1,5 +1,8 @@
 package it.polito.ai.virtuallabs;
 
+import it.polito.ai.virtuallabs.dtos.vms.VMOsDTO;
+import it.polito.ai.virtuallabs.entities.vms.VMOs;
+import it.polito.ai.virtuallabs.repositories.vms.VMOsRepository;
 import it.polito.ai.virtuallabs.security.entities.User;
 import it.polito.ai.virtuallabs.security.repositories.UserRepository;
 import it.polito.ai.virtuallabs.service.TeamService;
@@ -13,6 +16,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Arrays;
+import java.util.HashSet;
 
 @SpringBootApplication
 @EnableScheduling
@@ -20,7 +24,7 @@ public class VirtualLabsApplication {
     
     @Bean
     public CommandLineRunner runner(UserRepository repository, PasswordEncoder passwordEncoder,
-                                    VMService vmService, TeamService teamService){
+                                    VMOsRepository vmOsRepository){
         return args -> {
             try {
                 User admin = User.builder().id("a1").username("admin@polito.it").password(passwordEncoder.encode("admin"))
@@ -28,9 +32,21 @@ public class VirtualLabsApplication {
                 repository.saveAndFlush(admin);
                 System.out.println(repository.findAll());
 
-            }catch (Exception ignored){
-                System.out.println("fail");
-            }
+            }catch (Exception ignored){}
+
+            //Creazione VMOS versions
+            try {
+                VMOs windows = VMOs.builder().osName("Windows")
+                        .versions(new HashSet<>(Arrays.asList("Vista", "7", "10"))).build();
+                VMOs ubuntu = VMOs.builder().osName("Ubuntu")
+                        .versions(new HashSet<>(Arrays.asList("18.04", "19.10", "20.04"))).build();
+                VMOs mac = VMOs.builder().osName("MacOS")
+                        .versions(new HashSet<>(Arrays.asList("High Sierra", "Catalina"))).build();
+
+                vmOsRepository.saveAndFlush(windows);
+                vmOsRepository.saveAndFlush(ubuntu);
+                vmOsRepository.saveAndFlush(mac);
+            }catch (Exception ignored){}
 
         };
     }
