@@ -54,7 +54,7 @@ public class TeamServiceImpl implements TeamService {
 
         Professor professor = entityGetter.getProfessor(professorId);
 
-        course.setProfessor(professor);
+        course.addProfessor(professor);
         return mapper.map(course, CourseDTO.class);
     }
 
@@ -99,7 +99,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public List<CourseDTO> getAllCoursesByProfessor(String professorId) {
         Professor professor = entityGetter.getProfessor(professorId);
-        return courseRepository.findByProfessor(professor).stream().map(c-> mapper.map(c, CourseDTO.class))
+        return courseRepository.findByProfessors(professor).stream().map(c-> mapper.map(c, CourseDTO.class))
                 .collect(Collectors.toList());
     }
 

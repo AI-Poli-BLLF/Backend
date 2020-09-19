@@ -1,4 +1,4 @@
-package it.polito.ai.virtuallabs.dtos;
+package it.polito.ai.virtuallabs.dtos.tokens;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

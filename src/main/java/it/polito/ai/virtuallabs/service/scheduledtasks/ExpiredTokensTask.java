@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
+//todo: creare scheduled task per i token registrazione e notifiche
 @Component
 @Log(topic = "ScheduledTask")
 public class ExpiredTokensTask {

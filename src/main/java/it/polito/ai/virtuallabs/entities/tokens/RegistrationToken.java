@@ -12,7 +12,6 @@ import java.util.UUID;
 
 @Data
 @Entity
-@NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class RegistrationToken{
     @EqualsAndHashCode.Include
@@ -23,11 +22,15 @@ public class RegistrationToken{
     private String userLastName;
     private Timestamp expiryDate;
 
-    public RegistrationToken(String userId, String userFirstName, String userLastName) {
+    public RegistrationToken() {
         this.id = UUID.randomUUID().toString();
+        this.expiryDate = Timestamp.valueOf(LocalDateTime.now().plusHours(5));
+    }
+
+    public RegistrationToken(String userId, String userFirstName, String userLastName) {
+        this();
         this.userId = userId;
         this.userFirstName = userFirstName;
         this.userLastName = userLastName;
-        this.expiryDate = Timestamp.valueOf(LocalDateTime.now().plusHours(5));
     }
 }

@@ -32,9 +32,12 @@ public class Course {
     private List<Team> teams = new ArrayList<>();
 
     //todo: modificare relazione molti a molti
-    @ManyToOne
-    @JoinColumn(name = "professor_id")
-    private Professor professor;
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "professor_course",
+            joinColumns = @JoinColumn(name = "course_name"),
+            inverseJoinColumns = @JoinColumn(name = "professor_id")
+    )
+    private List<Professor> professors = new ArrayList<>();
 
     @OneToOne(mappedBy = "course")
     private VMModel vmModel;
@@ -66,13 +69,19 @@ public class Course {
         team.setCourse(null);
     }
 
-    public void setProfessor(Professor professor) {
-        if(this.professor != null)
-            this.professor.getCourses().remove(this);
+    public void addProfessor(Professor professor) {
+        if(professor == null)
+            return;
 
-        if(professor != null && !professor.getCourses().contains(this))
-            professor.getCourses().add(this);
+        professors.add(professor);
+        professor.getCourses().add(this);
+    }
 
-        this.professor = professor;
+    public void removeProfessor(Professor professor){
+        if(professor == null)
+            return;
+
+        professors.remove(professor);
+        professor.getCourses().remove(this);
     }
 }

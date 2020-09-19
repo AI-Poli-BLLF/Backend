@@ -3,19 +3,21 @@ package it.polito.ai.virtuallabs.service.implementations;
 import it.polito.ai.virtuallabs.dtos.ProfessorDTO;
 import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.dtos.TeamDTO;
-import it.polito.ai.virtuallabs.dtos.TokenDTO;
+import it.polito.ai.virtuallabs.dtos.tokens.TokenDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMConfigDTO;
+import it.polito.ai.virtuallabs.entities.Course;
+import it.polito.ai.virtuallabs.entities.Professor;
+import it.polito.ai.virtuallabs.entities.Student;
 import it.polito.ai.virtuallabs.entities.Team;
+import it.polito.ai.virtuallabs.entities.tokens.NotificationToken;
 import it.polito.ai.virtuallabs.entities.tokens.RegistrationToken;
 import it.polito.ai.virtuallabs.entities.tokens.Token;
+import it.polito.ai.virtuallabs.repositories.tokens.NotificationTokenRepository;
 import it.polito.ai.virtuallabs.repositories.tokens.RegistrationTokenRepository;
 import it.polito.ai.virtuallabs.repositories.tokens.TokenRepository;
-import it.polito.ai.virtuallabs.repositories.vms.VMConfigRepository;
 import it.polito.ai.virtuallabs.security.service.exceptions.UserAlreadyExistException;
 import it.polito.ai.virtuallabs.service.*;
-import it.polito.ai.virtuallabs.service.exceptions.InvalidOrExpiredTokenException;
-import it.polito.ai.virtuallabs.service.exceptions.TeamNotFoundException;
-import it.polito.ai.virtuallabs.service.exceptions.TokenNotFoundException;
+import it.polito.ai.virtuallabs.service.exceptions.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
@@ -55,7 +57,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Autowired
     private ManagementService managementService;
     @Autowired
-    private VMConfigRepository vmConfigRepository;
+    private NotificationTokenRepository notificationTokenRepository;
 
     @Override
     @Async
@@ -244,5 +246,105 @@ public class NotificationServiceImpl implements NotificationService {
 
         managementService.enableUser(t.getUserId());
         registrationTokenRepository.delete(t);
+    }
+
+    @PreAuthorize("@securityApiAuth.isMe(#studentId)")
+    @Override
+    @Transactional
+    public void requestForCourseEnrolling(String studentId, String courseName) {
+        Course c = entityGetter.getCourse(courseName);
+        Student s = entityGetter.getStudent(studentId);
+
+        if(c.getStudents().contains(s))
+            throw new StudentAlreadyEnrolledToCourseException(studentId, courseName);
+
+        String message = String.format("" +
+                "Lo studente <i>%s</i> ha richiesto di poter essere iscritto al corso <i>%s</i>"
+        );
+        List<Professor> professors = c.getProfessors();
+        List<NotificationToken> tokens = professors.stream()
+                .map(p -> new NotificationToken(studentId, p.getId(), courseName, message, NotificationToken.NotificationType.STUDENT_ENROLLING))
+                .collect(Collectors.toList());
+
+        notificationTokenRepository.saveAll(tokens);
+    }
+
+    @PreAuthorize("@securityApiAuth.isMe(#senderProfessorId)")
+    @Override
+    @Transactional
+    public void cooperateWithProfessor(String senderProfessorId, List<String> receiverProfessorIds, String courseName) {
+        Course c = entityGetter.getCourse(courseName);
+        Professor sender = entityGetter.getProfessor(senderProfessorId);
+        List<Professor> receivers = receiverProfessorIds.stream().map(entityGetter::getProfessor)
+                .collect(Collectors.toList());
+
+        if(!c.getProfessors().contains(sender))
+            throw new ProfessorNotOwnCourseException(senderProfessorId, courseName);
+
+        String message = String.format("Il professore %s vuole cooperare con te per il corso %s", senderProfessorId, courseName);
+        List<NotificationToken> notificationTokens = receivers.stream().map(p->{
+            if(c.getProfessors().contains(p))
+                throw new ProfessorAlreadyOwnCourseException(p.getId(), courseName);
+
+            return new NotificationToken(senderProfessorId, p.getId(), courseName, message, NotificationToken.NotificationType.PROFESSOR_COOPERATION);
+        }).collect(Collectors.toList());
+
+        notificationTokenRepository.saveAll(notificationTokens);
+    }
+
+    @Override
+    @Transactional
+    public void readNotification(String tokenId) {
+        NotificationToken notificationToken = entityGetter.getNotificationToken(tokenId);
+        notificationToken.setNotificationRead(true);
+    }
+
+    @Override
+    @Transactional
+    public void acceptEnrollingRequest(String tokenId) {
+        NotificationToken notificationToken = entityGetter.getNotificationToken(tokenId);
+        Student sender = entityGetter.getStudent(notificationToken.getSenderId());
+        Course c = entityGetter.getCourse(notificationToken.getCourseName());
+
+        //Cancella il token di richiesta di iscrizione
+        notificationTokenRepository.delete(notificationToken);
+        notificationTokenRepository.deleteBySenderIdAndCourseName(sender.getId(), c.getName());
+
+        //todo: enroll student
+
+
+        String message = String.format("La tua richiesta di iscrizione al corso %s è stata accettata", notificationToken.getCourseName());
+        NotificationToken answer = new NotificationToken(
+                notificationToken.getReceiverId(),
+                notificationToken.getSenderId(),
+                notificationToken.getCourseName(),
+                message,
+                NotificationToken.NotificationType.RESPONSE
+                );
+
+        notificationTokenRepository.save(answer);
+    }
+
+    @Override
+    @Transactional
+    public void rejectEnrollingRequest(String tokenId) {
+        NotificationToken notificationToken = entityGetter.getNotificationToken(tokenId);
+        Student sender = entityGetter.getStudent(notificationToken.getSenderId());
+        Course c = entityGetter.getCourse(notificationToken.getCourseName());
+
+        //Cancella il token di richiesta di iscrizione
+        notificationTokenRepository.delete(notificationToken);
+        notificationTokenRepository.deleteBySenderIdAndCourseName(sender.getId(), c.getName());
+
+        String message = String.format("La tua richiesta di iscrizione al corso <i>%s</i> è stata rifiutata", notificationToken.getCourseName());
+        NotificationToken answer = new NotificationToken(
+                notificationToken.getReceiverId(),
+                notificationToken.getSenderId(),
+                notificationToken.getCourseName(),
+                message,
+                NotificationToken.NotificationType.RESPONSE
+        );
+
+        notificationTokenRepository.save(answer);
     }
 }

@@ -5,7 +5,7 @@ import it.polito.ai.virtuallabs.controllers.utility.TransactionChain;
 import it.polito.ai.virtuallabs.dtos.CourseDTO;
 import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.dtos.TeamDTO;
-import it.polito.ai.virtuallabs.dtos.TokenDTO;
+import it.polito.ai.virtuallabs.dtos.tokens.TokenDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMConfigDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMInstanceDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMModelDTO;

@@ -1,6 +1,7 @@
 package it.polito.ai.virtuallabs.service.implementations;
 
 import it.polito.ai.virtuallabs.entities.*;
+import it.polito.ai.virtuallabs.entities.tokens.NotificationToken;
 import it.polito.ai.virtuallabs.entities.tokens.RegistrationToken;
 import it.polito.ai.virtuallabs.entities.tokens.Token;
 import it.polito.ai.virtuallabs.entities.vms.VMConfig;
@@ -8,6 +9,7 @@ import it.polito.ai.virtuallabs.entities.vms.VMInstance;
 import it.polito.ai.virtuallabs.entities.vms.VMModel;
 import it.polito.ai.virtuallabs.entities.vms.VMOs;
 import it.polito.ai.virtuallabs.repositories.*;
+import it.polito.ai.virtuallabs.repositories.tokens.NotificationTokenRepository;
 import it.polito.ai.virtuallabs.repositories.tokens.RegistrationTokenRepository;
 import it.polito.ai.virtuallabs.repositories.tokens.TokenRepository;
 import it.polito.ai.virtuallabs.repositories.vms.VMConfigRepository;
@@ -54,6 +56,8 @@ public class EntityGetterImpl implements EntityGetter {
     private RegistrationTokenRepository registrationTokenRepository;
     @Autowired
     private VMOsRepository vmOsRepository;
+    @Autowired
+    private NotificationTokenRepository notificationTokenRepository;
 
     @Override
     public Course getCourse(String courseName){
@@ -147,6 +151,13 @@ public class EntityGetterImpl implements EntityGetter {
     public VMOs getVmOs(String osName) {
         return vmOsRepository.findByOsNameIgnoreCase(osName).orElseThrow(
                 () -> new VMOsNotFoundException(osName)
+        );
+    }
+
+    @Override
+    public NotificationToken getNotificationToken(String tokenId){
+        return notificationTokenRepository.findById(tokenId).orElseThrow(
+                () -> new InvalidOrExpiredTokenException(tokenId)
         );
     }
 }

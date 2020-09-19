@@ -182,21 +182,22 @@ def deleteStudentFromCourse(course_name, student_id, token):
 
 if __name__ == '__main__':
     admin_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbkBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX0FETUlOIl0sImlhdCI6MTYwMDMzNzQ4OCwiZXhwIjoxNjAwMzczNDg4fQ.F-II8zNHxkk-8pXZYfHjUAGjDgtd45fjZNz-0ZRWbkY"
-    d1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMTIzNDU2QHBvbGl0by5pdCIsInJvbGVzIjpbIlJPTEVfUFJPRkVTU09SIl0sImlhdCI6MTYwMDMzODg2MCwiZXhwIjoxNjAwMzc0ODYwfQ.0DykoEan8ZtBAiKKMc_jdaoU_FYJ0S0ek_3SlfkDfk0"
+    d1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMjY3NTQxQHBvbGl0by5pdCIsInJvbGVzIjpbIlJPTEVfUFJPRkVTU09SIl0sImlhdCI6MTYwMDQ2MDAwNiwiZXhwIjoxNjAwNDk2MDA2fQ.EJQ8xn0d6I_FS2XhiQ2sJfefONpxFqy6m030CgCOzIw"
     s1_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzMTIzNDU2QHN0dWRlbnRpLnBvbGl0by5pdCIsInJvbGVzIjpbIlJPTEVfU1RVREVOVCJdLCJpYXQiOjE2MDAxNzAyMTYsImV4cCI6MTYwMDIwNjIxNn0.SYYPRa7efjI8YAWs1ghe6_1LhRztoquUFpaCBN66Hu0"
     s2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzMTQ3MjU4QHN0dWRlbnRpLnBvbGl0by5pdCIsInJvbGVzIjpbIlJPTEVfU1RVREVOVCJdLCJpYXQiOjE2MDAxNzAyMzEsImV4cCI6MTYwMDIwNjIzMX0.8nfdtrjv7phLl50SUm8MKuqYO779RnecPgZTI_tn5C0"
     d2_token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJkMkBwb2xpdG8uaXQiLCJyb2xlcyI6WyJST0xFX1BST0ZFU1NPUiJdLCJpYXQiOjE1OTY2MzY3MTIsImV4cCI6MTU5NjY3MjcxMn0.adY9W4UVT7p1_BMtGMVIS3yXl8s5rpejham0yUeciJU"
 
-    res = authenticate("d123456@polito.it", "ciaoa")
-    #res = registerUser("Giovanni", "Malnati", "d267541", "ciao")
-    #res = confirmRegistration("4993505f-4e8a-41d8-9c66-64e5d0925321")
+
+    res = registerUser("Giovanni", "Malnati", "d267541", "ciao")
+    #res = confirmRegistration("1cfb7935-50f5-4611-bc38-ea14f50607f4")
     #res = createVmOs("Ubuntu", admin_token)
     #res = addOsVersion("Ubuntu", "20.04", admin_token)
-    #res = authenticate("d123456@polito.it", "ciao")
+    #res = authenticate("d267541@polito.it", "ciao")
     #res = registerUser("Gianpiero", "Cabodi", "d123456", "ciao", "d123456@polito.it")
     #res = confirmRegistration("0cc869e9-8622-4e71-bc57-bfdfca87e334")
-    #res = addCourse("PDS", 1, 2, "Ubuntu", "19.10", "d123456", d1_token)
-    #res = enableDisableCourse("PDS", True, d1_token)
+    #res = addCourse("AI", 1, 2, "Ubuntu", "19.10", "d267541", d1_token)
+    #res = addCourse("PDS", 1, 2, "Ubuntu", "19.10", "d267541", d1_token)
+    #res = enableDisableCourse("AI", True, d1_token)
     #res = enrollOne("PDS", "s123456", d1_token)
     #res = enrollOne("PDS", "s267541", d1_token)
     #res = deleteStudentFromCourse("PDS", "s123456", d1_token)

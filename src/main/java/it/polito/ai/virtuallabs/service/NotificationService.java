@@ -1,8 +1,7 @@
 package it.polito.ai.virtuallabs.service;
 
-import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.dtos.TeamDTO;
-import it.polito.ai.virtuallabs.dtos.TokenDTO;
+import it.polito.ai.virtuallabs.dtos.tokens.TokenDTO;
 
 import java.util.List;
 
@@ -16,4 +15,11 @@ public interface NotificationService {
     TokenDTO getPendingMemberToken(Long teamId, String memberId);
     void sendConfirmEmailRegistration(String email, String userFirstName, String userLastName);
     void confirmRegistration(String token);
+
+    //NOTIFICATION TOKEN
+    void requestForCourseEnrolling(String studentId, String courseName);
+    void cooperateWithProfessor(String senderProfessorId, List<String> receiverProfessorIds, String courseName);
+    void readNotification(String tokenId);
+    void acceptEnrollingRequest(String tokenId);
+    void rejectEnrollingRequest(String tokenId);
 }

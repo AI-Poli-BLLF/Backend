@@ -7,6 +7,7 @@ import org.springframework.expression.spel.ast.Assign;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +24,7 @@ public class Professor {
     private String firstName;
     private String photoName;
 
-    @OneToMany(mappedBy = "professor")
+    @ManyToMany(mappedBy = "professors")
     private List<Course> courses = new ArrayList<>();
 
     @OneToMany(mappedBy = "professor")
@@ -34,7 +35,7 @@ public class Professor {
             return;
 
         courses.add(course);
-        course.setProfessor(this);
+        course.getProfessors().add(this);
     }
 
     public void removeCourse(Course course){
@@ -42,7 +43,7 @@ public class Professor {
             return;
 
         courses.remove(course);
-        course.setProfessor(null);
+        course.getProfessors().remove(this);
     }
 
     public void addAssignment(Assignment assignment){

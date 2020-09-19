@@ -1,6 +1,7 @@
 package it.polito.ai.virtuallabs.service;
 
 import it.polito.ai.virtuallabs.entities.*;
+import it.polito.ai.virtuallabs.entities.tokens.NotificationToken;
 import it.polito.ai.virtuallabs.entities.tokens.RegistrationToken;
 import it.polito.ai.virtuallabs.entities.tokens.Token;
 import it.polito.ai.virtuallabs.entities.vms.VMConfig;
@@ -22,4 +23,5 @@ public interface EntityGetter {
     RegistrationToken getRegistrationToken(String tokenId);
     VMOs getVmOsVersion(String osName, String version);
     VMOs getVmOs(String osName);
+    NotificationToken getNotificationToken(String tokenId);
 }
