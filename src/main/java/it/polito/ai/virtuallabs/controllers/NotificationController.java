@@ -50,4 +50,52 @@ public class NotificationController {
         }
     }
 
+    @PostMapping("/accept-enrolling-request")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    private void acceptEnrollingRequest(@RequestBody String tokenId){
+        try {
+            notificationService.acceptEnrollingRequest(tokenId);
+        }catch (NotificationException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
+    @PostMapping("/reject-enrolling-request")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    private void rejectEnrollingRequest(@RequestBody String tokenId){
+        try {
+            notificationService.rejectEnrollingRequest(tokenId);
+        }catch (NotificationException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
+    @PostMapping("/accept-cooperation")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    private void acceptCooperation(@RequestBody String tokenId){
+        try {
+            notificationService.acceptCooperation(tokenId);
+        }catch (NotificationException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
+    @PostMapping("/reject-cooperation")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    private void rejectCooperation(@RequestBody String tokenId){
+        try {
+            notificationService.rejectCooperation(tokenId);
+        }catch (NotificationException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
+    @PutMapping("/read-notification")
+    private void readNotification(@RequestBody String tokenId){
+        try {
+            notificationService.readNotification(tokenId);
+        }catch (NotificationException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
 }

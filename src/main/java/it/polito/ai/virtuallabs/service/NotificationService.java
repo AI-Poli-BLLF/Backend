@@ -19,6 +19,8 @@ public interface NotificationService {
     //NOTIFICATION TOKEN
     void requestForCourseEnrolling(String studentId, String courseName);
     void cooperateWithProfessor(String senderProfessorId, List<String> receiverProfessorIds, String courseName);
+    void acceptCooperation(String tokenId);
+    void rejectCooperation(String tokenId);
     void readNotification(String tokenId);
     void acceptEnrollingRequest(String tokenId);
     void rejectEnrollingRequest(String tokenId);

@@ -7,8 +7,10 @@ import it.polito.ai.virtuallabs.service.AssignmentService;
 import it.polito.ai.virtuallabs.dtos.CourseDTO;
 import it.polito.ai.virtuallabs.dtos.ProfessorDTO;
 import it.polito.ai.virtuallabs.service.ImageUploadService;
+import it.polito.ai.virtuallabs.service.NotificationService;
 import it.polito.ai.virtuallabs.service.TeamService;
 import it.polito.ai.virtuallabs.service.exceptions.DraftNotFoundException;
+import it.polito.ai.virtuallabs.service.exceptions.NotificationException;
 import it.polito.ai.virtuallabs.service.exceptions.ProfessorNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.TeamServiceException;
 import it.polito.ai.virtuallabs.service.exceptions.images.ImageServiceException;
@@ -31,7 +33,9 @@ public class ProfessorController {
     @Autowired
     private ImageUploadService imageUploadService;
     @Autowired
-    AssignmentService assignmentService;
+    private AssignmentService assignmentService;
+    @Autowired
+    private NotificationService notificationService;
 
     @GetMapping({"/", ""})
     private List<ProfessorDTO> getAllProfessors() {
@@ -92,6 +96,7 @@ public class ProfessorController {
     }
     //tested
     @PostMapping(value = "/{professorId}/{assignmentId}/uploadAssignmentPhoto")
+    @ResponseStatus(value = HttpStatus.CREATED)
     private Map<String, String> uploadAssignmentPhoto(@PathVariable String professorId, @PathVariable String assignmentId, @RequestParam("image") MultipartFile image){
         try{
             Map<String, String> map = new HashMap<>();
@@ -112,6 +117,7 @@ public class ProfessorController {
     }
 
     @PostMapping(value = "/{assignmentId}/{draftId}/review")
+    @ResponseStatus(value = HttpStatus.CREATED)
     private DraftDTO reviewDraft(@PathVariable String assignmentId, @PathVariable String draftId, int grade){
         try{
             DraftDTO draftDTO = assignmentService.getDraft(draftId);
@@ -151,6 +157,16 @@ public class ProfessorController {
             return assignmentService.getAssignmentPerProfessorPerCourse(professorId, courseId);
         } catch (ProfessorNotFoundException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("getAssignmentPerProfessor failed"));
+        }
+    }
+
+    @PostMapping("/{senderProfessorId}/courses/{courseName}/cooperate")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    private void cooperateWith(@PathVariable String senderProfessorId, @PathVariable String courseName, @RequestBody List<String> receiverProfessorIds){
+        try {
+            notificationService.cooperateWithProfessor(senderProfessorId, receiverProfessorIds, courseName);
+        }catch (NotificationException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }
 }

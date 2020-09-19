@@ -259,7 +259,7 @@ public class NotificationServiceImpl implements NotificationService {
             throw new StudentAlreadyEnrolledToCourseException(studentId, courseName);
 
         String message = String.format("" +
-                "Lo studente <i>%s</i> ha richiesto di poter essere iscritto al corso <i>%s</i>"
+                "Lo studente %s ha richiesto di poter essere iscritto al corso %s"
         );
         List<Professor> professors = c.getProfessors();
         List<NotificationToken> tokens = professors.stream()
@@ -303,6 +303,10 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void acceptEnrollingRequest(String tokenId) {
         NotificationToken notificationToken = entityGetter.getNotificationToken(tokenId);
+
+        if(notificationToken.getType() != NotificationToken.NotificationType.STUDENT_ENROLLING)
+            throw new InvalidOrExpiredTokenException(tokenId);
+
         Student sender = entityGetter.getStudent(notificationToken.getSenderId());
         Course c = entityGetter.getCourse(notificationToken.getCourseName());
 
@@ -310,8 +314,7 @@ public class NotificationServiceImpl implements NotificationService {
         notificationTokenRepository.delete(notificationToken);
         notificationTokenRepository.deleteBySenderIdAndCourseName(sender.getId(), c.getName());
 
-        //todo: enroll student
-
+        teamService.addStudentToCourse(sender.getId(), c.getName());
 
         String message = String.format("La tua richiesta di iscrizione al corso %s è stata accettata", notificationToken.getCourseName());
         NotificationToken answer = new NotificationToken(
@@ -329,6 +332,10 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void rejectEnrollingRequest(String tokenId) {
         NotificationToken notificationToken = entityGetter.getNotificationToken(tokenId);
+
+        if(notificationToken.getType() != NotificationToken.NotificationType.STUDENT_ENROLLING)
+            throw new InvalidOrExpiredTokenException(tokenId);
+
         Student sender = entityGetter.getStudent(notificationToken.getSenderId());
         Course c = entityGetter.getCourse(notificationToken.getCourseName());
 
@@ -336,7 +343,7 @@ public class NotificationServiceImpl implements NotificationService {
         notificationTokenRepository.delete(notificationToken);
         notificationTokenRepository.deleteBySenderIdAndCourseName(sender.getId(), c.getName());
 
-        String message = String.format("La tua richiesta di iscrizione al corso <i>%s</i> è stata rifiutata", notificationToken.getCourseName());
+        String message = String.format("La tua richiesta di iscrizione al corso %s è stata rifiutata", notificationToken.getCourseName());
         NotificationToken answer = new NotificationToken(
                 notificationToken.getReceiverId(),
                 notificationToken.getSenderId(),
@@ -345,6 +352,86 @@ public class NotificationServiceImpl implements NotificationService {
                 NotificationToken.NotificationType.RESPONSE
         );
 
+        notificationTokenRepository.save(answer);
+    }
+
+    @Transactional
+    @Override
+    public void acceptCooperation(String tokenId) {
+        NotificationToken notificationToken = entityGetter.getNotificationToken(tokenId);
+
+        if(notificationToken.getType() != NotificationToken.NotificationType.PROFESSOR_COOPERATION)
+            throw new InvalidOrExpiredTokenException(tokenId);
+
+        Professor sender = entityGetter.getProfessor(notificationToken.getSenderId());
+        Professor receiver = entityGetter.getProfessor(notificationToken.getReceiverId());
+        Course c = entityGetter.getCourse(notificationToken.getCourseName());
+
+        if(!c.getProfessors().contains(sender))
+            throw new ProfessorNotOwnCourseException(sender.getId(), c.getName());
+
+        String messageToSender = String.format("Il professor %s %s (%s) ha accettato " +
+                "la tua richiesta di collaborazione per il corso %s",
+                receiver.getFirstName(), receiver.getName(), c.getName());
+
+        String messageToOtherProfessors = String.format("Il professor %s %s (%s) ha cominciato a collaborare per il corso %s",
+                receiver.getFirstName(), receiver.getName(), c.getName());
+
+        //Messaggio per il professore che ha fatto l'invito
+        NotificationToken answerToSender = new NotificationToken(
+                receiver.getId(),
+                sender.getId(),
+                c.getName(),
+                messageToSender,
+                NotificationToken.NotificationType.RESPONSE
+        );
+        //Messaggi per i professori appartenenti al corso tranne quello che ha fatto l'invito
+        List<NotificationToken> answers = c.getProfessors().stream().filter(p -> !p.equals(sender))
+                .map(p-> new NotificationToken(
+                        receiver.getId(),
+                        p.getId(),
+                        c.getName(),
+                        messageToOtherProfessors,
+                        NotificationToken.NotificationType.RESPONSE
+                )).collect(Collectors.toList());
+
+        //Metto tutti i token assieme e li salvo nel db
+        answers.add(answerToSender);
+        notificationTokenRepository.saveAll(answers);
+        //Aggiungo il prof e cancello il token di partenza
+        c.getProfessors().add(receiver);
+        notificationTokenRepository.delete(notificationToken);
+    }
+
+    @Transactional
+    @Override
+    public void rejectCooperation(String tokenId) {
+        NotificationToken notificationToken = entityGetter.getNotificationToken(tokenId);
+
+        if(notificationToken.getType() != NotificationToken.NotificationType.PROFESSOR_COOPERATION)
+            throw new InvalidOrExpiredTokenException(tokenId);
+
+        Professor sender = entityGetter.getProfessor(notificationToken.getSenderId());
+        Professor receiver = entityGetter.getProfessor(notificationToken.getReceiverId());
+        Course c = entityGetter.getCourse(notificationToken.getCourseName());
+
+        if(!c.getProfessors().contains(sender))
+            throw new ProfessorNotOwnCourseException(sender.getId(), c.getName());
+
+        String message = String.format("Il professor %s %s (%s) ha rifiutato " +
+                        "la tua richiesta di collaborazione per il corso %s",
+                receiver.getFirstName(), receiver.getName(), c.getName());
+
+        //Messaggio per il professore che ha fatto l'invito
+        NotificationToken answer = new NotificationToken(
+                receiver.getId(),
+                sender.getId(),
+                c.getName(),
+                message,
+                NotificationToken.NotificationType.RESPONSE
+        );
+
+        notificationTokenRepository.delete(notificationToken);
         notificationTokenRepository.save(answer);
     }
 }

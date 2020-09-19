@@ -8,7 +8,9 @@ import it.polito.ai.virtuallabs.dtos.TeamDTO;
 import it.polito.ai.virtuallabs.entities.Draft;
 import it.polito.ai.virtuallabs.service.AssignmentService;
 import it.polito.ai.virtuallabs.service.ImageUploadService;
+import it.polito.ai.virtuallabs.service.NotificationService;
 import it.polito.ai.virtuallabs.service.TeamService;
+import it.polito.ai.virtuallabs.service.exceptions.NotificationException;
 import it.polito.ai.virtuallabs.service.exceptions.TeamServiceException;
 import it.polito.ai.virtuallabs.service.exceptions.images.ImageServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,8 @@ public class StudentController {
     private ImageUploadService imageUploadService;
     @Autowired
     private AssignmentService assignmentService;
+    @Autowired
+    private NotificationService notificationService;
 
     @GetMapping({"", "/"})
     private List<StudentDTO> all(){
@@ -168,4 +172,13 @@ public class StudentController {
         }
     }
 
+    @PostMapping("/{senderStudentId}/enrolling-course-request")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    private void enrollRequest(@PathVariable String senderStudentId, @RequestBody String courseName){
+        try {
+            notificationService.requestForCourseEnrolling(senderStudentId, courseName);
+        }catch (NotificationException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
 }

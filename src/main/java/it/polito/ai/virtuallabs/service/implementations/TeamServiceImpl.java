@@ -169,6 +169,7 @@ public class TeamServiceImpl implements TeamService {
         return true;
     }
 
+    //todo: gestire cosa succede ai team e alle VM quando lo studente viene rimosso dal corso
     @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
     @Override
     public void deleteStudentFromCourse(String courseName, String studentId) {
