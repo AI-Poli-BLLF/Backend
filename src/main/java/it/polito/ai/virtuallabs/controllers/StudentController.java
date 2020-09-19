@@ -36,8 +36,6 @@ public class StudentController {
     private ImageUploadService imageUploadService;
     @Autowired
     private AssignmentService assignmentService;
-    @Autowired
-    private NotificationService notificationService;
 
     @GetMapping({"", "/"})
     private List<StudentDTO> all(){
@@ -168,16 +166,6 @@ public class StudentController {
             map.put("imageRef", imageUploadService.storeDraftImage(image, draftId));
             return map;
         } catch (ImageServiceException e){
-            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
-        }
-    }
-
-    @PostMapping("/{senderStudentId}/enrolling-course-request")
-    @ResponseStatus(value = HttpStatus.CREATED)
-    private void enrollRequest(@PathVariable String senderStudentId, @RequestBody String courseName){
-        try {
-            notificationService.requestForCourseEnrolling(senderStudentId, courseName);
-        }catch (NotificationException | TeamServiceException e){
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }

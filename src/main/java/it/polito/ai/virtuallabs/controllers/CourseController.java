@@ -13,6 +13,7 @@ import it.polito.ai.virtuallabs.service.NotificationService;
 import it.polito.ai.virtuallabs.service.TeamService;
 import it.polito.ai.virtuallabs.service.VMService;
 import it.polito.ai.virtuallabs.service.exceptions.CourseNotFoundException;
+import it.polito.ai.virtuallabs.service.exceptions.NotificationException;
 import it.polito.ai.virtuallabs.service.exceptions.TeamNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.TeamServiceException;
 import it.polito.ai.virtuallabs.service.exceptions.vms.VMServiceException;
@@ -526,6 +527,16 @@ public class CourseController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team or vm");
         }catch (VMServiceException | TeamServiceException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @PostMapping("/{courseName}/enrolling-course-request")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    private void enrollRequest(@PathVariable String courseName, @RequestBody String senderStudentId){
+        try {
+            notificationService.requestForCourseEnrolling(senderStudentId, courseName);
+        }catch (NotificationException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }
 }
