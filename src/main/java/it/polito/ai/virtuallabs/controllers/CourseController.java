@@ -72,7 +72,7 @@ public class CourseController {
         }
     }
 
-    @PostMapping({"/"})
+    @PostMapping({"/", ""})
     @ResponseStatus(value = HttpStatus.CREATED)
     private CourseDTO addCourse(@RequestBody @Valid ModelHelper.AddCourseRequest courseRequest){
         try{
