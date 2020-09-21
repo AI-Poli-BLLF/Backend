@@ -613,4 +613,61 @@ public class VMServiceImpl implements VMService {
                 .map(vmOs -> mapper.map(vmOs, VMOsDTO.class))
                 .collect(Collectors.toList());
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @Override
+    public VMConfigDTO getUsedResources() {
+        List<VMInstance> vms = vmInstanceRepository.findAll();
+        int cpu = vms.stream()
+                .map(e -> e.isActive() ? e.getCpu() : 0)
+                .reduce(0, Integer::sum);
+        int ram = vms.stream()
+                .map(e -> e.isActive() ? e.getRamSize() : 0)
+                .reduce(0, Integer::sum);
+        int disk = vms.stream()
+                .map(e -> e.isActive() ? e.getDiskSize() : 0)
+                .reduce(0, Integer::sum);
+        int active = vms.stream()
+                .map(e -> e.isActive() ? 1 : 0)
+                .reduce(0, Integer::sum);
+        return new VMConfigDTO(cpu, disk, ram, active, vms.size());
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @Override
+    public VMConfigDTO getAllocatedResourcesByUsers() {
+        List<VMInstance> vms = vmInstanceRepository.findAll();
+        int cpu = vms.stream()
+                .map(VMInstance::getCpu)
+                .reduce(0, Integer::sum);
+        int ram = vms.stream()
+                .map(VMInstance::getRamSize)
+                .reduce(0, Integer::sum);
+        int disk = vms.stream()
+                .map(VMInstance::getDiskSize)
+                .reduce(0, Integer::sum);
+        return new VMConfigDTO(cpu, disk, ram, vms.size(), vms.size());
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @Override
+    public VMConfigDTO getAllocatedResourcesByConfig() {
+        List<VMConfig> vms = vmConfigRepository.findAll();
+        int cpu = vms.stream()
+                .map(VMConfig::getMaxCpu)
+                .reduce(0, Integer::sum);
+        int ram = vms.stream()
+                .map(VMConfig::getMaxRam)
+                .reduce(0, Integer::sum);
+        int disk = vms.stream()
+                .map(VMConfig::getMaxDisk)
+                .reduce(0, Integer::sum);
+        int active = vms.stream()
+                .map(VMConfig::getMaxActive)
+                .reduce(0, Integer::sum);
+        int number = vms.stream()
+                .map(VMConfig::getMaxVm)
+                .reduce(0, Integer::sum);
+        return new VMConfigDTO(cpu, disk, ram, active, number);
+    }
 }

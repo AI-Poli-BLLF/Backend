@@ -58,7 +58,8 @@ public class TeamServiceImpl implements TeamService {
         return mapper.map(course, CourseDTO.class);
     }
 
-    @PreAuthorize("@securityApiAuth.ownCourse(#oldCourseName)")
+    // todo: è giusto l'admin messo così?
+    @PreAuthorize("@securityApiAuth.ownCourse(#oldCourseName) || hasRole('ADMIN')")
     @Override
     public CourseDTO updateCourse(String oldCourseName, CourseDTO newCourse) {
         Course course = entityGetter.getCourse(oldCourseName);
@@ -71,14 +72,14 @@ public class TeamServiceImpl implements TeamService {
 
     //Permit All authenticated
     @Override
-    @PreAuthorize("hasRole('PROFESSOR') || @securityApiAuth.isEnrolled(#courseName)")
+    @PreAuthorize("hasRole('PROFESSOR') || @securityApiAuth.isEnrolled(#courseName) || hasRole('ADMIN')")
     public Optional<CourseDTO> getCourse(String courseName) {
         Optional<Course> course = courseRepository.findByNameIgnoreCase(courseName);
         return course.map(c -> mapper.map(c, CourseDTO.class));
     }
 
-
-    @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
+    // todo: è giusto l'admin messo così?
+    @PreAuthorize("@securityApiAuth.ownCourse(#courseName) || hasRole('ADMIN')")
     @Override
     public void deleteCourse(String courseName) {
         Course c = entityGetter.getCourse(courseName);
@@ -103,6 +104,7 @@ public class TeamServiceImpl implements TeamService {
                 .collect(Collectors.toList());
     }
 
+    // todo: ma il peauth?
     //@PreAuthorize("hasAnyRole('PROFESSOR', 'ADMIN')")
     @Override
     public boolean addStudent(StudentDTO student) {
@@ -170,7 +172,7 @@ public class TeamServiceImpl implements TeamService {
     }
 
     //todo: gestire cosa succede ai team e alle VM quando lo studente viene rimosso dal corso
-    @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
+    @PreAuthorize("@securityApiAuth.ownCourse(#courseName) || hasRole('ADMIN')")
     @Override
     public void deleteStudentFromCourse(String courseName, String studentId) {
         Course c = entityGetter.getCourse(courseName);
