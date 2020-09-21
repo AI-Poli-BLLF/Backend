@@ -537,4 +537,13 @@ public class TeamServiceImpl implements TeamService {
         professors.forEach(p-> p.setCourseNames(professorRepository.getCourseNames(p.getId())));
         return professors;
     }
+
+    @Override
+    public List<ProfessorDTO> getProfessorsOfCourse(String courseName) {
+        List<ProfessorDTO> professorDTOS = entityGetter.getCourse(courseName).getProfessors()
+                .stream().map(p-> mapper.map(p, ProfessorDTO.class))
+                .collect(Collectors.toList());
+        professorDTOS.forEach(p-> p.setCourseNames(professorRepository.getCourseNames(p.getId())));
+        return professorDTOS;
+    }
 }

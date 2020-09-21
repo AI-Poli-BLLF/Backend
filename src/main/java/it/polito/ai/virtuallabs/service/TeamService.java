@@ -41,5 +41,5 @@ public interface TeamService {
     Optional<ProfessorDTO> getProfessor(String professorId);
     boolean addProfessor(ProfessorDTO professorDTO);
     List<Long> evictPendingTeamsOfMembers(Long teamId);
-
+    List<ProfessorDTO> getProfessorsOfCourse(String courseName);
 }

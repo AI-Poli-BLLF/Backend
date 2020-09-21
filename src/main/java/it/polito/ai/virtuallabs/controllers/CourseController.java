@@ -3,6 +3,7 @@ package it.polito.ai.virtuallabs.controllers;
 import it.polito.ai.virtuallabs.controllers.utility.ModelHelper;
 import it.polito.ai.virtuallabs.controllers.utility.TransactionChain;
 import it.polito.ai.virtuallabs.dtos.CourseDTO;
+import it.polito.ai.virtuallabs.dtos.ProfessorDTO;
 import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.dtos.TeamDTO;
 import it.polito.ai.virtuallabs.dtos.tokens.TokenDTO;
@@ -537,6 +538,16 @@ public class CourseController {
             notificationService.requestForCourseEnrolling(senderStudentId, courseName);
         }catch (NotificationException | TeamServiceException e){
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
+    @GetMapping("/{courseName}/professors")
+    private List<ProfessorDTO> getProfessorsOfCourse(@PathVariable String courseName){
+        try{
+            return teamService.getProfessorsOfCourse(courseName).stream()
+                    .map(ModelHelper::enrich).collect(Collectors.toList());
+        }catch (VMServiceException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
 }
