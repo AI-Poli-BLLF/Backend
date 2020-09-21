@@ -37,15 +37,18 @@ public class VirtualLabsApplication {
             //Creazione VMOS versions
             try {
                 VMOs windows = VMOs.builder().osName("Windows")
-                        .versions(new HashSet<>(Arrays.asList("Vista", "7", "10"))).build();
+                        .versions(new HashSet<>(Arrays.asList("Vista", "7", "8", "10"))).build();
                 VMOs ubuntu = VMOs.builder().osName("Ubuntu")
                         .versions(new HashSet<>(Arrays.asList("18.04", "19.10", "20.04"))).build();
                 VMOs mac = VMOs.builder().osName("MacOS")
                         .versions(new HashSet<>(Arrays.asList("High Sierra", "Catalina"))).build();
+                 VMOs android = VMOs.builder().osName("Android")
+                                        .versions(new HashSet<>(Arrays.asList("8", "9", "10"))).build();
 
                 vmOsRepository.saveAndFlush(windows);
                 vmOsRepository.saveAndFlush(ubuntu);
                 vmOsRepository.saveAndFlush(mac);
+                vmOsRepository.saveAndFlush(android);
             }catch (Exception ignored){}
 
         };

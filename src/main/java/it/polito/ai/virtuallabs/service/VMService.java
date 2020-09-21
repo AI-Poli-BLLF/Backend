@@ -5,6 +5,7 @@ import it.polito.ai.virtuallabs.dtos.vms.VMConfigDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMInstanceDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMModelDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMOsDTO;
+import it.polito.ai.virtuallabs.entities.vms.VMConfig;
 import it.polito.ai.virtuallabs.entities.vms.VMOs;
 
 import java.util.List;
@@ -41,4 +42,8 @@ public interface VMService {
     void deleteOsVersion(String osName, String version);
     List<VMOsDTO> getAvailableVmOs();
     List<VMOsDTO> getAllVmOs();
-}
+
+    VMConfigDTO getUsedResources();
+    VMConfigDTO getAllocatedResourcesByUsers();
+    VMConfigDTO getAllocatedResourcesByConfig();
+    }

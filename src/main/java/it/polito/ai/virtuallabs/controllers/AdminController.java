@@ -1,5 +1,6 @@
 package it.polito.ai.virtuallabs.controllers;
 
+import it.polito.ai.virtuallabs.dtos.vms.VMConfigDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMOsDTO;
 import it.polito.ai.virtuallabs.service.VMService;
 import it.polito.ai.virtuallabs.service.exceptions.vms.VMServiceException;
@@ -30,6 +31,33 @@ public class AdminController {
     private List<VMOsDTO> getAllVmOs(){
         try {
             return vmService.getAllVmOs();
+        }catch (VMServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
+    @GetMapping("/resources/used")
+    private VMConfigDTO getUsedResources(){
+        try {
+            return vmService.getUsedResources();
+        }catch (VMServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
+    @GetMapping("/resources/reserved")
+    private VMConfigDTO getReservedResources(){
+        try {
+            return vmService.getAllocatedResourcesByConfig();
+        }catch (VMServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
+    @GetMapping("/resources/allocated")
+    private VMConfigDTO getAllocatedResources(){
+        try {
+            return vmService.getAllocatedResourcesByUsers();
         }catch (VMServiceException e){
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
