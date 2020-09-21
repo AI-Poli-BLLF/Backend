@@ -9,10 +9,11 @@ import it.polito.ai.virtuallabs.dtos.ProfessorDTO;
 import it.polito.ai.virtuallabs.service.ImageUploadService;
 import it.polito.ai.virtuallabs.service.NotificationService;
 import it.polito.ai.virtuallabs.service.TeamService;
-import it.polito.ai.virtuallabs.service.exceptions.DraftNotFoundException;
+import it.polito.ai.virtuallabs.service.exceptions.assignments.DraftNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.NotificationException;
 import it.polito.ai.virtuallabs.service.exceptions.ProfessorNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.TeamServiceException;
+import it.polito.ai.virtuallabs.service.exceptions.assignments.AssignmentNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.images.ImageServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -85,19 +86,21 @@ public class ProfessorController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
-    //tested
-    @PostMapping(value = "/{professorId}/{courseId}/createAssignment")
+
+    @PostMapping(value = "/{professorId}/courses/{courseId}/createAssignment")
     @ResponseStatus(value = HttpStatus.CREATED)
     private AssignmentDTO createAssignment(@PathVariable String professorId, @PathVariable String courseId, @RequestBody @Valid AssignmentDTO assignmentDTO){
-        if(assignmentService.addAssignment(assignmentDTO, courseId)) {
-            return assignmentDTO;
-        }
-        throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Assignment already exist: %s", assignmentDTO.getId()));
+        AssignmentDTO assignmentDTO1 =  assignmentService.addAssignment(assignmentDTO, courseId);
+        if(assignmentDTO1.getId() == null)
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Assignment already exist: %s", assignmentDTO.getId()));
+
+//        assignmentService.createAllDrafts(courseId, assignmentDTO1);
+        return assignmentDTO1;
     }
     //tested
-    @PostMapping(value = "/{professorId}/{assignmentId}/uploadAssignmentPhoto")
+    @PostMapping(value = "/{professorId}/assignments/{assignmentId}/uploadAssignmentPhoto")
     @ResponseStatus(value = HttpStatus.CREATED)
-    private Map<String, String> uploadAssignmentPhoto(@PathVariable String professorId, @PathVariable String assignmentId, @RequestParam("image") MultipartFile image){
+    private Map<String, String> uploadAssignmentPhoto(@PathVariable String professorId, @PathVariable Long assignmentId, @RequestParam("image") MultipartFile image){
         try{
             Map<String, String> map = new HashMap<>();
             map.put("imageRef", imageUploadService.storeAssignmentImage(image, professorId, assignmentId));
@@ -107,8 +110,8 @@ public class ProfessorController {
         }
     }
     //tested
-    @GetMapping(value = "/{assignmentId}/getProfessor")
-    private ProfessorDTO getProfessor(@PathVariable String assignmentId){
+    @GetMapping(value = "/assignments/{assignmentId}/getProfessor")
+    private ProfessorDTO getProfessor(@PathVariable Long assignmentId){
         try{
             return assignmentService.getAssignmentProfessor(assignmentId);
         } catch (NoSuchElementException e) {
@@ -116,12 +119,12 @@ public class ProfessorController {
         }
     }
 
-    @PostMapping(value = "/{assignmentId}/{draftId}/review")
+    @PostMapping(value = "/assignments/{assignmentId}/drafts/{draftId}/review")
     @ResponseStatus(value = HttpStatus.CREATED)
-    private DraftDTO reviewDraft(@PathVariable String assignmentId, @PathVariable String draftId, int grade){
+    private DraftDTO reviewDraft(@PathVariable Long assignmentId, @PathVariable Long draftId, int grade){
         try{
             DraftDTO draftDTO = assignmentService.getDraft(draftId);
-            if(draftDTO.getState().matches("SUBMITTED")){
+            if(draftDTO.getState().equals(DraftDTO.State.SUBMITTED)){
                 assignmentService.getDraft(draftId).setGrade(grade);
                 assignmentService.setDraftStatus(draftId, Draft.State.REVIEWED);
                 return draftDTO;
@@ -132,26 +135,27 @@ public class ProfessorController {
         }
     }
 
-    @PostMapping(value = "/{assignmentId}/{draftId}/lock")
-    private boolean setLock(@PathVariable String assignmentId, @PathVariable String draftId){
+    @PutMapping(value = "/assignments/{assignmentId}/drafts/{draftId}/lock")
+    private boolean setLock(@PathVariable Long assignmentId, @PathVariable Long draftId){
         try{
-            assignmentService.getDraft(draftId).setLock(true);
+            assignmentService.setDraftLock(draftId);
             return true;
         } catch (DraftNotFoundException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Draft not found %s", draftId));
         }
     }
-    @PostMapping(value = "/{assignmentId}/{draftId}/unlock")
-    private boolean setUnLock(@PathVariable String assignmentId, @PathVariable String draftId){
+    @PutMapping(value = "/assignments/{assignmentId}/drafts/{draftId}/unlock")
+    private boolean setUnLock(@PathVariable Long assignmentId, @PathVariable Long draftId){
         try{
-            assignmentService.getDraft(draftId).setLock(false);
+//            assignmentService.getDraft(draftId).setLock(false);
+            assignmentService.setDraftUnlock(draftId);
             return true;
         } catch (DraftNotFoundException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Draft not found %s", draftId));
         }
     }
 
-    @GetMapping("/{professorId}/{courseId}/assignments")
+    @GetMapping("/{professorId}/courses/{courseId}/assignments")
     private List<AssignmentDTO> getAssignments(@PathVariable String professorId, @PathVariable String courseId){
         try{
             return assignmentService.getAssignmentPerProfessorPerCourse(professorId, courseId);
@@ -159,6 +163,25 @@ public class ProfessorController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("getAssignmentPerProfessor failed"));
         }
     }
+
+    @GetMapping("/{professorId}/courses/{courseId}/assignments/{assignmentId}/drafts")
+    private List<DraftDTO> getDrafts(@PathVariable String professorId, @PathVariable String courseId, @PathVariable Long assignmentId){
+        try{
+            return assignmentService.getDrafts(assignmentId);
+        } catch (AssignmentNotFoundException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("getDrafts failed"));
+        }
+    }
+
+    @GetMapping("/drafts/{draftId}/getStudent")
+    private StudentDTO getStudentForDraft(@PathVariable Long draftId){
+        try {
+            return this.assignmentService.getStudentForDraft(draftId);
+        } catch (DraftNotFoundException e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("getStudentForDraft failed"));
+        }
+    }
+
 
     @PostMapping("/{senderProfessorId}/courses/{courseName}/cooperate")
     @ResponseStatus(value = HttpStatus.CREATED)

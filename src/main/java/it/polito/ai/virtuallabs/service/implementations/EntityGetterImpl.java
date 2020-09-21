@@ -18,6 +18,8 @@ import it.polito.ai.virtuallabs.repositories.vms.VMModelRepository;
 import it.polito.ai.virtuallabs.repositories.vms.VMOsRepository;
 import it.polito.ai.virtuallabs.service.EntityGetter;
 import it.polito.ai.virtuallabs.service.exceptions.*;
+import it.polito.ai.virtuallabs.service.exceptions.assignments.AssignmentNotFoundException;
+import it.polito.ai.virtuallabs.service.exceptions.assignments.DraftNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.vms.VMConfigNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.vms.VMInstanceNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.vms.VMModelNotFoundException;
@@ -109,14 +111,14 @@ public class EntityGetterImpl implements EntityGetter {
     }
 
     @Override
-    public Assignment getAssignment(String assignmentId) {
+    public Assignment getAssignment(Long assignmentId) {
         return assignmentRepository.findById(assignmentId).orElseThrow(
                 () -> new AssignmentNotFoundException(assignmentId)
         );
     }
 
     @Override
-    public Draft getDraft(String draftId) {
+    public Draft getDraft(Long draftId) {
         return draftRepository.findById(draftId).orElseThrow(
                 () -> new DraftNotFoundException(draftId)
         );

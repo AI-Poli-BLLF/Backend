@@ -1,7 +1,7 @@
-package it.polito.ai.virtuallabs.service.exceptions;
+package it.polito.ai.virtuallabs.service.exceptions.assignments;
 
 public class AssignmentNotFoundException extends RuntimeException {
-    public AssignmentNotFoundException(String id) {
+    public AssignmentNotFoundException(Long id) {
         super(String.format("Assignment <%s> does not exist", id));
     }
 }

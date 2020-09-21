@@ -92,7 +92,7 @@ public class ImageUploadServiceImpl implements ImageUploadService {
 
     @PreAuthorize("@securityApiAuth.isMe(#professorId)")
     @Override
-    public String storeAssignmentImage(MultipartFile image, String professorId, String assigmentId) {
+    public String storeAssignmentImage(MultipartFile image, String professorId, Long assigmentId) {
         String type;
         String extension;
         try {
@@ -112,7 +112,7 @@ public class ImageUploadServiceImpl implements ImageUploadService {
     }
 
     @Override
-    public String storeDraftImage(MultipartFile image, String draftId) {
+    public String storeDraftImage(MultipartFile image, Long draftId) {
         String type;
         String extension;
         try {
@@ -160,7 +160,7 @@ public class ImageUploadServiceImpl implements ImageUploadService {
     }
 
     @Override
-    public byte[] getAssignmentImage(String assignmentId) {
+    public byte[] getAssignmentImage(Long assignmentId) {
         String photoName;
         Assignment assignment = getter.getAssignment(assignmentId);
         photoName = assignment.getPhotoName() == null ? defaultImg : assignment.getPhotoName();
@@ -174,7 +174,7 @@ public class ImageUploadServiceImpl implements ImageUploadService {
     }
 
     @Override
-    public byte[] getDraftImage(String draftId) {
+    public byte[] getDraftImage(Long draftId) {
         String photoName;
         Draft draft = getter.getDraft(draftId);
         photoName = draft.getPhotoName() == null ? defaultImg : draft.getPhotoName();
@@ -201,14 +201,14 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         }
     }
 
-    private String storeAssignmentOnDb(String imageName, String assignmentId){
+    private String storeAssignmentOnDb(String imageName, Long assignmentId){
         Assignment assignment = getter.getAssignment(assignmentId);
         assignment.setPhotoName(imageName);
         return String.format("http://localhost8080/API/professors/%s/photo", assignmentId);
     }
 
     //non mi piace la stringa di ritorno
-    private String storeDraftOnDb(String imageName, String draftId){
+    private String storeDraftOnDb(String imageName, Long draftId){
         Draft draft = getter.getDraft(draftId);
         draft.setPhotoName(imageName);
         return String.format("http://localhost8080/API/%s/photo", draftId); //solo di questa riga non sono sicuro

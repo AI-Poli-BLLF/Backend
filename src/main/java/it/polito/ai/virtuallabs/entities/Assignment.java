@@ -3,6 +3,7 @@ package it.polito.ai.virtuallabs.entities;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -10,8 +11,9 @@ import java.util.List;
 @Data
 public class Assignment {
     @Id
-    private String id;
-
+    @GeneratedValue
+    private Long id;
+    private String name;
     private Date releaseDate;
     private Date expiryDate;
     private String photoName;
@@ -25,7 +27,7 @@ public class Assignment {
     private Course course;
 
     @OneToMany(mappedBy = "assignment")
-    private List<Draft> drafts;
+    private List<Draft> drafts = new ArrayList<>();
 
     public void setProfessor(Professor professor) {
         if(this.professor != null)

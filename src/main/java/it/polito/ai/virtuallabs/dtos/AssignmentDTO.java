@@ -8,6 +8,7 @@ import org.springframework.hateoas.RepresentationModel;
 
 import javax.persistence.Id;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -18,9 +19,12 @@ import java.util.Date;
 @AllArgsConstructor
 public class AssignmentDTO extends RepresentationModel<AssignmentDTO> {
 
-    @EqualsAndHashCode.Include
+//    @NotNull
     @Id
-    private String id;
+    private Long id;
+
+    @EqualsAndHashCode.Include
+    private String name;
 
     @EqualsAndHashCode.Include
     private Timestamp releaseDate;

@@ -17,8 +17,8 @@ public interface EntityGetter {
     Student getStudent(String studentId);
     Professor getProfessor(String professorId);
     VMInstance getVMInstance(Long vmInstanceId);
-    Assignment getAssignment(String assignmentId);
-    Draft getDraft(String draftId);
+    Assignment getAssignment(Long assignmentId);
+    Draft getDraft(Long draftId);
     Token getToken(String tokenId);
     RegistrationToken getRegistrationToken(String tokenId);
     VMOs getVmOsVersion(String osName, String version);

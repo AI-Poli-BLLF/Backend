@@ -1,10 +1,7 @@
 package it.polito.ai.virtuallabs.controllers;
 
 import it.polito.ai.virtuallabs.controllers.utility.ModelHelper;
-import it.polito.ai.virtuallabs.dtos.CourseDTO;
-import it.polito.ai.virtuallabs.dtos.DraftDTO;
-import it.polito.ai.virtuallabs.dtos.StudentDTO;
-import it.polito.ai.virtuallabs.dtos.TeamDTO;
+import it.polito.ai.virtuallabs.dtos.*;
 import it.polito.ai.virtuallabs.entities.Draft;
 import it.polito.ai.virtuallabs.service.AssignmentService;
 import it.polito.ai.virtuallabs.service.ImageUploadService;
@@ -12,6 +9,7 @@ import it.polito.ai.virtuallabs.service.NotificationService;
 import it.polito.ai.virtuallabs.service.TeamService;
 import it.polito.ai.virtuallabs.service.exceptions.NotificationException;
 import it.polito.ai.virtuallabs.service.exceptions.TeamServiceException;
+import it.polito.ai.virtuallabs.service.exceptions.assignments.AssignmentNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.images.ImageServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+import javax.ws.rs.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -122,10 +121,13 @@ public class StudentController {
         }
     }
     //tested
-    @GetMapping(value = "/{studentId}/{assignmentId}/{draftId}")
-    DraftDTO readAssignment(@PathVariable String studentId, @PathVariable String assignmentId, @PathVariable String draftId){
+    @GetMapping(value = "/{studentId}/assignments/{assignmentId}/drafts/{draftId}")
+    DraftDTO readAssignment(@PathVariable String studentId, @PathVariable Long assignmentId, @PathVariable Long draftId){
         try{
-            assignmentService.setDraftStatus(draftId, Draft.State.READ);
+            // todo: creare un nuovo draft, uguale al primo ma con stato diverso
+            DraftDTO draftDTO = assignmentService.getDraft(draftId);
+            draftDTO.setState(DraftDTO.State.READ);
+            assignmentService.addDraft(draftDTO, assignmentId, studentId);
             return assignmentService.getDraft(draftId);
         } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Draft not found for student: %s", studentId));
@@ -135,22 +137,27 @@ public class StudentController {
 //    @GetMapping(getAssignmentImage) da fare!
 
     //tested
-    @PostMapping(value = "/{studentId}/{assignmentId}/createDraft")
+    @PostMapping(value = "/{studentId}/assignments/{assignmentId}/createDraft")
     @ResponseStatus(value = HttpStatus.CREATED)
-    private DraftDTO createDraft(@PathVariable String studentId, @PathVariable String assignmentId, @RequestBody DraftDTO draftDTO){
+    private DraftDTO createDraft(@PathVariable String studentId, @PathVariable Long assignmentId, @RequestBody DraftDTO draftDTO){
         if(assignmentService.addDraft(draftDTO, assignmentId, studentId))
 //            return ModelHelper.enrich(draftDTO);
             return draftDTO;
         throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Draft already exist: %s", draftDTO.getId()));
     }
     //tested
-    @GetMapping(value = "/{studentId}/{draftId}")
-    private DraftDTO getDraft(@PathVariable String studentId, @PathVariable String draftId){
+    @GetMapping(value = "/{studentId}/drafts/{draftId}")
+    private DraftDTO getDraft(@PathVariable String studentId, @PathVariable Long draftId){
         return assignmentService.getDraft(draftId);
     }
+
+    @GetMapping(value = "/{studentId}/drafts")
+    private List<DraftDTO> getDraftsForStudent(@PathVariable String studentId){
+        return assignmentService.getDraftsForStudent(studentId);
+    }
     //tested
-    @PostMapping(value = "/{studentId}/submitDraft")
-    private DraftDTO submitDraft(@PathVariable String studentId, @RequestParam String draftId){
+    @PostMapping(value = "/{studentId}/drafts/submitDraft")
+    private DraftDTO submitDraft(@PathVariable String studentId, @RequestParam Long draftId){
         try{
             assignmentService.setDraftStatus(draftId, Draft.State.SUBMITTED);
             return assignmentService.getDraft(draftId);
@@ -159,8 +166,8 @@ public class StudentController {
         }
     }
     //tested
-    @PostMapping(value = "/{studentId}/{draftId}/uploadDraftPhoto")
-    private Map<String, String> uploadDraftPhoto(@PathVariable String studentId, @PathVariable String draftId, @RequestParam("image") MultipartFile image){
+    @PostMapping(value = "/{studentId}/drafts/{draftId}/uploadDraftPhoto")
+    private Map<String, String> uploadDraftPhoto(@PathVariable String studentId, @PathVariable Long draftId, @RequestParam("image") MultipartFile image){
         try {
             Map<String, String> map = new HashMap<>();
             map.put("imageRef", imageUploadService.storeDraftImage(image, draftId));

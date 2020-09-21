@@ -2,6 +2,7 @@ package it.polito.ai.virtuallabs.controllers;
 
 import it.polito.ai.virtuallabs.controllers.utility.ModelHelper;
 import it.polito.ai.virtuallabs.controllers.utility.TransactionChain;
+import it.polito.ai.virtuallabs.dtos.*;
 import it.polito.ai.virtuallabs.dtos.CourseDTO;
 import it.polito.ai.virtuallabs.dtos.ProfessorDTO;
 import it.polito.ai.virtuallabs.dtos.StudentDTO;
@@ -10,6 +11,7 @@ import it.polito.ai.virtuallabs.dtos.tokens.TokenDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMConfigDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMInstanceDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMModelDTO;
+import it.polito.ai.virtuallabs.service.AssignmentService;
 import it.polito.ai.virtuallabs.service.NotificationService;
 import it.polito.ai.virtuallabs.service.TeamService;
 import it.polito.ai.virtuallabs.service.VMService;
@@ -17,6 +19,7 @@ import it.polito.ai.virtuallabs.service.exceptions.CourseNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.NotificationException;
 import it.polito.ai.virtuallabs.service.exceptions.TeamNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.TeamServiceException;
+import it.polito.ai.virtuallabs.service.exceptions.assignments.AssignmentServiceException;
 import it.polito.ai.virtuallabs.service.exceptions.vms.VMServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -44,6 +47,8 @@ public class CourseController {
     private NotificationService notificationService;
     @Autowired
     private VMService vmService;
+    @Autowired
+    private AssignmentService assignmentService;
     @Autowired
     private TransactionChain transactionChain;
 
@@ -315,7 +320,16 @@ public class CourseController {
         }
     }
 
-    /*@PostMapping("/{courseName}/teams/{teamId}/vm-config")
+    @GetMapping(value = "/{courseName}/assignments")
+    private List<AssignmentDTO> getAllAssignment(@PathVariable String courseName){
+        try {
+            return this.assignmentService.getAssignmentsForCourse(courseName);
+        }catch (AssignmentServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
+    @PostMapping("/{courseName}/teams/{teamId}/vm-config")
     @ResponseStatus(value = HttpStatus.CREATED)
     private VMConfigDTO createVMConfig(@PathVariable String courseName, @PathVariable String teamId,
                                        @RequestBody @Valid VMConfigDTO config){
@@ -327,7 +341,7 @@ public class CourseController {
         }catch (VMServiceException | TeamServiceException e){
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
-    }*/
+    }
 
 
     @PutMapping("/{courseName}/teams/{teamId}/vm-config/")

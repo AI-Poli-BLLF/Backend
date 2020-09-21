@@ -14,8 +14,8 @@ public class Draft {
     public enum State{NULL, READ, SUBMITTED, REVIEWED}
 
     @Id
-    @EqualsAndHashCode.Include
-    private String id;
+    @GeneratedValue
+    private Long id;
 
     private State state;
 
@@ -46,6 +46,13 @@ public class Draft {
         if(assignment != null && !assignment.getDrafts().contains(this))
             assignment.getDrafts().add(this);
         this.assignment = assignment;
+    }
+
+    public void setStudent(Student student){
+        if(student == null)
+            return;
+        this.student = student;
+        student.getDrafts().add(this);
     }
 
 }
