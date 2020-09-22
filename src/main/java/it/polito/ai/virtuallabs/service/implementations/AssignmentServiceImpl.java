@@ -8,6 +8,7 @@ import it.polito.ai.virtuallabs.entities.*;
 import it.polito.ai.virtuallabs.repositories.*;
 import it.polito.ai.virtuallabs.security.service.SecurityApiAuth;
 import it.polito.ai.virtuallabs.service.AssignmentService;
+import it.polito.ai.virtuallabs.service.EntityGetter;
 import it.polito.ai.virtuallabs.service.exceptions.*;
 import it.polito.ai.virtuallabs.service.exceptions.assignments.AssignmentNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.assignments.AssignmentServiceException;
@@ -20,13 +21,11 @@ import org.springframework.expression.spel.ast.Assign;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,9 +43,11 @@ public class AssignmentServiceImpl implements AssignmentService {
     CourseRepository courseRepository;
     @Autowired
     StudentRepository studentRepository;
+    @Autowired
+    EntityGetter entityGetter;
 
-    @PreAuthorize("hasRole('PROFESSOR')")
-    public AssignmentDTO addAssignment(AssignmentDTO assignmentDTO, String courseId){
+    @PreAuthorize("@securityApiAuth.isMe(#professorId) && @securityApiAuth.ownCourse(#courseId)")
+    public AssignmentDTO addAssignment(String professorId, AssignmentDTO assignmentDTO, String courseId){
 
         if(assignmentDTO.getId() != null) {
             if (assignmentRepository.findById(assignmentDTO.getId()).isPresent())
@@ -56,12 +57,10 @@ public class AssignmentServiceImpl implements AssignmentService {
          Course course = courseRepository.findById(courseId).orElseThrow(
                 () -> new CourseNotFoundException(courseId)
         );
-
         if(assignmentDTO.getExpiryDate().before(assignmentDTO.getReleaseDate()))
             throw new AssignmentServiceException("expiryBeforeRelease");
 
         Assignment assignment = mapper.map(assignmentDTO, Assignment.class);
-        String professorId = SecurityApiAuth.getPrincipal().getId();
         Professor professor = professorRepository.findByIdIgnoreCase(professorId)
                 .orElseThrow(() -> new ProfessorNotFoundException(professorId));
         assert (professor.getAssignments().contains(assignment) || assignment.getProfessor() != null);
@@ -154,6 +153,55 @@ public class AssignmentServiceImpl implements AssignmentService {
 
         return true;
     }
+
+    // todo: lo studente deve appartenere al corso nel preauth
+    @Override
+    @PreAuthorize("hasRole('STUDENT')")
+    public DraftDTO readAssigment(Long assignmentId, String studentId) {
+        Student student = entityGetter.getStudent(studentId);
+        Assignment assignment = entityGetter.getAssignment(assignmentId);
+        List<Draft> drafts = draftRepository.findByAssignmentAndStudent(assignment, student);
+        if(drafts.stream().anyMatch(d -> d.getState().equals(Draft.State.READ))){
+            // todo: salvarlo da qualche parte
+            return mapper.map(drafts.stream().filter(d -> d.getState().equals(Draft.State.READ)).findFirst(), DraftDTO.class);
+        }
+        Draft draft = Draft.builder()
+                .state(Draft.State.READ)
+                .student(student)
+                .timestamp(Timestamp.valueOf(LocalDateTime.now()))
+                .build();
+        draft = draftRepository.save(draft);
+        return mapper.map(draft, DraftDTO.class);
+    }
+
+//    // todo: lo studente deve appartenere al corso nel preauth
+//    @Override
+//    @PreAuthorize("hasRole('STUDENT')")
+//    public DraftDTO addDraft(MultipartFile image, Long assignmentId, String studentId);
+//        Student student = entityGetter.getStudent(studentId);
+//        Assignment assignment = entityGetter.getAssignment(assignmentId);
+//        List<Draft> drafts = draftRepository.findByAssignmentAndStudent(assignment, student);
+//        if(drafts.stream().noneMatch(d -> d.getState().equals(Draft.State.READ)) ||
+//                drafts.stream().anyMatch(d -> d.getState().equals(Draft.State.SUBMITTED)
+//        )){
+//            // todo: da implementare una eccezione nel caso non sia stata letta la consegna o sia stato consegnato
+//            throw new RuntimeException();
+//        }
+//
+//        Draft draft = drafts.stream()
+//                .filter(d -> d.getState().equals(Draft.State.READ)).min((draft1, draft2) -> draft1.getTimestamp().compareTo(draft2.getTimestamp())).get();
+//
+//        Draft draft1 = Draft.builder()
+//                .locker(false)
+//                .photoName(draft.getPhotoName())
+//                .student(student)
+//                .state(Draft.State.SUBMITTED)
+//                .timestamp(Timestamp.valueOf(LocalDateTime.now()))
+//                .assignment(assignment)
+//                .build();
+//        draft1 = draftRepository.save(draft1);
+//        return mapper.map(draft1, DraftDTO.class);
+//    }
 
     @Override
     public DraftDTO getDraft(Long draftId) {

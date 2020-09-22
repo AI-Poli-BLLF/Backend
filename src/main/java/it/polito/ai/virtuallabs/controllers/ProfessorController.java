@@ -87,10 +87,10 @@ public class ProfessorController {
         }
     }
 
-    @PostMapping(value = "/{professorId}/courses/{courseId}/createAssignment")
+    @PostMapping(value = "/{professorId}/courses/{courseId}/assignments")
     @ResponseStatus(value = HttpStatus.CREATED)
     private AssignmentDTO createAssignment(@PathVariable String professorId, @PathVariable String courseId, @RequestBody @Valid AssignmentDTO assignmentDTO){
-        AssignmentDTO assignmentDTO1 =  assignmentService.addAssignment(assignmentDTO, courseId);
+        AssignmentDTO assignmentDTO1 =  assignmentService.addAssignment(professorId, assignmentDTO, courseId);
         if(assignmentDTO1.getId() == null)
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Assignment already exist: %s", assignmentDTO.getId()));
 

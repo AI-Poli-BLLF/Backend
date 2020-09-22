@@ -10,6 +10,7 @@ import it.polito.ai.virtuallabs.service.TeamService;
 import it.polito.ai.virtuallabs.service.exceptions.NotificationException;
 import it.polito.ai.virtuallabs.service.exceptions.TeamServiceException;
 import it.polito.ai.virtuallabs.service.exceptions.assignments.AssignmentNotFoundException;
+import it.polito.ai.virtuallabs.service.exceptions.assignments.AssignmentServiceException;
 import it.polito.ai.virtuallabs.service.exceptions.images.ImageServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -137,14 +138,57 @@ public class StudentController {
 //    @GetMapping(getAssignmentImage) da fare!
 
     //tested
-    @PostMapping(value = "/{studentId}/assignments/{assignmentId}/createDraft")
+    @PostMapping(value = "/{studentId}/courses/{courseName}/assignments/{assignmentId}/draft")
     @ResponseStatus(value = HttpStatus.CREATED)
-    private DraftDTO createDraft(@PathVariable String studentId, @PathVariable Long assignmentId, @RequestBody DraftDTO draftDTO){
-        if(assignmentService.addDraft(draftDTO, assignmentId, studentId))
-//            return ModelHelper.enrich(draftDTO);
-            return draftDTO;
-        throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Draft already exist: %s", draftDTO.getId()));
+    private Map<String, String> createDraft(@PathVariable String studentId, @PathVariable Long assignmentId, @RequestParam("image") MultipartFile image){
+        try{
+            Map<String, String> map = new HashMap<>();
+            map.put("imageRef", imageUploadService.storeAssignmentImage(image, studentId, assignmentId));
+            return map;
+        }catch (ImageServiceException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
     }
+//
+//    @GetMapping(value = "/{studentId}/courses/{courseName}/assignments/{assignmentId}/draft/{draftId}")
+//
+//
+//    @GetMapping(value = "/{studentId}/courses/{courseName}/assignments/{assignmentId}/draft/{draftId}/image")
+
+//    //tested
+//    @PostMapping(value = "/{studentId}/assignments/{assignmentId}/createDraft")
+//    @ResponseStatus(value = HttpStatus.CREATED)
+//    private DraftDTO createDraft(@PathVariable String studentId, @PathVariable Long assignmentId, @RequestBody DraftDTO draftDTO){
+//        // todo
+//        if(assignmentService.addDraft(draftDTO, assignmentId, studentId))
+////            return ModelHelper.enrich(draftDTO);
+//            return draftDTO;
+//        throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Draft already exist: %s", draftDTO.getId()));
+//    }
+
+    //tested
+    @PostMapping(value = "/{studentId}/courses/{courseName}/assignments/{assignmentId}/read")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    private DraftDTO draftRead(@PathVariable String studentId, @PathVariable Long assignmentId, @RequestBody DraftDTO draftDTO){
+        try {
+            return assignmentService.readAssigment(assignmentId, studentId);
+        }
+//            return ModelHelper.enrich(draftDTO);
+        catch (AssignmentServiceException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+//    //tested
+//    @PostMapping(value = "/{studentId}/assignments/{assignmentId}/submit")
+//    @ResponseStatus(value = HttpStatus.CREATED)
+//    private DraftDTO submitDraft(@PathVariable String studentId, @PathVariable Long assignmentId, @RequestBody DraftDTO draftDTO){
+//        if(assignmentService.addDraft(draftDTO, assignmentId, studentId))
+////            return ModelHelper.enrich(draftDTO);
+//            return draftDTO;
+//        throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Draft already exist: %s", draftDTO.getId()));
+//    }
+
     //tested
     @GetMapping(value = "/{studentId}/drafts/{draftId}")
     private DraftDTO getDraft(@PathVariable String studentId, @PathVariable Long draftId){
