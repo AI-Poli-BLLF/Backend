@@ -32,5 +32,7 @@ public interface AssignmentService {
 
     void setDraftLock(Long draftId);
     void setDraftUnlock(Long draftId);
+
+    int evaluateDraft(Long draftId, int grade);
 }
 
