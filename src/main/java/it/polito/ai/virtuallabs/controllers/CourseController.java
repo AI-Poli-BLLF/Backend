@@ -15,10 +15,7 @@ import it.polito.ai.virtuallabs.service.AssignmentService;
 import it.polito.ai.virtuallabs.service.NotificationService;
 import it.polito.ai.virtuallabs.service.TeamService;
 import it.polito.ai.virtuallabs.service.VMService;
-import it.polito.ai.virtuallabs.service.exceptions.CourseNotFoundException;
-import it.polito.ai.virtuallabs.service.exceptions.NotificationException;
-import it.polito.ai.virtuallabs.service.exceptions.TeamNotFoundException;
-import it.polito.ai.virtuallabs.service.exceptions.TeamServiceException;
+import it.polito.ai.virtuallabs.service.exceptions.*;
 import it.polito.ai.virtuallabs.service.exceptions.assignments.AssignmentServiceException;
 import it.polito.ai.virtuallabs.service.exceptions.vms.VMServiceException;
 import lombok.Synchronized;
@@ -198,6 +195,17 @@ public class CourseController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid team");
         }catch (NoSuchElementException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, new TeamNotFoundException(Long.valueOf(teamId)).getMessage());
+        }
+    }
+
+    @DeleteMapping("/{courseName}/teams/{teamId}")
+    private void deleteTeam(@PathVariable String courseName, @PathVariable Long teamId){
+        try{
+            teamService.deleteTeam(courseName, teamId);
+        }catch (TeamNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }catch (TeamNotBelongToCourseException e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
 

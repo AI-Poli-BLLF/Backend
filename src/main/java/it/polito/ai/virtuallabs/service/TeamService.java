@@ -1,7 +1,6 @@
 package it.polito.ai.virtuallabs.service;
 
 import it.polito.ai.virtuallabs.dtos.*;
-import it.polito.ai.virtuallabs.entities.Assignment;
 import it.polito.ai.virtuallabs.entities.Team;
 
 import java.io.Reader;
@@ -37,6 +36,7 @@ public interface TeamService {
     Optional<TeamDTO> getTeam(String courseName, Long id);
     void setTeamStatus(Long teamId, Team.Status status);
     void evictTeam(Long teamId);
+    void deleteTeam(String courseName, Long teamId);
     List<ProfessorDTO> getProfessors();
     Optional<ProfessorDTO> getProfessor(String professorId);
     boolean addProfessor(ProfessorDTO professorDTO);

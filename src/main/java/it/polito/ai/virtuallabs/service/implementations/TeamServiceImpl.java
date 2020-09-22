@@ -5,6 +5,7 @@ import com.opencsv.bean.CsvToBeanBuilder;
 import it.polito.ai.virtuallabs.dtos.*;
 import it.polito.ai.virtuallabs.entities.*;
 import it.polito.ai.virtuallabs.repositories.*;
+import it.polito.ai.virtuallabs.repositories.tokens.TokenRepository;
 import it.polito.ai.virtuallabs.service.AssignmentService;
 import it.polito.ai.virtuallabs.service.EntityGetter;
 import it.polito.ai.virtuallabs.service.TeamService;
@@ -30,6 +31,8 @@ public class TeamServiceImpl implements TeamService {
     private CourseRepository courseRepository;
     @Autowired
     private TeamRepository teamRepository;
+    @Autowired
+    private TokenRepository tokenRepository;
     @Autowired
     private ProfessorRepository professorRepository;
     @Autowired
@@ -519,7 +522,7 @@ public class TeamServiceImpl implements TeamService {
         List<Long> teamsToEvict = new ArrayList<>();
         for (Student s : members) {
             List<Long> studentTeamsToEvict = s.getTeams().stream()
-                    .filter(t -> t.getId() != team.get().getId())
+                    .filter(t -> !t.getId().equals(team.get().getId()))
                     .filter(t -> t.getCourse() == team.get().getCourse())
                     .map(Team::getId)
                     .collect(Collectors.toList());
@@ -538,6 +541,17 @@ public class TeamServiceImpl implements TeamService {
 
         // 4. delete tokens (done by the caller)
         return teamsToEvict;
+    }
+
+    // todo: controllare che sia giusto
+    @Override
+    public void deleteTeam(String courseName, Long teamId) {
+        Team team = entityGetter.getTeam(teamId);
+        if (!team.getCourse().getName().equals(courseName))
+            throw new TeamNotBelongToCourseException();
+        vmService.deleteVmsByTeamId(team.getId());
+        teamRepository.delete(team);
+        System.out.println("Team: " + teamRepository.findById(teamId).isPresent());
     }
 
     //Permit all authenticated
