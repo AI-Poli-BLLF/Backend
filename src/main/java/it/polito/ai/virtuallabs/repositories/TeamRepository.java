@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TeamRepository extends JpaRepository<Team, Long> {
     void deleteByCourse(Course c);
+    void deleteByName(String teamName);
 }

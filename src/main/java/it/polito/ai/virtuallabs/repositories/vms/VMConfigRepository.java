@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface VMConfigRepository extends JpaRepository<VMConfig, Long> {
     void deleteByTeamCourseNameIgnoreCase(String courseName);
+    void deleteByTeamId(Long teamId);
 }

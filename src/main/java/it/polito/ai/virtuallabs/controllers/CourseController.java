@@ -112,6 +112,7 @@ public class CourseController {
         try {
             teamService.deleteStudentFromCourse(courseName, studentId);
         }catch (TeamServiceException e){
+            e.printStackTrace();
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }

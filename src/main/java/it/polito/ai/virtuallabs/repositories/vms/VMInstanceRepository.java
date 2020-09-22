@@ -15,4 +15,5 @@ public interface VMInstanceRepository extends JpaRepository<VMInstance, Long> {
     List<VMInstance> findAllByTeamIdAndActiveFalse(Long teamId);
 
     void deleteByTeamCourseNameIgnoreCase(String courseName);
+    void deleteByTeamId(Long teamId);
 }

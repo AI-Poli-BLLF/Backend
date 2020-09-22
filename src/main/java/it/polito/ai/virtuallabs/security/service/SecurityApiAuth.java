@@ -98,4 +98,11 @@ public class SecurityApiAuth {
 
         return ownerIds.contains(principal.getId());
     }
+
+    public boolean amIbelongToTeam(Long teamId) {
+        Team t = entityGetter.getTeam(teamId);
+        User principal = getPrincipal();
+
+        return t.getMembers().contains(entityGetter.getStudent(principal.getId()));
+    }
 }

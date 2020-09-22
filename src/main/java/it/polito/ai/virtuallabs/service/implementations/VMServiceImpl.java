@@ -557,6 +557,13 @@ public class VMServiceImpl implements VMService {
         vmModelRepository.deleteByIdIgnoreCase(courseName);
     }
 
+    @PreAuthorize("@securityApiAuth.doesTeamBelongsToOwnedOrEnrolledCourses(#teamId)")
+    @Override
+    public void deleteVmsByTeamId(Long teamId) {
+        vmInstanceRepository.deleteByTeamId(teamId);
+        vmConfigRepository.deleteByTeamId(teamId);
+    }
+
     private boolean teamBelongToCourse(Team t, Course c){
         return t.getCourse().equals(c);
     }

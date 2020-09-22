@@ -181,7 +181,17 @@ public class TeamServiceImpl implements TeamService {
         if(!c.getStudents().contains(student))
             throw new StudentNotEnrolledException(studentId, courseName);
 
+        Team t = student.getTeams().stream().filter(team-> team.getCourse().equals(c)).findFirst()
+                .orElse(null);
+
+        if(t != null) {
+            vmService.deleteVmsByTeamId(t.getId());
+            teamRepository.delete(t);
+            t.removeMember(student);
+        }
+
         student.removeCourse(c);
+        System.out.println("DELETE "+ student.getFirstName()+" STUDENT FROM COURSE");
     }
 
     @PreAuthorize("hasRole('ADMIN') || @securityApiAuth.ownCourse(#courseName)")
