@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -217,7 +218,15 @@ public class AssignmentServiceImpl implements AssignmentService {
         if(!assignment.getCourse().equals(c))
             throw new AssignmentServiceException("Assignment doesn't belong to course " + courseName);
 
-        return assignment.getDrafts().stream()
+
+        // todo: tornare solo un draft per studente
+        List<Draft> lastDrafts = new LinkedList<>();
+        List<Student> students = assignment.getDrafts().stream().map(Draft::getStudent).distinct().collect(Collectors.toList());
+        for (Student student: students){
+            // non può essere nullo perchè gli studenti li abbiamo aggiunti dalla lista dei draft
+            lastDrafts.add(assignment.getDrafts().stream().min((d1, d2) -> d2.getTimestamp().compareTo(d1.getTimestamp())).get());
+        }
+        return lastDrafts.stream()
                 .map(a -> mapper.map(a, DraftDTO.class))
                 .collect(Collectors.toList());
     }
