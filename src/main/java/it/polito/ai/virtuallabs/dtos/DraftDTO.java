@@ -19,6 +19,8 @@ public class DraftDTO extends RepresentationModel<DraftDTO> {
     @Id
     private Long id;
 
+    private String photoName;
+
     @EqualsAndHashCode.Include
     private State state;
 
