@@ -557,7 +557,7 @@ public class VMServiceImpl implements VMService {
         vmModelRepository.deleteByIdIgnoreCase(courseName);
     }
 
-    @PreAuthorize("@securityApiAuth.doesTeamBelongsToOwnedOrEnrolledCourses(#teamId)")
+    @PreAuthorize("@securityApiAuth.doesTeamBelongsToOwnedOrEnrolledCourses(#teamId) || hasRole('ADMIN')")
     @Override
     public void deleteVmsByTeamId(Long teamId) {
         vmInstanceRepository.deleteByTeamId(teamId);
@@ -580,6 +580,7 @@ public class VMServiceImpl implements VMService {
         return vmOsDTO;
     }
 
+    // todo: mettere un modello a caso a tutti i corsi che usano quella vm
     @PreAuthorize("hasRole('ADMIN')")
     @Override
     public void deleteVMOs(String osName) {

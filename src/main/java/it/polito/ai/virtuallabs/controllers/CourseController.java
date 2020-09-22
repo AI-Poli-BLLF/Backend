@@ -21,6 +21,7 @@ import it.polito.ai.virtuallabs.service.exceptions.TeamNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.TeamServiceException;
 import it.polito.ai.virtuallabs.service.exceptions.assignments.AssignmentServiceException;
 import it.polito.ai.virtuallabs.service.exceptions.vms.VMServiceException;
+import lombok.Synchronized;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -108,6 +109,7 @@ public class CourseController {
     }
 
     @DeleteMapping("/{courseName}/enrolled/{studentId}")
+    @Synchronized
     private void deleteStudentFromCourse(@PathVariable String courseName, @PathVariable String studentId){
         try {
             teamService.deleteStudentFromCourse(courseName, studentId);
