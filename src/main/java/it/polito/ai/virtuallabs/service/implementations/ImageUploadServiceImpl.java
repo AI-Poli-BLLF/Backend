@@ -173,8 +173,9 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         }
     }
 
+    @PreAuthorize("@securityApiAuth.ownDraft(#studentId, #courseName, #assignmentId, #draftId) || @securityApiAuth.ownCourse(#courseName)")
     @Override
-    public byte[] getDraftImage(Long draftId) {
+    public byte[] getDraftImage(String studentId, String courseName, Long assignmentId, Long draftId) {
         String photoName;
         Draft draft = getter.getDraft(draftId);
         photoName = draft.getPhotoName() == null ? defaultImg : draft.getPhotoName();

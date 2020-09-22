@@ -1,6 +1,7 @@
 package it.polito.ai.virtuallabs.controllers;
 
 import it.polito.ai.virtuallabs.controllers.utility.ModelHelper;
+import it.polito.ai.virtuallabs.controllers.utility.TransactionChain;
 import it.polito.ai.virtuallabs.dtos.*;
 import it.polito.ai.virtuallabs.entities.Draft;
 import it.polito.ai.virtuallabs.service.AssignmentService;
@@ -9,11 +10,11 @@ import it.polito.ai.virtuallabs.dtos.ProfessorDTO;
 import it.polito.ai.virtuallabs.service.ImageUploadService;
 import it.polito.ai.virtuallabs.service.NotificationService;
 import it.polito.ai.virtuallabs.service.TeamService;
+import it.polito.ai.virtuallabs.service.exceptions.assignments.AssignmentServiceException;
 import it.polito.ai.virtuallabs.service.exceptions.assignments.DraftNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.NotificationException;
 import it.polito.ai.virtuallabs.service.exceptions.ProfessorNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.TeamServiceException;
-import it.polito.ai.virtuallabs.service.exceptions.assignments.AssignmentNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.images.ImageServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -37,6 +38,8 @@ public class ProfessorController {
     private AssignmentService assignmentService;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private TransactionChain transactionChain;
 
     @GetMapping({"/", ""})
     private List<ProfessorDTO> getAllProfessors() {
@@ -89,26 +92,27 @@ public class ProfessorController {
 
     @PostMapping(value = "/{professorId}/courses/{courseId}/assignments")
     @ResponseStatus(value = HttpStatus.CREATED)
-    private AssignmentDTO createAssignment(@PathVariable String professorId, @PathVariable String courseId, @RequestBody @Valid AssignmentDTO assignmentDTO){
-        AssignmentDTO assignmentDTO1 =  assignmentService.addAssignment(professorId, assignmentDTO, courseId);
-        if(assignmentDTO1.getId() == null)
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Assignment already exist: %s", assignmentDTO.getId()));
-
-//        assignmentService.createAllDrafts(courseId, assignmentDTO1);
-        return assignmentDTO1;
-    }
-    //tested
-    @PostMapping(value = "/{professorId}/assignments/{assignmentId}/uploadAssignmentPhoto")
-    @ResponseStatus(value = HttpStatus.CREATED)
-    private Map<String, String> uploadAssignmentPhoto(@PathVariable String professorId, @PathVariable Long assignmentId, @RequestParam("image") MultipartFile image){
-        try{
-            Map<String, String> map = new HashMap<>();
-            map.put("imageRef", imageUploadService.storeAssignmentImage(image, professorId, assignmentId));
-            return map;
-        }catch (ImageServiceException | TeamServiceException e){
+    private AssignmentDTO createAssignment(@PathVariable String professorId, @PathVariable String courseId,
+                                           @RequestBody @Valid AssignmentDTO assignmentDTO, @RequestParam("image") MultipartFile image){
+        try {
+            return ModelHelper.enrich(transactionChain.addAssignmentAndUploadImage(professorId, assignmentDTO, courseId, image), courseId);
+        }catch (TeamServiceException | AssignmentServiceException e){
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }
+    //tested
+//    @PostMapping(value = "/{professorId}/courses/{courseId}/assignments/{assignmentId}/uploadAssignmentPhoto")
+//    @ResponseStatus(value = HttpStatus.CREATED)
+//    private Map<String, String> uploadAssignmentPhoto(@PathVariable String professorId, @PathVariable String courseId,
+//                                                      @PathVariable Long assignmentId, @RequestParam("image") MultipartFile image){
+//        try{
+//            Map<String, String> map = new HashMap<>();
+//            map.put("imageRef", imageUploadService.storeAssignmentImage(image, professorId, assignmentId));
+//            return map;
+//        }catch (ImageServiceException | TeamServiceException e){
+//            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+//        }
+//    }
     //tested
     @GetMapping(value = "/assignments/{assignmentId}/getProfessor")
     private ProfessorDTO getProfessor(@PathVariable Long assignmentId){
@@ -119,17 +123,12 @@ public class ProfessorController {
         }
     }
 
-    @PostMapping(value = "/assignments/{assignmentId}/drafts/{draftId}/review")
+    @PostMapping(value = "{professorId}/courses/{courseName}/assignments/{assignmentId}/drafts/{draftId}/correction")
     @ResponseStatus(value = HttpStatus.CREATED)
-    private DraftDTO reviewDraft(@PathVariable Long assignmentId, @PathVariable Long draftId, int grade){
+    private CorrectionDTO correctDraft(@PathVariable String professorId, @PathVariable String courseName,
+                                  @PathVariable Long assignmentId, @PathVariable Long draftId, @RequestParam("image") MultipartFile image){
         try{
-            DraftDTO draftDTO = assignmentService.getDraft(draftId);
-            if(draftDTO.getState().equals(DraftDTO.State.SUBMITTED)){
-                assignmentService.getDraft(draftId).setGrade(grade);
-                assignmentService.setDraftStatus(draftId, Draft.State.REVIEWED);
-                return draftDTO;
-            }
-            else return null;
+            return transactionChain.correctDraftAndUploadImage(professorId, courseName, assignmentId, draftId, false, image);
         } catch (DraftNotFoundException e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Draft not found %s", draftId));
         }
@@ -167,8 +166,8 @@ public class ProfessorController {
     @GetMapping("/{professorId}/courses/{courseId}/assignments/{assignmentId}/drafts")
     private List<DraftDTO> getDrafts(@PathVariable String professorId, @PathVariable String courseId, @PathVariable Long assignmentId){
         try{
-            return assignmentService.getDrafts(assignmentId);
-        } catch (AssignmentNotFoundException e){
+            return assignmentService.getDrafts(professorId, courseId, assignmentId);
+        } catch (AssignmentServiceException | TeamServiceException  e){
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("getDrafts failed"));
         }
     }

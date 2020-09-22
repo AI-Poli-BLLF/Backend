@@ -1,9 +1,9 @@
 package it.polito.ai.virtuallabs.dtos;
 
+import it.polito.ai.virtuallabs.entities.Draft;
 import lombok.*;
 import org.springframework.hateoas.RepresentationModel;
 
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.sql.Timestamp;
 
@@ -14,15 +14,13 @@ import java.sql.Timestamp;
 @Builder
 public class DraftDTO extends RepresentationModel<DraftDTO> {
 
-    public enum State{NULL, READ, SUBMITTED, REVIEWED}
-
     @Id
     private Long id;
 
     private String photoName;
 
     @EqualsAndHashCode.Include
-    private State state;
+    private Draft.DraftState state;
 
     @EqualsAndHashCode.Include
     private int grade;

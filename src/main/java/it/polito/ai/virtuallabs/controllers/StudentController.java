@@ -1,15 +1,13 @@
 package it.polito.ai.virtuallabs.controllers;
 
 import it.polito.ai.virtuallabs.controllers.utility.ModelHelper;
+import it.polito.ai.virtuallabs.controllers.utility.TransactionChain;
 import it.polito.ai.virtuallabs.dtos.*;
 import it.polito.ai.virtuallabs.entities.Draft;
 import it.polito.ai.virtuallabs.service.AssignmentService;
 import it.polito.ai.virtuallabs.service.ImageUploadService;
-import it.polito.ai.virtuallabs.service.NotificationService;
 import it.polito.ai.virtuallabs.service.TeamService;
-import it.polito.ai.virtuallabs.service.exceptions.NotificationException;
 import it.polito.ai.virtuallabs.service.exceptions.TeamServiceException;
-import it.polito.ai.virtuallabs.service.exceptions.assignments.AssignmentNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.assignments.AssignmentServiceException;
 import it.polito.ai.virtuallabs.service.exceptions.images.ImageServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
-import javax.ws.rs.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +33,8 @@ public class StudentController {
     private ImageUploadService imageUploadService;
     @Autowired
     private AssignmentService assignmentService;
+    @Autowired
+    private TransactionChain transactionChain;
 
     @GetMapping({"", "/"})
     private List<StudentDTO> all(){
@@ -121,63 +120,75 @@ public class StudentController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
-    //tested
-    @GetMapping(value = "/{studentId}/assignments/{assignmentId}/drafts/{draftId}")
-    DraftDTO readAssignment(@PathVariable String studentId, @PathVariable Long assignmentId, @PathVariable Long draftId){
+
+    //todo: aggiungere link all'immagine
+    @GetMapping(value = "/{studentId}/courses/{courseName}/assignments/{assignmentId}/image",
+            produces = {MediaType.IMAGE_JPEG_VALUE,
+                    MediaType.IMAGE_PNG_VALUE,
+                    MediaType.IMAGE_JPEG_VALUE})
+    private byte[] readAssignment(@PathVariable String studentId, @PathVariable String courseName, @PathVariable Long assignmentId){
         try{
-            // todo: creare un nuovo draft, uguale al primo ma con stato diverso
-            DraftDTO draftDTO = assignmentService.getDraft(draftId);
-            draftDTO.setState(DraftDTO.State.READ);
-            assignmentService.addDraft(draftDTO, assignmentId, studentId);
-            return assignmentService.getDraft(draftId);
-        } catch (NoSuchElementException e) {
+            return transactionChain.getAssignmentImageAndReadAssignment(assignmentId, studentId, courseName);
+        } catch (ImageServiceException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Draft not found for student: %s", studentId));
         }
     }
 
-//    @GetMapping(getAssignmentImage) da fare!
 
     //tested
-    @PostMapping(value = "/{studentId}/courses/{courseName}/assignments/{assignmentId}/draft")
-    @ResponseStatus(value = HttpStatus.CREATED)
-    private Map<String, String> createDraft(@PathVariable String studentId, @PathVariable Long assignmentId, @RequestParam("image") MultipartFile image){
-        try{
-            Map<String, String> map = new HashMap<>();
-            map.put("imageRef", imageUploadService.storeAssignmentImage(image, studentId, assignmentId));
-            return map;
-        }catch (ImageServiceException | TeamServiceException e){
-            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
-        }
-    }
+//    @PostMapping(value = "/{studentId}/courses/{courseName}/assignments/{assignmentId}/draft")
+//    @ResponseStatus(value = HttpStatus.CREATED)
+//    private Map<String, String> createDraft(@PathVariable String studentId, @PathVariable Long assignmentId, @RequestParam("image") MultipartFile image){
+//        try{
+//            Map<String, String> map = new HashMap<>();
+//            map.put("imageRef", imageUploadService.storeAssignmentImage(image, studentId, assignmentId));
+//            return map;
+//        }catch (ImageServiceException | TeamServiceException e){
+//            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+//        }
+//    }
 //
 //    @GetMapping(value = "/{studentId}/courses/{courseName}/assignments/{assignmentId}/draft/{draftId}")
 //
 //
-//    @GetMapping(value = "/{studentId}/courses/{courseName}/assignments/{assignmentId}/draft/{draftId}/image")
+    @GetMapping(value = "/{studentId}/courses/{courseName}/assignments/{assignmentId}/draft/{draftId}/image",
+            produces = {MediaType.IMAGE_JPEG_VALUE,
+                    MediaType.IMAGE_PNG_VALUE,
+                    MediaType.IMAGE_JPEG_VALUE})
+    private byte[] getDraftImage(@PathVariable String studentId, @PathVariable String courseName,
+                                 @PathVariable Long assignmentId, @PathVariable Long draftId){
+        try{
+            return imageUploadService.getDraftImage(studentId, courseName, assignmentId, draftId);
+        }catch (ImageServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
+    //@PostMapping("/{studentId}/courses/{courseName}/assignments/{assignmentId}/draft/{draftId}/")
 
 //    //tested
 //    @PostMapping(value = "/{studentId}/assignments/{assignmentId}/createDraft")
 //    @ResponseStatus(value = HttpStatus.CREATED)
 //    private DraftDTO createDraft(@PathVariable String studentId, @PathVariable Long assignmentId, @RequestBody DraftDTO draftDTO){
-//        // todo
+//
 //        if(assignmentService.addDraft(draftDTO, assignmentId, studentId))
-////            return ModelHelper.enrich(draftDTO);
+//            return ModelHelper.enrich(draftDTO);
 //            return draftDTO;
 //        throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Draft already exist: %s", draftDTO.getId()));
 //    }
 
     //tested
-    @PostMapping(value = "/{studentId}/courses/{courseName}/assignments/{assignmentId}/read")
-    @ResponseStatus(value = HttpStatus.CREATED)
-    private DraftDTO draftRead(@PathVariable String studentId, @PathVariable Long assignmentId, @RequestBody DraftDTO draftDTO){
-        try {
-            return assignmentService.readAssigment(assignmentId, studentId);
-        }
+//    @PostMapping(value = "/{studentId}/courses/{courseName}/assignments/{assignmentId}/read")
+//    @ResponseStatus(value = HttpStatus.CREATED)
+//    private DraftDTO draftRead(@PathVariable String studentId, @PathVariable Long assignmentId, @RequestBody DraftDTO draftDTO){
+//        try {
+//            return assignmentService.readAssigment(assignmentId, studentId);
+//        }
 //            return ModelHelper.enrich(draftDTO);
-        catch (AssignmentServiceException | TeamServiceException e){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        }
-    }
+//        catch (AssignmentServiceException | TeamServiceException e){
+//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+//        }
+//    }
 
 //    //tested
 //    @PostMapping(value = "/{studentId}/assignments/{assignmentId}/submit")
@@ -189,23 +200,28 @@ public class StudentController {
 //        throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Draft already exist: %s", draftDTO.getId()));
 //    }
 
-    //tested
-    @GetMapping(value = "/{studentId}/drafts/{draftId}")
-    private DraftDTO getDraft(@PathVariable String studentId, @PathVariable Long draftId){
-        return assignmentService.getDraft(draftId);
-    }
+//    //tested
+//    @GetMapping(value = "/{studentId}/drafts/{draftId}")
+//    private DraftDTO getDraft(@PathVariable String studentId, @PathVariable Long draftId){
+//        return assignmentService.getDraft(draftId);
+//    }
 
-    @GetMapping(value = "/{studentId}/drafts")
-    private List<DraftDTO> getDraftsForStudent(@PathVariable String studentId){
-        return assignmentService.getDraftsForStudent(studentId);
+    @GetMapping(value = "/{studentId}/courses/{courseName}/assignments/{assignmentId}/drafts")
+    private List<DraftDTO> getDraftsForStudent(@PathVariable String studentId, @PathVariable String courseName, @PathVariable Long assignmentId){
+        try {
+            return assignmentService.getDraftsForStudent(studentId, courseName, assignmentId);
+        }catch (AssignmentServiceException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("getDraftsForStudent failed"));
+        }
+
     }
     //tested
-    @PostMapping(value = "/{studentId}/drafts/submitDraft")
-    private DraftDTO submitDraft(@PathVariable String studentId, @RequestParam Long draftId){
+    @PostMapping("/{studentId}/courses/{courseName}/assignments/{assignmentId}/drafts")
+    private DraftDTO submitDraft(@PathVariable String studentId, @PathVariable String courseName, @PathVariable Long assignmentId,
+                                 @RequestParam("image") MultipartFile image){
         try{
-            assignmentService.setDraftStatus(draftId, Draft.State.SUBMITTED);
-            return assignmentService.getDraft(draftId);
-        } catch (NoSuchElementException e){
+            return transactionChain.submitDraftAndUploadImage(studentId, courseName, assignmentId, image);
+        } catch (AssignmentServiceException | TeamServiceException e){
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Draft not found for student: %s", studentId));
         }
     }

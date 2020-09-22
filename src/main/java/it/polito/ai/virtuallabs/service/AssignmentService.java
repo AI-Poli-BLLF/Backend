@@ -1,11 +1,7 @@
 package it.polito.ai.virtuallabs.service;
 
-import it.polito.ai.virtuallabs.dtos.AssignmentDTO;
-import it.polito.ai.virtuallabs.dtos.DraftDTO;
-import it.polito.ai.virtuallabs.dtos.ProfessorDTO;
-import it.polito.ai.virtuallabs.dtos.StudentDTO;
+import it.polito.ai.virtuallabs.dtos.*;
 import it.polito.ai.virtuallabs.entities.Draft;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,14 +16,15 @@ public interface AssignmentService {
     ProfessorDTO getAssignmentProfessor(Long assignmentId);
 
 //    boolean addDraft(DraftDTO draftDTO, Long assignmentId, String studentId);
-    DraftDTO readAssigment(Long assignmentId, String studentId);
+    DraftDTO readAssigment(Long assignmentId, String studentId, String courseName);
     boolean addDraft(DraftDTO draftDTO, Long assignmentId, String studentId);
     DraftDTO getDraft(Long draftId);
-    List<DraftDTO> getDrafts(Long assignmentId);
+    List<DraftDTO> getDrafts(String professorId, String courseName, Long assignmentId);
     StudentDTO getStudentForDraft(Long draftId);
-    List<DraftDTO> getDraftsForStudent(String studentId);
+    List<DraftDTO> getDraftsForStudent(String studentId, String courseName, Long assignmentId);
 
-    void setDraftStatus(Long draftId, Draft.State state);
+    CorrectionDTO correctDraft(String professorId, String courseName, Long assignmentId, Long draftId, boolean lockDraft);
+    void setDraftStatus(Long draftId, Draft.DraftState state);
 
     void passiveDraftSubmit();
 
@@ -37,5 +34,7 @@ public interface AssignmentService {
     void setDraftUnlock(Long draftId);
 
     int evaluateDraft(Long draftId, int grade);
+
+    DraftDTO submitDraft(String studentId, String courseName, Long assignmentId);
 }
 

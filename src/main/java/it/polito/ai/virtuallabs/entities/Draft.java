@@ -4,22 +4,21 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Entity
 @Data
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Draft {
 
-    public enum State{NULL, READ, SUBMITTED, REVIEWED}
+    public enum DraftState {NULL, READ, SUBMITTED, REVIEWED}
 
     @Id
     @GeneratedValue
     private Long id;
 
-    private State state;
+    private DraftState state;
 
     private int grade;
 
@@ -37,10 +36,25 @@ public class Draft {
     @JoinColumn(name = "student_id")
     private Student student;
 
-    public void setStatus(State state){
+    @OneToOne(mappedBy = "draft")
+    private Correction correction;
+
+    public void setStatus(DraftState state){
         this.state = state;
     }
 
+    public Draft() {
+        this.timestamp = Timestamp.valueOf(LocalDateTime.now());
+        this.grade = 0;
+        this.locker = false;
+    }
+
+    public Draft(DraftState state, Assignment assignment, Student student) {
+        this();
+        this.state = state;
+        this.assignment = assignment;
+        this.student = student;
+    }
 
     public void setAssignment(Assignment assignment){
         if(this.assignment != null)

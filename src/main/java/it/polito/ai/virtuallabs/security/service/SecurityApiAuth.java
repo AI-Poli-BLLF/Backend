@@ -105,4 +105,9 @@ public class SecurityApiAuth {
 
         return t.getMembers().contains(entityGetter.getStudent(principal.getId()));
     }
+
+    public boolean ownDraft(String studentId, String courseName, Long assignmentId, Long draftId) {
+        //todo: gestire controlli
+        return true;
+    }
 }

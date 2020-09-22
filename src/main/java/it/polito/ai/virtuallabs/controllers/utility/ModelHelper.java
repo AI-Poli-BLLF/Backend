@@ -3,10 +3,7 @@ package it.polito.ai.virtuallabs.controllers.utility;
 import it.polito.ai.virtuallabs.controllers.CourseController;
 import it.polito.ai.virtuallabs.controllers.ProfessorController;
 import it.polito.ai.virtuallabs.controllers.StudentController;
-import it.polito.ai.virtuallabs.dtos.CourseDTO;
-import it.polito.ai.virtuallabs.dtos.ProfessorDTO;
-import it.polito.ai.virtuallabs.dtos.StudentDTO;
-import it.polito.ai.virtuallabs.dtos.TeamDTO;
+import it.polito.ai.virtuallabs.dtos.*;
 import it.polito.ai.virtuallabs.dtos.vms.VMInstanceDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMModelDTO;
 import lombok.Data;
@@ -64,13 +61,15 @@ public class ModelHelper {
         return professor;
     }
 
-//    public static AssignmentDTO enrich(AssignmentDTO assignmentDTO){
-//        Link self = linkTo(ProfessorController.class).slash(assignmentDTO).slash(assignmentDTO.getId()).withSelfRel();
-//        Link professor = linkTo(ProfessorController.class).slash(assignmentDTO.getId()).slash("getProfessor").withRel("getProfessor");
-//        assignmentDTO.add(self);
-//        assignmentDTO.add(professor);
-//        return assignmentDTO;
-//    }
+    public static AssignmentDTO enrich(AssignmentDTO assignmentDTO, String courseName){
+        //todo: add image path
+        /*Link self = linkTo(ProfessorController.class).slash(assignmentDTO).slash(assignmentDTO.getId()).withSelfRel();
+        Link professor = linkTo(ProfessorController.class).slash(assignmentDTO.getId()).slash("getProfessor").withRel("getProfessor");
+        assignmentDTO.add(self);
+        assignmentDTO.add(professor);*/
+        //Link image = linkTo(CourseController.class).slash(courseName).slash()
+        return assignmentDTO;
+    }
 
 //    public static DraftDTO enrich(DraftDTO draftDTO){
 //        Link self = linkTo(StudentController.class).slash(draftDTO.getStudent .slash(DraftDTO.getId()).slash().withselfrel)

@@ -12,5 +12,5 @@ public interface DraftRepository extends JpaRepository<Draft, Long> {
     List<Draft> findByAssignmentAndStudent(Assignment assignment, Student student);
     List<Draft> findByAssignmentCourseAndStudent(Course course, Student student);
     void deleteByAssignmentCourseNameIgnoreCase(String courseName);
-
+    List<Draft> findByAssignmentAndStudentOrderByTimestampDesc(Assignment assignment, Student student);
 }
