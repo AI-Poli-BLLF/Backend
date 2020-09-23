@@ -27,8 +27,8 @@ public class Professor {
     @ManyToMany(mappedBy = "professors")
     private List<Course> courses = new ArrayList<>();
 
-    @OneToMany(mappedBy = "professor")
-    private List<Assignment> assignments = new ArrayList<>();
+//    @OneToMany(mappedBy = "professor")
+//    private List<Assignment> assignments = new ArrayList<>();
 
     public void addCourse(Course course){
         if(course == null)
@@ -44,20 +44,6 @@ public class Professor {
 
         courses.remove(course);
         course.getProfessors().remove(this);
-    }
-
-    public void addAssignment(Assignment assignment){
-        if(assignment == null)
-            return;
-        assignments.add(assignment);
-        assignment.setProfessor(this);
-    }
-
-    public void removeAssignment(Assignment assignment){
-        if(assignment == null)
-            return;
-        assignments.remove(assignment);
-        assignment.setProfessor(null);
     }
 
     public String getEmail(){

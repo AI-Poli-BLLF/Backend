@@ -49,9 +49,9 @@ public class TransactionChain {
         notificationService.sendConfirmEmailRegistration(user.getEmail(), user.getFirstName(), user.getName());
     }
 
-    public AssignmentDTO addAssignmentAndUploadImage(String professorId, AssignmentDTO assignmentDTO, String courseId, MultipartFile image){
-        AssignmentDTO a = assignmentService.addAssignment(professorId, assignmentDTO, courseId);
-        uploadService.storeAssignmentImage(image, professorId, a.getId());
+    public AssignmentDTO addAssignmentAndUploadImage(AssignmentDTO assignmentDTO, String courseName, MultipartFile image){
+        AssignmentDTO a = assignmentService.addAssignment(assignmentDTO, courseName);
+        uploadService.storeAssignmentImage(image, courseName, a.getId());
         return a;
     }
 
@@ -60,10 +60,10 @@ public class TransactionChain {
         return uploadService.getAssignmentImage(courseName, assignmentId);
     }
 
-    public CorrectionDTO correctDraftAndUploadImage(String professorId, String courseName,
-                                                    Long assignmentId, Long draftId, int grade, MultipartFile image) {
-        CorrectionDTO corr =  assignmentService.correctDraft(professorId, courseName, assignmentId, draftId, grade);
-        uploadService.storeCorrectionImage(professorId, courseName, assignmentId, draftId, corr.getId(), image);
+    public CorrectionDTO correctDraftAndUploadImage(String courseName, Long assignmentId, Long draftId,
+                                                    int grade, MultipartFile image) {
+        CorrectionDTO corr =  assignmentService.correctDraft(courseName, assignmentId, draftId, grade);
+        uploadService.storeCorrectionImage(courseName, assignmentId, draftId, corr.getId(), image);
         return corr;
     }
 

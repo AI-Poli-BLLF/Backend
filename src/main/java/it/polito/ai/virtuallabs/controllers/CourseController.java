@@ -1,5 +1,8 @@
 package it.polito.ai.virtuallabs.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import it.polito.ai.virtuallabs.controllers.utility.ModelHelper;
 import it.polito.ai.virtuallabs.controllers.utility.TransactionChain;
 import it.polito.ai.virtuallabs.dtos.*;
@@ -11,16 +14,17 @@ import it.polito.ai.virtuallabs.dtos.tokens.TokenDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMConfigDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMInstanceDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMModelDTO;
-import it.polito.ai.virtuallabs.service.AssignmentService;
-import it.polito.ai.virtuallabs.service.NotificationService;
-import it.polito.ai.virtuallabs.service.TeamService;
-import it.polito.ai.virtuallabs.service.VMService;
+import it.polito.ai.virtuallabs.service.*;
 import it.polito.ai.virtuallabs.service.exceptions.*;
 import it.polito.ai.virtuallabs.service.exceptions.assignments.AssignmentServiceException;
+import it.polito.ai.virtuallabs.service.exceptions.assignments.DraftNotFoundException;
+import it.polito.ai.virtuallabs.service.exceptions.images.ImageServiceException;
 import it.polito.ai.virtuallabs.service.exceptions.vms.VMServiceException;
 import lombok.Synchronized;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -47,6 +51,8 @@ public class CourseController {
     private VMService vmService;
     @Autowired
     private AssignmentService assignmentService;
+    @Autowired
+    private ImageUploadService imageUploadService;
     @Autowired
     private TransactionChain transactionChain;
 
@@ -328,15 +334,6 @@ public class CourseController {
         }
     }
 
-    @GetMapping(value = "/{courseName}/assignments")
-    private List<AssignmentDTO> getAllAssignment(@PathVariable String courseName){
-        try {
-            return this.assignmentService.getAssignmentsForCourse(courseName);
-        }catch (AssignmentServiceException e){
-            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
-        }
-    }
-
     @PostMapping("/{courseName}/teams/{teamId}/vm-config")
     @ResponseStatus(value = HttpStatus.CREATED)
     private VMConfigDTO createVMConfig(@PathVariable String courseName, @PathVariable String teamId,
@@ -572,4 +569,105 @@ public class CourseController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
+
+    @GetMapping("/{courseName}/assignments")
+    private List<AssignmentDTO> getAssignments(@PathVariable String courseName){
+        try{
+            return assignmentService.getAssignmentsOfCourse(courseName);
+        } catch (ProfessorNotFoundException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "getAssignmentPerProfessor failed");
+        }
+    }
+
+    @PostMapping(value = "/{courseName}/assignments")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    private AssignmentDTO createAssignment(@PathVariable String courseName,
+                                           @RequestParam("json") String assignmentString, @RequestParam("image") MultipartFile image,
+                                           @Autowired ObjectMapper mapper){
+        try {
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            AssignmentDTO assignmentDTO = mapper.readValue(assignmentString, AssignmentDTO.class);
+            System.out.println(assignmentDTO);
+            return ModelHelper.enrich(transactionChain.addAssignmentAndUploadImage(assignmentDTO, courseName, image), courseName);
+        }catch (TeamServiceException | AssignmentServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+        catch (JsonProcessingException e) {
+            e.printStackTrace();
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @PostMapping(value = "/{courseName}/assignments/{assignmentId}/drafts/{draftId}/correction")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    private CorrectionDTO correctDraft(@PathVariable String courseName,
+                                       @PathVariable Long assignmentId, @PathVariable Long draftId, @RequestParam("image") MultipartFile image){
+        try{
+            return transactionChain.correctDraftAndUploadImage(courseName, assignmentId, draftId, 0, image);
+        } catch (TeamServiceException | AssignmentServiceException | ImageServiceException e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    // todo: questo metodo è solo per i prof, ma il sevice è in comune
+    @GetMapping(value = "/{courseName}/assignments/{assignmentId}/image",
+            produces = {MediaType.IMAGE_JPEG_VALUE,
+                    MediaType.IMAGE_PNG_VALUE,
+                    MediaType.IMAGE_JPEG_VALUE})
+    private byte[] getAssignmentImage(@PathVariable String courseName,
+                                      @PathVariable Long assignmentId){
+        try{
+            return imageUploadService.getAssignmentImageP(courseName, assignmentId);
+        }catch (ImageServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
+    @PostMapping("/{courseName}/assignments/{assignmentId}/drafts/{draftId}/evaluate")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    private CorrectionDTO evaluateDraft(@PathVariable String courseName,
+                                        @PathVariable String assignmentId, @PathVariable String draftId,
+                                        @RequestParam("grade") String grade, @RequestParam("image") MultipartFile image){
+        try{
+            return this.transactionChain.correctDraftAndUploadImage(courseName, Long.parseLong(assignmentId),
+                    Long.parseLong(draftId), Integer.parseInt(grade), image);
+        } catch (AssignmentServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+        catch ( NumberFormatException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @GetMapping(value = "/{courseName}/assignments/{assignmentId}/draft/{draftId}/image",
+            produces = {MediaType.IMAGE_JPEG_VALUE,
+                    MediaType.IMAGE_PNG_VALUE,
+                    MediaType.IMAGE_JPEG_VALUE})
+    private byte[] getDraftImage(@PathVariable String courseName,
+                                 @PathVariable Long assignmentId, @PathVariable Long draftId) {
+        try {
+            return imageUploadService.getDraftImageProf(courseName, assignmentId, draftId);
+        } catch (ImageServiceException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
+    @GetMapping("/{courseName}/assignments/{assignmentId}/drafts/{draftId}/student")
+    private StudentDTO getStudentForDraft(@PathVariable String courseName, @PathVariable Long assignmentId, @PathVariable Long draftId){
+        try {
+            return this.assignmentService.getStudentForDraft(courseName, assignmentId, draftId);
+        } catch (DraftNotFoundException e){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "getStudentForDraft failed");
+        }
+    }
+
+    @GetMapping("/{courseName}/assignments/{assignmentId}/drafts")
+    private List<DraftDTO> getDrafts(@PathVariable String courseName, @PathVariable Long assignmentId){
+        try{
+            return assignmentService.getDrafts(courseName, assignmentId);
+        } catch (AssignmentServiceException | TeamServiceException  e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "getDrafts failed");
+        }
+    }
+
 }

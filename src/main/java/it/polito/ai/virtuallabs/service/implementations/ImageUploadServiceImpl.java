@@ -8,6 +8,7 @@ import it.polito.ai.virtuallabs.repositories.StudentRepository;
 import it.polito.ai.virtuallabs.service.EntityGetter;
 import it.polito.ai.virtuallabs.service.ImageUploadService;
 import it.polito.ai.virtuallabs.service.exceptions.TeamServiceException;
+import it.polito.ai.virtuallabs.service.exceptions.assignments.AssignmentNotOfThisCourseException;
 import it.polito.ai.virtuallabs.service.exceptions.images.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.tika.Tika;
@@ -89,9 +90,13 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         return storeRefOnDb(imageName, userId);
     }
 
-    @PreAuthorize("@securityApiAuth.isMe(#professorId)")
+    @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
     @Override
-    public String storeAssignmentImage(MultipartFile image, String professorId, Long assigmentId) {
+    public String storeAssignmentImage(MultipartFile image, String courseName, Long assigmentId) {
+        Assignment assignment = getter.getAssignment(assigmentId);
+        if (!assignment.getCourse().getName().equals(courseName)){
+            throw new AssignmentNotOfThisCourseException(assigmentId, courseName);
+        }
         String type;
         String extension;
         try {
@@ -131,9 +136,35 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         return storeDraftOnDb(imageName, studentId, courseName, assignmentId, draftId);
     }
 
-    @PreAuthorize("@securityApiAuth.isMe(#professorId) && @securityApiAuth.ownCourse(#courseName)")
     @Override
-    public String storeCorrectionImage(String professorId, String courseName, Long assignmentId, Long draftId, Long correctionId, MultipartFile image) {
+    public byte[] getDraftImage(String courseName, Long assignmentId, Long draftId) {
+        String photoName;
+        Draft draft = getter.getDraft(draftId);
+        photoName = draft.getPhotoName() == null ? defaultImg : draft.getPhotoName();
+        String path = String.format("%s/%s", baseDraftImagePath, photoName);
+        try {
+            File image = new File(path);
+            return FileUtils.readFileToByteArray(image);
+        }catch (IOException e){
+            throw new ImageConversionException();
+        }
+    }
+
+    @PreAuthorize("@securityApiAuth.isMe(#studentId) && @securityApiAuth.ownDraft(#studentId, #courseName, #assignmentId, #draftId)")
+    @Override
+    public byte[] getDraftImageStudent(String studentId, String courseName, Long assignmentId, Long draftId) {
+        return getDraftImage(courseName, assignmentId, draftId);
+    }
+
+    @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
+    @Override
+    public byte[] getDraftImageProf(String courseName, Long assignmentId, Long draftId) {
+        return getDraftImage(courseName, assignmentId, draftId);
+    }
+
+    @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
+    @Override
+    public String storeCorrectionImage(String courseName, Long assignmentId, Long draftId, Long correctionId, MultipartFile image) {
         String type;
         String extension;
         try {
@@ -149,7 +180,7 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         }
         String imageName = String.format("%s-correction.%s", correctionId, extension);
         storeCorrectionOnDisk(image, imageName);
-        return storeCorrectionOnDb(imageName, professorId, courseName, assignmentId, draftId, correctionId);
+        return storeCorrectionOnDb(imageName, courseName, assignmentId, draftId, correctionId);
     }
 
     @Override
@@ -194,19 +225,10 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         }
     }
 
-    @PreAuthorize("@securityApiAuth.ownDraft(#studentId, #courseName, #assignmentId, #draftId) || @securityApiAuth.ownCourse(#courseName)")
+    @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
     @Override
-    public byte[] getDraftImage(String studentId, String courseName, Long assignmentId, Long draftId) {
-        String photoName;
-        Draft draft = getter.getDraft(draftId);
-        photoName = draft.getPhotoName() == null ? defaultImg : draft.getPhotoName();
-        String path = String.format("%s/%s", baseDraftImagePath, photoName);
-        try {
-            File image = new File(path);
-            return FileUtils.readFileToByteArray(image);
-        }catch (IOException e){
-            throw new ImageConversionException();
-        }
+    public byte[] getAssignmentImageP(String courseName, Long assignmentId) {
+        return getAssignmentImage(courseName, assignmentId);
     }
 
     private String storeRefOnDb(String imageName, String userId) {
@@ -235,10 +257,10 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         return String.format("http://localhost8080/API/students/%s/courses/%s/assignments/%s/drafts/%s/image", studentId, courseName, assignmentId, draftId);
     }
 
-    private String storeCorrectionOnDb(String imageName, String professorId, String courseName, Long assignmentId, Long draftId, Long correctionId){
+    private String storeCorrectionOnDb(String imageName, String courseName, Long assignmentId, Long draftId, Long correctionId){
         Correction corr = getter.getCorrection(correctionId);
         corr.setPhotoName(imageName);
-        return String.format("http://localhost:8080/API/professors/%s/courses/%s/assignments/%s/drafts/%s/corrections/%s/image", professorId, courseName, assignmentId, draftId, correctionId);
+        return String.format("http://localhost:8080/API/courses/%s/assignments/%s/drafts/%s/corrections/%s/image", courseName, assignmentId, draftId, correctionId);
         // todo: verificare tutti i links
     }
 
