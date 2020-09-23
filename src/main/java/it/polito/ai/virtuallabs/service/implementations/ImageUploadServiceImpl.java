@@ -110,8 +110,9 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         return storeAssignmentOnDb(imageName, assigmentId);
     }
 
+    @PreAuthorize("@securityApiAuth.isMe(#studentId) && @securityApiAuth.ownDraft(#studentId, #courseName, #assignmentId, #draftId)")
     @Override
-    public String storeDraftImage(MultipartFile image, Long draftId) {
+    public String storeDraftImage(String studentId, String courseName, Long assignmentId, Long draftId, MultipartFile image) {
         String type;
         String extension;
         try {
@@ -127,9 +128,29 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         }
         String imageName = String.format("%s-draft.%s", draftId, extension);
         storeDraftOnDisk(image, imageName);
-        return storeDraftOnDb(imageName, draftId);
+        return storeDraftOnDb(imageName, studentId, courseName, assignmentId, draftId);
     }
 
+    @PreAuthorize("@securityApiAuth.isMe(#professorId) && @securityApiAuth.ownCourse(#courseName)")
+    @Override
+    public String storeCorrectionImage(String professorId, String courseName, Long assignmentId, Long draftId, Long correctionId, MultipartFile image) {
+        String type;
+        String extension;
+        try {
+            String[] detection = tika.detect(image.getBytes()).split("/");
+            type = detection[0];
+            extension = detection[1];
+            if (!type.equals("image"))
+                throw new UnsupportedMediaTypeException(type);
+            if (!extensions.contains(extension))
+                throw new ImageExtensionUnsupported(extension);
+        } catch (IOException e) {
+            throw new ImageDetectionException();
+        }
+        String imageName = String.format("%s-correction.%s", correctionId, extension);
+        storeCorrectionOnDisk(image, imageName);
+        return storeCorrectionOnDb(imageName, professorId, courseName, assignmentId, draftId, correctionId);
+    }
 
     @Override
     public byte[] getImage(String userId) {
@@ -207,11 +228,17 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         return String.format("http://localhost8080/API/professors/%s/photo", assignmentId);
     }
 
-    //non mi piace la stringa di ritorno
-    private String storeDraftOnDb(String imageName, Long draftId){
+    private String storeDraftOnDb(String imageName, String studentId, String courseName, Long assignmentId, Long draftId){
         Draft draft = getter.getDraft(draftId);
         draft.setPhotoName(imageName);
-        return String.format("http://localhost8080/API/%s/photo", draftId); //solo di questa riga non sono sicuro
+        return String.format("http://localhost8080/API/students/%s/courses/%s/assignments/%s/drafts/%s/image", studentId, courseName, assignmentId, draftId);
+    }
+
+    private String storeCorrectionOnDb(String imageName, String professorId, String courseName, Long assignmentId, Long draftId, Long correctionId){
+        Correction corr = getter.getCorrection(correctionId);
+        corr.setPhotoName(imageName);
+        return String.format("http://localhost:8080/API/professors/%s/courses/%s/assignments/%s/drafts/%s/corrections/%s/image", professorId, courseName, assignmentId, draftId, correctionId);
+        // todo: verificare tutti i links
     }
 
     private void storeOnDisk(MultipartFile image, String imageName) {
@@ -240,6 +267,17 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         try{
             Path copyLocation = Paths
                     .get(baseDraftImagePath + File.separator + StringUtils.cleanPath(imageName));
+            Files.copy(image.getInputStream(), copyLocation, StandardCopyOption.REPLACE_EXISTING);
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new ImageStorageException(imageName);
+        }
+    }
+
+    private void storeCorrectionOnDisk(MultipartFile image, String imageName) {
+        try{
+            Path copyLocation = Paths
+                    .get(baseCorrectionImagePath + File.separator + StringUtils.cleanPath(imageName));
             Files.copy(image.getInputStream(), copyLocation, StandardCopyOption.REPLACE_EXISTING);
         } catch (Exception e){
             e.printStackTrace();

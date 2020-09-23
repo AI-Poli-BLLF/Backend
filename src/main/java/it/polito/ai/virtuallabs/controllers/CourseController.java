@@ -60,10 +60,7 @@ public class CourseController {
         try{
             return ModelHelper.enrich(teamService.getCourse(courseName).get());
         }catch (NoSuchElementException e){
-            // todo: quando un corso non viene trovato forse ha più senso tornare una bad request,
-            //  perchè la not found mi da l'idea di una pagina che non esiste e anche lato front non capisco la
-            //  differenza se l'url è sbagliato o se la richiesta è sbagliata
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Course not found: %s", courseName));
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("Course not found: %s", courseName));
         }
     }
 

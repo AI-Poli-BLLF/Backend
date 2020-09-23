@@ -136,9 +136,9 @@ public class StudentController {
             produces = {MediaType.IMAGE_JPEG_VALUE,
                     MediaType.IMAGE_PNG_VALUE,
                     MediaType.IMAGE_JPEG_VALUE})
-    private byte[] readAssignment(@PathVariable String studentId, @PathVariable String courseName, @PathVariable Long assignmentId) {
-        try {
-            return transactionChain.getAssignmentImageAndReadAssignment(assignmentId, studentId, courseName);
+    private byte[] readAssignment(@PathVariable String studentId, @PathVariable String courseName, @PathVariable String assignmentId){
+        try{
+            return transactionChain.getAssignmentImageAndReadAssignment(Long.parseLong(assignmentId), studentId, courseName);
         } catch (ImageServiceException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Draft not found for student: %s", studentId));
         }
@@ -233,16 +233,17 @@ public class StudentController {
         try {
             return transactionChain.submitDraftAndUploadImage(studentId, courseName, assignmentId, image);
         } catch (AssignmentServiceException | TeamServiceException e) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Draft not found for student: %s", studentId));
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+//            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Draft not found for student: %s", studentId));
         }
     }
 
-    //tested
-    @PostMapping(value = "/{studentId}/drafts/{draftId}/uploadDraftPhoto")
-    private Map<String, String> uploadDraftPhoto(@PathVariable String studentId, @PathVariable Long draftId, @RequestParam("image") MultipartFile image) {
+    @PostMapping(value = "/{studentId}/courses/{courseName}/assignments/{assignmentId}/drafts/{draftId}/uploadDraftPhoto")
+    private Map<String, String> uploadDraftPhoto(@PathVariable String studentId, @PathVariable String courseName, @PathVariable Long assignmentId,
+                                                 @PathVariable Long draftId, @RequestParam("image") MultipartFile image) {
         try {
             Map<String, String> map = new HashMap<>();
-            map.put("imageRef", imageUploadService.storeDraftImage(image, draftId));
+            map.put("imageRef", imageUploadService.storeDraftImage(studentId, courseName, assignmentId, draftId, image));
             return map;
         } catch (ImageServiceException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());

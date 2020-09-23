@@ -273,7 +273,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         else throw new AssignmentNotOfThisDraftException(assignmentId, draftId);
     }
 
-    @PreAuthorize("@securityApiAuth.isMe(#studentId) && @securityApiAuth.isEnrolled(#courseName)")
+    @PreAuthorize("@securityApiAuth.isMe(#studentId) && @securityApiAuth.isEnrolled(#courseName) || @securityApiAuth.ownCourse(#courseName)")
     @Override
     public List<DraftDTO> getDraftsForStudent(String studentId, String courseName, Long assignmentId) {
         Student s = entityGetter.getStudent(studentId);
@@ -303,6 +303,8 @@ public class AssignmentServiceImpl implements AssignmentService {
         Correction corr = new Correction();
         Draft newDraft= new Draft(Draft.DraftState.REVIEWED, a, d.getStudent());
         newDraft.setLocker(lockDraft);
+        newDraft.setPhotoName(lastDraft.getPhotoName());
+        newDraft = draftRepository.save(newDraft);
         corr.setDraft(newDraft);
 
         return mapper.map(correctionRepository.save(corr), CorrectionDTO.class);
