@@ -228,7 +228,8 @@ public class StudentController {
         try {
             return transactionChain.submitDraftAndUploadImage(studentId, courseName, assignmentId, image);
         } catch (AssignmentServiceException | TeamServiceException e) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Draft not found for student: %s", studentId));
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+//            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Draft not found for student: %s", studentId));
         }
     }
 

@@ -186,12 +186,12 @@ public class ProfessorController {
         }
     }
 
-    @GetMapping("/{professorId}/courses/{courseName}/assignments/{assignmentId}/drafts/{draftId}/getStudent")
+    @GetMapping("/{professorId}/courses/{courseName}/assignments/{assignmentId}/drafts/{draftId}/student")
     private StudentDTO getStudentForDraft(@PathVariable String professorId, @PathVariable String courseName, @PathVariable Long assignmentId, @PathVariable Long draftId){
         try {
             return this.assignmentService.getStudentForDraft(professorId, courseName, assignmentId, draftId);
         } catch (DraftNotFoundException e){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("getStudentForDraft failed"));
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "getStudentForDraft failed");
         }
     }
 
