@@ -52,12 +52,12 @@ public class TransactionChain {
 
     public byte[] getAssignmentImageAndReadAssignment(Long assignmentId, String studentId, String courseName){
         assignmentService.readAssigment(assignmentId, studentId, courseName);
-        return uploadService.getAssignmentImage(assignmentId);
+        return uploadService.getAssignmentImage(courseName, assignmentId);
     }
 
     public CorrectionDTO correctDraftAndUploadImage(String professorId, String courseName,
-                                                    Long assignmentId, Long draftId, boolean lockDraft, MultipartFile image) {
-        CorrectionDTO corr =  assignmentService.correctDraft(professorId, courseName, assignmentId, draftId, lockDraft);
+                                                    Long assignmentId, Long draftId, int grade, MultipartFile image) {
+        CorrectionDTO corr =  assignmentService.correctDraft(professorId, courseName, assignmentId, draftId, grade);
         uploadService.storeCorrectionImage(professorId, courseName, assignmentId, draftId, corr.getId(), image);
         return corr;
     }

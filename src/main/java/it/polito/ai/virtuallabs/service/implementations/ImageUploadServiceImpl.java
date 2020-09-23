@@ -44,7 +44,7 @@ public class ImageUploadServiceImpl implements ImageUploadService {
     private String baseAssignmentImagePath;
     @Value("src/main/resources/static/assignments/draftImages")
     private String baseDraftImagePath;
-    @Value("src/main/resources/static/assignments/draftImages/correctionImages")
+    @Value("src/main/resources/static/assignments/correctionImages")
     private String baseCorrectionImagePath;
 
     private final StudentRepository studentRepository;
@@ -180,7 +180,8 @@ public class ImageUploadServiceImpl implements ImageUploadService {
     }
 
     @Override
-    public byte[] getAssignmentImage(Long assignmentId) {
+    @PreAuthorize("@securityApiAuth.ownCourse(#courseName) || @securityApiAuth.isEnrolled(#courseName)")
+    public byte[] getAssignmentImage(String courseName, Long assignmentId) {
         String photoName;
         Assignment assignment = getter.getAssignment(assignmentId);
         photoName = assignment.getPhotoName() == null ? defaultImg : assignment.getPhotoName();

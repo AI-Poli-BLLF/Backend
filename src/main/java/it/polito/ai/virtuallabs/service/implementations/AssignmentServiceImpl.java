@@ -9,18 +9,13 @@ import it.polito.ai.virtuallabs.service.exceptions.StudentNotEnrolledException;
 import it.polito.ai.virtuallabs.service.exceptions.StudentNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.SubmitAfterExpiryException;
 import it.polito.ai.virtuallabs.service.exceptions.assignments.*;
-import org.apache.tomcat.jni.Local;
-import org.hibernate.id.Assigned;
-import org.hibernate.tool.schema.internal.exec.ScriptTargetOutputToFile;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.expression.spel.ast.Assign;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -285,7 +280,7 @@ public class AssignmentServiceImpl implements AssignmentService {
 
     @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
     @Override
-    public CorrectionDTO correctDraft(String professorId, String courseName, Long assignmentId, Long draftId, boolean lockDraft) {
+    public CorrectionDTO correctDraft(String professorId, String courseName, Long assignmentId, Long draftId, int grade) {
         Professor p = entityGetter.getProfessor(professorId);
         Course c = entityGetter.getCourse(courseName);
         Assignment a = entityGetter.getAssignment(assignmentId);
@@ -302,7 +297,8 @@ public class AssignmentServiceImpl implements AssignmentService {
 
         Correction corr = new Correction();
         Draft newDraft= new Draft(Draft.DraftState.REVIEWED, a, d.getStudent());
-        newDraft.setLocker(lockDraft);
+        newDraft.setLocker(grade!=0);
+        newDraft.setGrade(grade);
         newDraft.setPhotoName(lastDraft.getPhotoName());
         newDraft = draftRepository.save(newDraft);
         corr.setDraft(newDraft);

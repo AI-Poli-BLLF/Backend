@@ -23,7 +23,7 @@ public interface AssignmentService {
     StudentDTO getStudentForDraft(String professorId, String courseName, Long assignmentId, Long draftId);
     List<DraftDTO> getDraftsForStudent(String studentId, String courseName, Long assignmentId);
 
-    CorrectionDTO correctDraft(String professorId, String courseName, Long assignmentId, Long draftId, boolean lockDraft);
+    CorrectionDTO correctDraft(String professorId, String courseName, Long assignmentId, Long draftId, int grade);
     void setDraftStatus(Long draftId, Draft.DraftState state);
 
     void passiveDraftSubmit();
