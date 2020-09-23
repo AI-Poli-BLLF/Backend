@@ -77,16 +77,16 @@ public class CourseController {
     @ResponseStatus(value = HttpStatus.CREATED)
     private CourseDTO addCourse(@RequestBody @Valid ModelHelper.AddCourseRequest courseRequest){
         try{
-            return ModelHelper.enrich(transactionChain.createCourseWithModel(courseRequest));
+            return ModelHelper.enrich(transactionChain.updateCourseWithModel(courseRequest));
         }catch (TeamServiceException | VMServiceException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }
 
     @PutMapping("/{oldCourseName}")
-    private CourseDTO editCourse(@PathVariable String oldCourseName, @RequestBody @Valid CourseDTO course){
+    private CourseDTO editCourse(@PathVariable String oldCourseName, @RequestBody @Valid ModelHelper.AddCourseRequest courseRequest){
         try{
-            return ModelHelper.enrich(teamService.updateCourse(oldCourseName, course));
+            return ModelHelper.enrich(transactionChain.updateCourseWithModel(oldCourseName, courseRequest));
         }catch (TeamServiceException | VMServiceException e){
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }

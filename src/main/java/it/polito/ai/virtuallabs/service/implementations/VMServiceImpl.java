@@ -72,8 +72,8 @@ public class VMServiceImpl implements VMService {
         Course c = getter.getCourse(courseName);
 
         //Se il corso non è attivo lancia una eccezione
-        if (!c.isEnabled())
-            throw new CourseNotEnabledException(courseName);
+//        if (!c.isEnabled())
+//            throw new CourseNotEnabledException(courseName);
 
         //Se è già stata creata un VMModel associato al corso lancia una eccezione
         VMModel vmModel = getter.getVMModel(courseName);

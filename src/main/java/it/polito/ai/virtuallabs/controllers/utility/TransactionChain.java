@@ -32,10 +32,15 @@ public class TransactionChain {
     @Autowired
     private ImageUploadService uploadService;
 
-    public CourseDTO createCourseWithModel(AddCourseRequest addCourseRequest){
+    public CourseDTO updateCourseWithModel(AddCourseRequest addCourseRequest){
         CourseDTO courseDTO = teamService.addCourse(addCourseRequest.getCourse(), addCourseRequest.getProfessorId());
         vmService.createVMModel(addCourseRequest.getVmModel(), addCourseRequest.getCourse().getName());
         return courseDTO;
+    }
+
+    public CourseDTO updateCourseWithModel(String oldCourseName, AddCourseRequest editCourseRequest){
+        vmService.updateVMModel(editCourseRequest.getVmModel(), oldCourseName);
+        return teamService.updateCourse(oldCourseName, editCourseRequest.getCourse());
     }
 
     public void registerUser(UserManagementService userManagementService, UserRegistration user){
