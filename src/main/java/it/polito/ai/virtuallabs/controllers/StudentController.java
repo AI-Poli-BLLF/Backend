@@ -233,12 +233,12 @@ public class StudentController {
         }
     }
 
-    //tested
-    @PostMapping(value = "/{studentId}/drafts/{draftId}/uploadDraftPhoto")
-    private Map<String, String> uploadDraftPhoto(@PathVariable String studentId, @PathVariable Long draftId, @RequestParam("image") MultipartFile image) {
+    @PostMapping(value = "/{studentId}/courses/{courseName}/assignments/{assignmentId}/drafts/{draftId}/uploadDraftPhoto")
+    private Map<String, String> uploadDraftPhoto(@PathVariable String studentId, @PathVariable String courseName, @PathVariable Long assignmentId,
+                                                 @PathVariable Long draftId, @RequestParam("image") MultipartFile image) {
         try {
             Map<String, String> map = new HashMap<>();
-            map.put("imageRef", imageUploadService.storeDraftImage(image, draftId));
+            map.put("imageRef", imageUploadService.storeDraftImage(studentId, courseName, assignmentId, draftId, image));
             return map;
         } catch (ImageServiceException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());

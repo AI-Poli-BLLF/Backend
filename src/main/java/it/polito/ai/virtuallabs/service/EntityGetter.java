@@ -24,4 +24,5 @@ public interface EntityGetter {
     VMOs getVmOsVersion(String osName, String version);
     VMOs getVmOs(String osName);
     NotificationToken getNotificationToken(String tokenId);
+    Correction getCorrection(Long correctionId);
 }

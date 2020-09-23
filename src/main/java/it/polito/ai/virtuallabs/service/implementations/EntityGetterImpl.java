@@ -19,6 +19,7 @@ import it.polito.ai.virtuallabs.repositories.vms.VMOsRepository;
 import it.polito.ai.virtuallabs.service.EntityGetter;
 import it.polito.ai.virtuallabs.service.exceptions.*;
 import it.polito.ai.virtuallabs.service.exceptions.assignments.AssignmentNotFoundException;
+import it.polito.ai.virtuallabs.service.exceptions.assignments.CorrectionNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.assignments.DraftNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.vms.VMConfigNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.vms.VMInstanceNotFoundException;
@@ -60,6 +61,8 @@ public class EntityGetterImpl implements EntityGetter {
     private VMOsRepository vmOsRepository;
     @Autowired
     private NotificationTokenRepository notificationTokenRepository;
+    @Autowired
+    private CorrectionRepository correctionRepository;
 
     @Override
     public Course getCourse(String courseName){
@@ -160,6 +163,13 @@ public class EntityGetterImpl implements EntityGetter {
     public NotificationToken getNotificationToken(String tokenId){
         return notificationTokenRepository.findById(tokenId).orElseThrow(
                 () -> new InvalidOrExpiredTokenException(tokenId)
+        );
+    }
+
+    @Override
+    public Correction getCorrection(Long correctionId) {
+        return correctionRepository.findById(correctionId).orElseThrow(
+                () -> new CorrectionNotFoundException(correctionId)
         );
     }
 }

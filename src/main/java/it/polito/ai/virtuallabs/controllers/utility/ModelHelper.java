@@ -6,8 +6,11 @@ import it.polito.ai.virtuallabs.controllers.StudentController;
 import it.polito.ai.virtuallabs.dtos.*;
 import it.polito.ai.virtuallabs.dtos.vms.VMInstanceDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMModelDTO;
+import it.polito.ai.virtuallabs.entities.Professor;
+import it.polito.ai.virtuallabs.entities.Student;
 import lombok.Data;
 import org.springframework.hateoas.Link;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -61,13 +64,18 @@ public class ModelHelper {
         return professor;
     }
 
-    public static AssignmentDTO enrich(AssignmentDTO assignmentDTO, String courseName){
-        //todo: add image path
-        /*Link self = linkTo(ProfessorController.class).slash(assignmentDTO).slash(assignmentDTO.getId()).withSelfRel();
+    public static AssignmentDTO enrich(AssignmentDTO assignmentDTO, String courseId) {
+        // todo: to test
+        Link self = linkTo(ProfessorController.class).slash(assignmentDTO).slash(assignmentDTO.getId()).withSelfRel();
         Link professor = linkTo(ProfessorController.class).slash(assignmentDTO.getId()).slash("getProfessor").withRel("getProfessor");
+        Link drafts = linkTo(ProfessorController.class).slash("assignments").slash(assignmentDTO.getId())
+                .slash("drafts").withRel("drafts");
+        Link image = linkTo(StudentController.class).slash("courses").slash(courseId).slash("assignments").slash(assignmentDTO.getId())
+                .slash("image").withRel("image");
         assignmentDTO.add(self);
-        assignmentDTO.add(professor);*/
-        //Link image = linkTo(CourseController.class).slash(courseName).slash()
+        assignmentDTO.add(professor);
+        assignmentDTO.add(drafts);
+        assignmentDTO.add(image);
         return assignmentDTO;
     }
 

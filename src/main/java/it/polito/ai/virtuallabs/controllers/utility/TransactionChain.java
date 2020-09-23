@@ -58,13 +58,13 @@ public class TransactionChain {
     public CorrectionDTO correctDraftAndUploadImage(String professorId, String courseName,
                                                     Long assignmentId, Long draftId, boolean lockDraft, MultipartFile image) {
         CorrectionDTO corr =  assignmentService.correctDraft(professorId, courseName, assignmentId, draftId, lockDraft);
-        //todo: creare funzione per caricamento immagini correzione
+        uploadService.storeCorrectionImage(professorId, courseName, assignmentId, draftId, corr.getId(), image);
         return corr;
     }
 
     public DraftDTO submitDraftAndUploadImage(String studentId, String courseName, Long assignmentId, MultipartFile image) {
         DraftDTO draft = assignmentService.submitDraft(studentId, courseName, assignmentId);
-        uploadService.storeDraftImage(image, draft.getId());
+        uploadService.storeDraftImage(studentId, courseName, assignmentId, draft.getId(), image);
         return draft;
     }
 }

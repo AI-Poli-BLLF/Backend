@@ -7,7 +7,8 @@ public interface ImageUploadService {
     byte[] getImage(String userId);
     String storeAssignmentImage(MultipartFile image, String professorId, Long assignmentId);
     byte[] getAssignmentImage(Long assignmentId);
-    String storeDraftImage(MultipartFile image, Long draftId);
+    String storeDraftImage(String studentId, String courseName, Long assignmentId, Long draftId, MultipartFile image);
     byte[] getDraftImage(String studentId, String courseName, Long assignmentId, Long draftId);
+    String storeCorrectionImage(String professorId, String courseName, Long assignmentId, Long draftId, Long correctionId, MultipartFile image);
     byte[] getCorrectionImageForDraft(String studentId, String courseName, Long assignmentId, Long draftId);
 }
