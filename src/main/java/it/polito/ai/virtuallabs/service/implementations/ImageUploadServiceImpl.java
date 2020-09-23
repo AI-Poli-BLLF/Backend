@@ -1,9 +1,6 @@
 package it.polito.ai.virtuallabs.service.implementations;
 
-import it.polito.ai.virtuallabs.entities.Assignment;
-import it.polito.ai.virtuallabs.entities.Draft;
-import it.polito.ai.virtuallabs.entities.Professor;
-import it.polito.ai.virtuallabs.entities.Student;
+import it.polito.ai.virtuallabs.entities.*;
 import it.polito.ai.virtuallabs.repositories.AssignmentRepository;
 import it.polito.ai.virtuallabs.repositories.DraftRepository;
 import it.polito.ai.virtuallabs.repositories.ProfessorRepository;
@@ -47,6 +44,8 @@ public class ImageUploadServiceImpl implements ImageUploadService {
     private String baseAssignmentImagePath;
     @Value("src/main/resources/static/assignments/draftImages")
     private String baseDraftImagePath;
+    @Value("src/main/resources/static/assignments/draftImages/correctionImages")
+    private String baseCorrectionImagePath;
 
     private final StudentRepository studentRepository;
     private final ProfessorRepository professorRepository;
@@ -248,4 +247,19 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         }
     }
 
+    @PreAuthorize("@securityApiAuth.ownDraft(#studentId, #courseName, #assignmentId, #draftId) || @securityApiAuth.ownCourse(#courseName)")
+    @Override
+    public byte[] getCorrectionImageForDraft(String studentId, String courseName, Long assignmentId, Long draftId) {
+        String photoName;
+        Draft draft = getter.getDraft(draftId);
+        Correction correction = draft.getCorrection();
+        photoName = correction.getPhotoName() == null ? defaultImg : correction.getPhotoName();
+        String path = String.format("%s/%s", baseCorrectionImagePath, photoName);
+        try {
+            File image = new File(path);
+            return FileUtils.readFileToByteArray(image);
+        }catch (IOException e){
+            throw new ImageConversionException();
+        }
+    }
 }

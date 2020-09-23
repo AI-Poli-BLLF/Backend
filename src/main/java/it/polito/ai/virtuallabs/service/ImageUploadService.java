@@ -9,4 +9,5 @@ public interface ImageUploadService {
     byte[] getAssignmentImage(Long assignmentId);
     String storeDraftImage(MultipartFile image, Long draftId);
     byte[] getDraftImage(String studentId, String courseName, Long assignmentId, Long draftId);
+    byte[] getCorrectionImageForDraft(String studentId, String courseName, Long assignmentId, Long draftId);
 }

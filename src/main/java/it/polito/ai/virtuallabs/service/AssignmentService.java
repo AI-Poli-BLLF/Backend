@@ -20,7 +20,7 @@ public interface AssignmentService {
     boolean addDraft(DraftDTO draftDTO, Long assignmentId, String studentId);
     DraftDTO getDraft(Long draftId);
     List<DraftDTO> getDrafts(String professorId, String courseName, Long assignmentId);
-    StudentDTO getStudentForDraft(Long draftId);
+    StudentDTO getStudentForDraft(String professorId, String courseName, Long assignmentId, Long draftId);
     List<DraftDTO> getDraftsForStudent(String studentId, String courseName, Long assignmentId);
 
     CorrectionDTO correctDraft(String professorId, String courseName, Long assignmentId, Long draftId, boolean lockDraft);
@@ -33,7 +33,7 @@ public interface AssignmentService {
     void setDraftLock(Long draftId);
     void setDraftUnlock(Long draftId);
 
-    int evaluateDraft(Long draftId, int grade);
+    int evaluateDraft(String professorId, String courseName, Long assignmentId, Long draftId, int grade);
 
     DraftDTO submitDraft(String studentId, String courseName, Long assignmentId);
 }

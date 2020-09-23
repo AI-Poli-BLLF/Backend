@@ -8,12 +8,13 @@ import it.polito.ai.virtuallabs.service.EntityGetter;
 import it.polito.ai.virtuallabs.service.exceptions.StudentNotEnrolledException;
 import it.polito.ai.virtuallabs.service.exceptions.StudentNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.SubmitAfterExpiryException;
-import it.polito.ai.virtuallabs.service.exceptions.assignments.AssignmentNotFoundException;
-import it.polito.ai.virtuallabs.service.exceptions.assignments.AssignmentServiceException;
-import it.polito.ai.virtuallabs.service.exceptions.assignments.DraftNotFoundException;
-import it.polito.ai.virtuallabs.service.exceptions.assignments.DraftNotLastSubmittedException;
+import it.polito.ai.virtuallabs.service.exceptions.assignments.*;
+import org.apache.tomcat.jni.Local;
+import org.hibernate.id.Assigned;
+import org.hibernate.tool.schema.internal.exec.ScriptTargetOutputToFile;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.expression.spel.ast.Assign;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -260,12 +261,16 @@ public class AssignmentServiceImpl implements AssignmentService {
         assignmentRepository.deleteByCourseNameIgnoreCase(courseName);
     }
 
+    @PreAuthorize("@securityApiAuth.isMe(#professorId) && @securityApiAuth.ownCourse(#courseName)")
     @Override
-    public StudentDTO getStudentForDraft(Long draftId) {
-        Student student = draftRepository.findById(draftId).orElseThrow(
-                () -> new DraftNotFoundException(draftId)
-        ).getStudent();
-        return mapper.map(student, StudentDTO.class);
+    public StudentDTO getStudentForDraft(String professorId, String courseName, Long assignmentId, Long draftId) {
+//        Professor professor = entityGetter.getProfessor(professorId);
+//        Course course = entityGetter.getCourse(courseName);
+        Assignment assignment = entityGetter.getAssignment(assignmentId);
+        Draft draft = entityGetter.getDraft(draftId);
+        if (draft.getAssignment().equals(assignment))
+            return mapper.map(draft.getStudent(), StudentDTO.class);
+        else throw new AssignmentNotOfThisDraftException(assignmentId, draftId);
     }
 
     @PreAuthorize("@securityApiAuth.isMe(#studentId) && @securityApiAuth.isEnrolled(#courseName)")
@@ -323,9 +328,15 @@ public class AssignmentServiceImpl implements AssignmentService {
         draft.setLocker(false);
     }
 
+    @PreAuthorize("@securityApiAuth.isMe(#professorId) && @securityApiAuth.ownCourse(#courseName)")
     @Override
-    public int evaluateDraft(Long draftId, int grade) {
-        return 0;
+    public int evaluateDraft(String professorId, String courseName, Long assignmentId, Long draftId, int grade) {
+        Draft draft = entityGetter.getDraft(draftId);
+        Assignment assignment = entityGetter.getAssignment(assignmentId);
+        if(!draft.getAssignment().equals(assignment))
+            throw new AssignmentNotOfThisDraftException(assignmentId, draftId);
+        draft.setGrade(grade);
+        return grade;
     }
 
     @PreAuthorize("@securityApiAuth.isMe(#studentId)")

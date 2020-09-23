@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+import javax.ws.rs.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -172,10 +173,10 @@ public class ProfessorController {
         }
     }
 
-    @GetMapping("/drafts/{draftId}/getStudent")
-    private StudentDTO getStudentForDraft(@PathVariable Long draftId){
+    @GetMapping("/{professorId}/courses/{courseName}/assignments/{assignmentId}/drafts/{draftId}/getStudent")
+    private StudentDTO getStudentForDraft(@PathVariable String professorId, @PathVariable String courseName, @PathVariable Long assignmentId, @PathVariable Long draftId){
         try {
-            return this.assignmentService.getStudentForDraft(draftId);
+            return this.assignmentService.getStudentForDraft(professorId, courseName, assignmentId, draftId);
         } catch (DraftNotFoundException e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("getStudentForDraft failed"));
         }
@@ -191,4 +192,31 @@ public class ProfessorController {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }
+
+    @GetMapping(value = "/{professorId}/courses/{courseName}/assignments/{assignmentId}/image",
+            produces = {MediaType.IMAGE_JPEG_VALUE,
+                    MediaType.IMAGE_PNG_VALUE,
+                    MediaType.IMAGE_JPEG_VALUE})
+    private byte[] getDraftImage(@PathVariable String professorId, @PathVariable String courseName,
+                                 @PathVariable Long assignmentId){
+        try{
+            // todo: secondo me mancano controlli su getAssignmentImage che può essere chiamata da stud o da prof
+            return imageUploadService.getAssignmentImage(assignmentId);
+        }catch (ImageServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
+    @PostMapping("/{professorId}/courses/{courseName}/assignments/{assignmentId}/drafts/{draftId}/evaluate")
+    @ResponseStatus(value = HttpStatus.CREATED)
+    private int evaluateDraft(@PathVariable String professorId, @PathVariable String courseName, @PathVariable Long assignmentId, @PathVariable Long draftId, int grade){
+        try{
+            return this.assignmentService.evaluateDraft(professorId, courseName, assignmentId, draftId, grade);
+        } catch (AssignmentServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
+//    addSolution
+
 }

@@ -37,53 +37,53 @@ public class StudentController {
     private TransactionChain transactionChain;
 
     @GetMapping({"", "/"})
-    private List<StudentDTO> all(){
+    private List<StudentDTO> all() {
         return teamService.getAllStudents().stream().map(ModelHelper::enrich).collect(Collectors.toList());
     }
 
     @GetMapping("/{studentId}")
-    private StudentDTO getOne(@PathVariable String studentId){
-        try{
+    private StudentDTO getOne(@PathVariable String studentId) {
+        try {
             return ModelHelper.enrich(teamService.getStudent(studentId).get());
-        }catch (NoSuchElementException e){
+        } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Student not found: %s", studentId));
         }
     }
 
-    @PostMapping({"","/"})
+    @PostMapping({"", "/"})
     @ResponseStatus(value = HttpStatus.CREATED)
-    private StudentDTO addStudent(@RequestBody @Valid StudentDTO student){
+    private StudentDTO addStudent(@RequestBody @Valid StudentDTO student) {
 
-        if(teamService.addStudent(student))
+        if (teamService.addStudent(student))
             return ModelHelper.enrich(student);
 
         throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Student already exist: %s", student.getId()));
     }
 
     @GetMapping("{studentId}/courses")
-    private List<CourseDTO> getCourses(@PathVariable String studentId){
+    private List<CourseDTO> getCourses(@PathVariable String studentId) {
         try {
             return teamService.getCourses(studentId).stream()
                     .map(ModelHelper::enrich)
                     .collect(Collectors.toList());
-        }catch (TeamServiceException e){
+        } catch (TeamServiceException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
 
     @GetMapping("/{studentId}/teams")
-    private List<TeamDTO> getTeamsForStudent(@PathVariable String studentId){
+    private List<TeamDTO> getTeamsForStudent(@PathVariable String studentId) {
         try {
             return teamService.getTeamsForStudent(studentId)
                     .stream().map(ModelHelper::enrich)
                     .collect(Collectors.toList());
-        }catch (TeamServiceException e){
+        } catch (TeamServiceException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
 
     @GetMapping("/{studentId}/teams/{courseName}")
-    private List<TeamDTO> getTeamsForStudentForCourse(@PathVariable String studentId, @PathVariable String courseName){
+    private List<TeamDTO> getTeamsForStudentForCourse(@PathVariable String studentId, @PathVariable String courseName) {
         try {
             List<TeamDTO> teamsForCourse = teamService.getTeamsForCourse(courseName);
             List<TeamDTO> teamsForStudent = teamService.getTeamsForStudent(studentId);
@@ -92,18 +92,18 @@ public class StudentController {
             return teamsForCourse
                     .stream().map(ModelHelper::enrich)
                     .collect(Collectors.toList());
-        }catch (TeamServiceException e){
+        } catch (TeamServiceException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
 
     @PostMapping("/{studentId}/uploadPhoto")
-    private Map<String, String> uploadPhoto(@PathVariable String studentId, @RequestParam("image") MultipartFile image){
+    private Map<String, String> uploadPhoto(@PathVariable String studentId, @RequestParam("image") MultipartFile image) {
         try {
             Map<String, String> map = new HashMap<>();
             map.put("imageRef", imageUploadService.store(image, studentId));
             return map;
-        }catch (ImageServiceException | TeamServiceException e){
+        } catch (ImageServiceException | TeamServiceException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }
@@ -112,11 +112,12 @@ public class StudentController {
             produces = {MediaType.IMAGE_JPEG_VALUE,
                     MediaType.IMAGE_PNG_VALUE,
                     MediaType.IMAGE_JPEG_VALUE})
-    private @ResponseBody byte[] getStudentPhoto(@PathVariable String studentId){
+    private @ResponseBody
+    byte[] getStudentPhoto(@PathVariable String studentId) {
         try {
 
             return imageUploadService.getImage(studentId);
-        }catch (ImageServiceException | TeamServiceException e){
+        } catch (ImageServiceException | TeamServiceException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
@@ -130,8 +131,8 @@ public class StudentController {
             produces = {MediaType.IMAGE_JPEG_VALUE,
                     MediaType.IMAGE_PNG_VALUE,
                     MediaType.IMAGE_JPEG_VALUE})
-    private byte[] readAssignment(@PathVariable String studentId, @PathVariable String courseName, @PathVariable Long assignmentId){
-        try{
+    private byte[] readAssignment(@PathVariable String studentId, @PathVariable String courseName, @PathVariable Long assignmentId) {
+        try {
             return transactionChain.getAssignmentImageAndReadAssignment(assignmentId, studentId, courseName);
         } catch (ImageServiceException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Draft not found for student: %s", studentId));
@@ -160,10 +161,10 @@ public class StudentController {
                     MediaType.IMAGE_PNG_VALUE,
                     MediaType.IMAGE_JPEG_VALUE})
     private byte[] getDraftImage(@PathVariable String studentId, @PathVariable String courseName,
-                                 @PathVariable Long assignmentId, @PathVariable Long draftId){
-        try{
+                                 @PathVariable Long assignmentId, @PathVariable Long draftId) {
+        try {
             return imageUploadService.getDraftImage(studentId, courseName, assignmentId, draftId);
-        }catch (ImageServiceException e){
+        } catch (ImageServiceException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }
@@ -211,32 +212,47 @@ public class StudentController {
 //    }
 
     @GetMapping(value = "/{studentId}/courses/{courseName}/assignments/{assignmentId}/drafts")
-    private List<DraftDTO> getDraftsForStudent(@PathVariable String studentId, @PathVariable String courseName, @PathVariable Long assignmentId){
+    private List<DraftDTO> getDraftsForStudent(@PathVariable String studentId, @PathVariable String courseName, @PathVariable Long assignmentId) {
         try {
             return assignmentService.getDraftsForStudent(studentId, courseName, assignmentId);
-        }catch (AssignmentServiceException | TeamServiceException e){
+        } catch (AssignmentServiceException | TeamServiceException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, String.format("getDraftsForStudent failed"));
         }
 
     }
+
     //tested
     @PostMapping("/{studentId}/courses/{courseName}/assignments/{assignmentId}/drafts")
     private DraftDTO submitDraft(@PathVariable String studentId, @PathVariable String courseName, @PathVariable Long assignmentId,
-                                 @RequestParam("image") MultipartFile image){
-        try{
+                                 @RequestParam("image") MultipartFile image) {
+        try {
             return transactionChain.submitDraftAndUploadImage(studentId, courseName, assignmentId, image);
-        } catch (AssignmentServiceException | TeamServiceException e){
+        } catch (AssignmentServiceException | TeamServiceException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Draft not found for student: %s", studentId));
         }
     }
+
     //tested
     @PostMapping(value = "/{studentId}/drafts/{draftId}/uploadDraftPhoto")
-    private Map<String, String> uploadDraftPhoto(@PathVariable String studentId, @PathVariable Long draftId, @RequestParam("image") MultipartFile image){
+    private Map<String, String> uploadDraftPhoto(@PathVariable String studentId, @PathVariable Long draftId, @RequestParam("image") MultipartFile image) {
         try {
             Map<String, String> map = new HashMap<>();
             map.put("imageRef", imageUploadService.storeDraftImage(image, draftId));
             return map;
-        } catch (ImageServiceException e){
+        } catch (ImageServiceException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
+    @GetMapping(value = "/{studentId}/courses/{courseName}/assignments/{assignmentId}/draft/{draftId}/correction-image",
+            produces = {MediaType.IMAGE_JPEG_VALUE,
+                    MediaType.IMAGE_PNG_VALUE,
+                    MediaType.IMAGE_JPEG_VALUE})
+    private byte[] getCorrectionImageForDraft(@PathVariable String studentId, @PathVariable String courseName,
+                                 @PathVariable Long assignmentId, @PathVariable Long draftId) {
+        try {
+            return imageUploadService.getCorrectionImageForDraft(studentId, courseName, assignmentId, draftId);
+        } catch (ImageServiceException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }
