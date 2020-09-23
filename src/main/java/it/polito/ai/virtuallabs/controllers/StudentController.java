@@ -122,6 +122,10 @@ public class StudentController {
     }
 
     //todo: aggiungere link all'immagine
+
+    // todo: fare una versione per il prof che non setta il draft state
+//    const path = `${this.url}/professor/${professorId}/courses/${courseName}/assignments/${assignmentId}/image`;
+
     @GetMapping(value = "/{studentId}/courses/{courseName}/assignments/{assignmentId}/image",
             produces = {MediaType.IMAGE_JPEG_VALUE,
                     MediaType.IMAGE_PNG_VALUE,
