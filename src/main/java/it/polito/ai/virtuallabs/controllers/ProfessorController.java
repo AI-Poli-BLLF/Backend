@@ -1,5 +1,9 @@
 package it.polito.ai.virtuallabs.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import it.polito.ai.virtuallabs.controllers.utility.ModelHelper;
 import it.polito.ai.virtuallabs.controllers.utility.TransactionChain;
 import it.polito.ai.virtuallabs.dtos.*;
@@ -16,6 +20,7 @@ import it.polito.ai.virtuallabs.service.exceptions.NotificationException;
 import it.polito.ai.virtuallabs.service.exceptions.ProfessorNotFoundException;
 import it.polito.ai.virtuallabs.service.exceptions.TeamServiceException;
 import it.polito.ai.virtuallabs.service.exceptions.images.ImageServiceException;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -94,11 +99,19 @@ public class ProfessorController {
     @PostMapping(value = "/{professorId}/courses/{courseId}/assignments")
     @ResponseStatus(value = HttpStatus.CREATED)
     private AssignmentDTO createAssignment(@PathVariable String professorId, @PathVariable String courseId,
-                                           @RequestBody @Valid AssignmentDTO assignmentDTO, @RequestParam("image") MultipartFile image){
+                                           @RequestParam("json") String assignmentString, @RequestParam("image") MultipartFile image,
+                                           @Autowired ObjectMapper mapper){
         try {
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            AssignmentDTO assignmentDTO = mapper.readValue(assignmentString, AssignmentDTO.class);
+            System.out.println(assignmentDTO);
             return ModelHelper.enrich(transactionChain.addAssignmentAndUploadImage(professorId, assignmentDTO, courseId, image), courseId);
         }catch (TeamServiceException | AssignmentServiceException e){
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+        catch (JsonProcessingException e) {
+            e.printStackTrace();
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
     //tested

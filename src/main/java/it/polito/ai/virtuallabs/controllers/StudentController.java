@@ -131,9 +131,9 @@ public class StudentController {
             produces = {MediaType.IMAGE_JPEG_VALUE,
                     MediaType.IMAGE_PNG_VALUE,
                     MediaType.IMAGE_JPEG_VALUE})
-    private byte[] readAssignment(@PathVariable String studentId, @PathVariable String courseName, @PathVariable Long assignmentId) {
-        try {
-            return transactionChain.getAssignmentImageAndReadAssignment(assignmentId, studentId, courseName);
+    private byte[] readAssignment(@PathVariable String studentId, @PathVariable String courseName, @PathVariable String assignmentId){
+        try{
+            return transactionChain.getAssignmentImageAndReadAssignment(Long.parseLong(assignmentId), studentId, courseName);
         } catch (ImageServiceException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Draft not found for student: %s", studentId));
         }
