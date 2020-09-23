@@ -21,13 +21,16 @@ public class NotificationToken {
     private String receiverId; //Id of the User who receive the request
     private String courseName;
     private String message;
+    private Timestamp creation;
     private Timestamp expiryDate;
     private NotificationType type;
     private boolean notificationRead; //Indicates if the notification has been read or not (reason of visualization)
 
     public NotificationToken() {
         this.id = UUID.randomUUID().toString();
-        this.expiryDate = Timestamp.valueOf(LocalDateTime.now().plusDays(5));
+        LocalDateTime now = LocalDateTime.now();
+        this.creation = Timestamp.valueOf(now);
+        this.expiryDate = Timestamp.valueOf(now.plusDays(5));
         this.notificationRead = false;
     }
 

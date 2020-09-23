@@ -3,10 +3,13 @@ package it.polito.ai.virtuallabs.controllers;
 import it.polito.ai.virtuallabs.controllers.utility.ModelHelper;
 import it.polito.ai.virtuallabs.controllers.utility.TransactionChain;
 import it.polito.ai.virtuallabs.dtos.*;
+import it.polito.ai.virtuallabs.dtos.tokens.BasicToken;
 import it.polito.ai.virtuallabs.entities.Draft;
 import it.polito.ai.virtuallabs.service.AssignmentService;
 import it.polito.ai.virtuallabs.service.ImageUploadService;
+import it.polito.ai.virtuallabs.service.NotificationService;
 import it.polito.ai.virtuallabs.service.TeamService;
+import it.polito.ai.virtuallabs.service.exceptions.NotificationException;
 import it.polito.ai.virtuallabs.service.exceptions.TeamServiceException;
 import it.polito.ai.virtuallabs.service.exceptions.assignments.AssignmentServiceException;
 import it.polito.ai.virtuallabs.service.exceptions.images.ImageServiceException;
@@ -35,6 +38,8 @@ public class StudentController {
     private AssignmentService assignmentService;
     @Autowired
     private TransactionChain transactionChain;
+    @Autowired
+    private NotificationService notificationService;
 
     @GetMapping({"", "/"})
     private List<StudentDTO> all() {
@@ -253,6 +258,15 @@ public class StudentController {
         try {
             return imageUploadService.getCorrectionImageForDraft(studentId, courseName, assignmentId, draftId);
         } catch (ImageServiceException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
+    @GetMapping("/{professorId}/notifications")
+    private List<BasicToken> getNotifications(@PathVariable String professorId){
+        try {
+            return notificationService.getProfessorNotification(professorId);
+        }catch (NotificationException | TeamServiceException e){
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }

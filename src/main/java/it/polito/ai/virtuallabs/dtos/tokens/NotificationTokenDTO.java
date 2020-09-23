@@ -6,10 +6,11 @@ import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.sql.Timestamp;
 
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class NotificationTokenDTO {
+public class NotificationTokenDTO implements BasicToken {
     @EqualsAndHashCode.Include
     @NotEmpty
     private String id;
@@ -23,5 +24,12 @@ public class NotificationTokenDTO {
     private String message;
     @NotNull
     private NotificationToken.NotificationType type;
+    @NotNull
+    private Timestamp creation;
     private boolean notificationRead;
+
+    @Override
+    public TokenType getDiscriminator() {
+        return TokenType.NOTIFICATION;
+    }
 }

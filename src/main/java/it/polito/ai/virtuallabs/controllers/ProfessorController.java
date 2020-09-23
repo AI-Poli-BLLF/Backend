@@ -3,7 +3,7 @@ package it.polito.ai.virtuallabs.controllers;
 import it.polito.ai.virtuallabs.controllers.utility.ModelHelper;
 import it.polito.ai.virtuallabs.controllers.utility.TransactionChain;
 import it.polito.ai.virtuallabs.dtos.*;
-import it.polito.ai.virtuallabs.entities.Draft;
+import it.polito.ai.virtuallabs.dtos.tokens.BasicToken;
 import it.polito.ai.virtuallabs.service.AssignmentService;
 import it.polito.ai.virtuallabs.dtos.CourseDTO;
 import it.polito.ai.virtuallabs.dtos.ProfessorDTO;
@@ -219,4 +219,13 @@ public class ProfessorController {
 
 //    addSolution
 
+
+    @GetMapping("/{professorId}/notifications")
+    private List<BasicToken> getNotifications(@PathVariable String professorId){
+        try {
+            return notificationService.getProfessorNotification(professorId);
+        }catch (NotificationException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
 }

@@ -3,6 +3,8 @@ package it.polito.ai.virtuallabs.service.implementations;
 import it.polito.ai.virtuallabs.dtos.ProfessorDTO;
 import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.dtos.TeamDTO;
+import it.polito.ai.virtuallabs.dtos.tokens.BasicToken;
+import it.polito.ai.virtuallabs.dtos.tokens.NotificationTokenDTO;
 import it.polito.ai.virtuallabs.dtos.tokens.TokenDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMConfigDTO;
 import it.polito.ai.virtuallabs.entities.Course;
@@ -259,7 +261,8 @@ public class NotificationServiceImpl implements NotificationService {
             throw new StudentAlreadyEnrolledToCourseException(studentId, courseName);
 
         String message = String.format("" +
-                "Lo studente %s ha richiesto di poter essere iscritto al corso %s"
+                "Lo studente %s %s (%s) ha richiesto di poter essere iscritto al corso %s",
+                s.getFirstName(), s.getName(), s.getId(), courseName
         );
         List<Professor> professors = c.getProfessors();
         List<NotificationToken> tokens = professors.stream()
@@ -269,6 +272,7 @@ public class NotificationServiceImpl implements NotificationService {
         notificationTokenRepository.saveAll(tokens);
     }
 
+    // todo: controllare che non sia già stata inviata una richiesta identica
     @PreAuthorize("@securityApiAuth.isMe(#senderProfessorId)")
     @Override
     @Transactional
@@ -281,7 +285,8 @@ public class NotificationServiceImpl implements NotificationService {
         if(!c.getProfessors().contains(sender))
             throw new ProfessorNotOwnCourseException(senderProfessorId, courseName);
 
-        String message = String.format("Il professore %s vuole cooperare con te per il corso %s", senderProfessorId, courseName);
+        String message = String.format("Il professor %s %s (%s) ha richiesto la tua collaborazione per il corso %s",
+                sender.getName(), sender.getFirstName(), senderProfessorId, courseName);
         List<NotificationToken> notificationTokens = receivers.stream().map(p->{
             if(c.getProfessors().contains(p))
                 throw new ProfessorAlreadyOwnCourseException(p.getId(), courseName);
@@ -372,10 +377,10 @@ public class NotificationServiceImpl implements NotificationService {
 
         String messageToSender = String.format("Il professor %s %s (%s) ha accettato " +
                 "la tua richiesta di collaborazione per il corso %s",
-                receiver.getFirstName(), receiver.getName(), c.getName());
+                receiver.getFirstName(), receiver.getName(), receiver.getId(), c.getName());
 
         String messageToOtherProfessors = String.format("Il professor %s %s (%s) ha cominciato a collaborare per il corso %s",
-                receiver.getFirstName(), receiver.getName(), c.getName());
+                receiver.getFirstName(), receiver.getName(), receiver.getId(), c.getName());
 
         //Messaggio per il professore che ha fatto l'invito
         NotificationToken answerToSender = new NotificationToken(
@@ -420,7 +425,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         String message = String.format("Il professor %s %s (%s) ha rifiutato " +
                         "la tua richiesta di collaborazione per il corso %s",
-                receiver.getFirstName(), receiver.getName(), c.getName());
+                receiver.getFirstName(), receiver.getName(), receiver.getId(), c.getName());
 
         //Messaggio per il professore che ha fatto l'invito
         NotificationToken answer = new NotificationToken(
@@ -433,5 +438,29 @@ public class NotificationServiceImpl implements NotificationService {
 
         notificationTokenRepository.delete(notificationToken);
         notificationTokenRepository.save(answer);
+    }
+
+    @PreAuthorize("@securityApiAuth.isMe(#professorId)")
+    @Override
+    public List<BasicToken> getProfessorNotification(String professorId) {
+        Professor p = entityGetter.getProfessor(professorId);
+        return notificationTokenRepository.findByReceiverIdOrderByCreationDesc(p.getId())
+                .stream().map(n -> mapper.map(n, NotificationTokenDTO.class))
+                .collect(Collectors.toList());
+    }
+
+    @PreAuthorize("@securityApiAuth.isMe(#studentId)")
+    @Override
+    public List<BasicToken> getStudentNotification(String studentId) {
+        Student s = entityGetter.getStudent(studentId);
+        List<BasicToken> notifications = notificationTokenRepository.findByReceiverIdOrderByCreationDesc(s.getId())
+                .stream().map(n -> mapper.map(n, NotificationTokenDTO.class))
+                .collect(Collectors.toList());
+        List<TokenDTO> teamInvitation = tokenRepository.findByStudentIdOrderByExpiryDateDesc(s.getId())
+                .stream().map(t-> mapper.map(t, TokenDTO.class))
+                .collect(Collectors.toList());
+
+        notifications.addAll(teamInvitation);
+        return notifications;
     }
 }

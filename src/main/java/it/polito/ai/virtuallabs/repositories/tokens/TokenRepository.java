@@ -17,4 +17,5 @@ public interface TokenRepository extends JpaRepository<Token, String> {
     void deleteAllByTeamId(Long teamId);
     int countTokenByTeamId(Long TeamId);
     Optional<Token> findOneByTeamIdAndStudentId(Long teamId, String studentId);
+    List<Token> findByStudentIdOrderByExpiryDateDesc(String studentId);
 }
