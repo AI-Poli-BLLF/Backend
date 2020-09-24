@@ -18,7 +18,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-
 import javax.transaction.Transactional;
 import java.io.File;
 import java.io.IOException;
@@ -66,6 +65,7 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         extensions = new HashSet<>(Arrays.asList("jpg", "jpeg", "png"));
     }
 
+    // permette di salvare, sia su DB che su disco, l'immagine dell'user (docente o studente)
     @PreAuthorize("@securityApiAuth.isMe(#userId)")
     @Override
     public String store(MultipartFile image, String userId) {
@@ -90,6 +90,37 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         return storeRefOnDb(imageName, userId);
     }
 
+    // salva l'immagine dell'user su disco
+    // chiamata dalla store qui sopra
+    private void storeOnDisk(MultipartFile image, String imageName) {
+        try {
+            Path copyLocation = Paths
+                    .get(baseImagePath + File.separator + StringUtils.cleanPath(imageName));
+            Files.copy(image.getInputStream(), copyLocation, StandardCopyOption.REPLACE_EXISTING);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new ImageStorageException(imageName);
+        }
+    }
+
+
+    // salva il link dell'immagine dell'user su DB
+    // chiamata dalla store
+    private String storeRefOnDb(String imageName, String userId) {
+        if(userId.toLowerCase().startsWith("d")){
+            Professor p = getter.getProfessor(userId);
+            p.setPhotoName(imageName);
+            return String.format("http://localhost:8080/API/professors/%s/photo", userId);
+        }else if (userId.toLowerCase().startsWith("s")){
+            Student s = getter.getStudent(userId);
+            s.setPhotoName(imageName);
+            return String.format("http://localhost:8080/API/students/%s/photo", userId);
+        }else{
+            throw new ImageStorageException("User not found");
+        }
+    }
+
+    // permette di salvare, sia su DB che su disco, l'immagine dell'assignment
     @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
     @Override
     public String storeAssignmentImage(MultipartFile image, String courseName, Long assigmentId) {
@@ -115,6 +146,24 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         return storeAssignmentOnDb(imageName, courseName, assigmentId);
     }
 
+    private void storeAssignmentOnDisk(MultipartFile image, String imageName) {
+        try{
+            Path copyLocation = Paths
+                    .get(baseAssignmentImagePath + File.separator + StringUtils.cleanPath(imageName));
+            Files.copy(image.getInputStream(), copyLocation, StandardCopyOption.REPLACE_EXISTING);
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new ImageStorageException(imageName);
+        }
+    }
+
+    private String storeAssignmentOnDb(String imageName, String courseName, Long assignmentId){
+        Assignment assignment = getter.getAssignment(assignmentId);
+        assignment.setPhotoName(imageName);
+        return String.format("http://localhost8080/API/courses/%s/assignments/%s/image", courseName, assignmentId);
+    }
+
+    // todo: quale controllo è giusto?
     //    @PreAuthorize("@securityApiAuth.isMe(#studentId) && @securityApiAuth.ownDraft(#studentId, #courseName, #assignmentId, #draftId)")
     @PreAuthorize("@securityApiAuth.isMe(#studentId) && @securityApiAuth.isEnrolled(#courseName)")
     @Override
@@ -137,30 +186,23 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         return storeDraftOnDb(imageName, studentId, courseName, assignmentId, draftId);
     }
 
-    @Override
-    public byte[] getDraftImage(String courseName, Long assignmentId, Long draftId) {
-        String photoName;
-        Draft draft = getter.getDraft(draftId);
-        photoName = draft.getPhotoName() == null ? defaultImg : draft.getPhotoName();
-        String path = String.format("%s/%s", baseDraftImagePath, photoName);
-        try {
-            File image = new File(path);
-            return FileUtils.readFileToByteArray(image);
-        }catch (IOException e){
-            throw new ImageConversionException();
+    private void storeDraftOnDisk(MultipartFile image, String imageName) {
+        try{
+            Path copyLocation = Paths
+                    .get(baseDraftImagePath + File.separator + StringUtils.cleanPath(imageName));
+            Files.copy(image.getInputStream(), copyLocation, StandardCopyOption.REPLACE_EXISTING);
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new ImageStorageException(imageName);
         }
     }
 
-    @PreAuthorize("@securityApiAuth.isMe(#studentId) && @securityApiAuth.ownDraft(#studentId, #courseName, #assignmentId, #draftId)")
-    @Override
-    public byte[] getDraftImageStudent(String studentId, String courseName, Long assignmentId, Long draftId) {
-        return getDraftImage(courseName, assignmentId, draftId);
-    }
-
-    @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
-    @Override
-    public byte[] getDraftImageProf(String courseName, Long assignmentId, Long draftId) {
-        return getDraftImage(courseName, assignmentId, draftId);
+    private String storeDraftOnDb(String imageName, String studentId, String courseName, Long assignmentId, Long draftId){
+        Draft draft = getter.getDraft(draftId);
+        draft.setPhotoName(imageName);
+        if(!draft.getStudent().getId().equals(studentId))
+            throw new ImageStorageException("User not of this draft");
+        return String.format("http://localhost8080/API/courses/%s/assignments/%s/drafts/%s/image", courseName, assignmentId, draftId);
     }
 
     @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
@@ -184,6 +226,26 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         return storeCorrectionOnDb(imageName, courseName, assignmentId, draftId, correctionId);
     }
 
+    private void storeCorrectionOnDisk(MultipartFile image, String imageName) {
+        try{
+            Path copyLocation = Paths
+                    .get(baseCorrectionImagePath + File.separator + StringUtils.cleanPath(imageName));
+            Files.copy(image.getInputStream(), copyLocation, StandardCopyOption.REPLACE_EXISTING);
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new ImageStorageException(imageName);
+        }
+    }
+
+    private String storeCorrectionOnDb(String imageName, String courseName, Long assignmentId, Long draftId, Long correctionId){
+        Correction corr = getter.getCorrection(correctionId);
+        corr.setPhotoName(imageName);
+        String studentId = corr.getDraft().getStudent().getId();
+        return String.format("http://localhost:8080/API/students/%s/courses/%s/assignments/%s/drafts/%s/correction-image", studentId, courseName, assignmentId, draftId);
+    }
+
+
+    // restituisce l'immagine dello user (docente o studente)
     @Override
     public byte[] getImage(String userId) {
         char prefix = userId.toLowerCase().toCharArray()[0];
@@ -211,6 +273,7 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         }
     }
 
+    // restituisce l'immagine della consegna allo studente
     @Override
     @PreAuthorize("@securityApiAuth.ownCourse(#courseName) || @securityApiAuth.isEnrolled(#courseName)")
     public byte[] getAssignmentImage(String courseName, Long assignmentId) {
@@ -226,91 +289,43 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         }
     }
 
-    @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
+    // wrapper per la restituzione dell'immagine della consegna al docente
     @Override
+    @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
     public byte[] getAssignmentImageP(String courseName, Long assignmentId) {
         return getAssignmentImage(courseName, assignmentId);
     }
 
-    private String storeRefOnDb(String imageName, String userId) {
-        if(userId.toLowerCase().startsWith("d")){
-            Professor p = getter.getProfessor(userId);
-            p.setPhotoName(imageName);
-            return String.format("http://localhost:8080/API/professors/%s/photo", userId);
-        }else if (userId.toLowerCase().startsWith("s")){
-            Student s = getter.getStudent(userId);
-            s.setPhotoName(imageName);
-            return String.format("http://localhost:8080/API/students/%s/photo", userId);
-        }else{
-            throw new ImageStorageException("User not found");
-        }
+    // restituisce l'immagine dell'elaborato allo studente
+    @PreAuthorize("@securityApiAuth.isMe(#studentId) && @securityApiAuth.ownDraft(#studentId, #courseName, #assignmentId, #draftId)")
+    @Override
+    public byte[] getDraftImageStudent(String studentId, String courseName, Long assignmentId, Long draftId) {
+        return getDraftImage(courseName, assignmentId, draftId);
     }
 
-    private String storeAssignmentOnDb(String imageName, String courseName, Long assignmentId){
-        Assignment assignment = getter.getAssignment(assignmentId);
-        assignment.setPhotoName(imageName);
-        return String.format("http://localhost8080/API/courses/%s/assignments/%s/image", courseName, assignmentId);
+    // restituisce l'immagine dell'elaborato al docente
+    @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
+    @Override
+    public byte[] getDraftImageProf(String courseName, Long assignmentId, Long draftId) {
+        return getDraftImage(courseName, assignmentId, draftId);
     }
 
-    private String storeDraftOnDb(String imageName, String studentId, String courseName, Long assignmentId, Long draftId){
+    @Override
+    public byte[] getDraftImage(String courseName, Long assignmentId, Long draftId) {
+        String photoName;
         Draft draft = getter.getDraft(draftId);
-        draft.setPhotoName(imageName);
-        if(!draft.getStudent().getId().equals(studentId))
-            throw new ImageStorageException("User not of this draft");
-        return String.format("http://localhost8080/API/courses/%s/assignments/%s/drafts/%s/image", courseName, assignmentId, draftId);
-    }
-
-    private String storeCorrectionOnDb(String imageName, String courseName, Long assignmentId, Long draftId, Long correctionId){
-        Correction corr = getter.getCorrection(correctionId);
-        corr.setPhotoName(imageName);
-        String studentId = corr.getDraft().getStudent().getId();
-        return String.format("http://localhost:8080/API/students/%s/courses/%s/assignments/%s/drafts/%s/correction-image", studentId, courseName, assignmentId, draftId);
-    }
-
-    private void storeOnDisk(MultipartFile image, String imageName) {
+        photoName = draft.getPhotoName() == null ? defaultImg : draft.getPhotoName();
+        String path = String.format("%s/%s", baseDraftImagePath, photoName);
         try {
-            Path copyLocation = Paths
-                    .get(baseImagePath + File.separator + StringUtils.cleanPath(imageName));
-            Files.copy(image.getInputStream(), copyLocation, StandardCopyOption.REPLACE_EXISTING);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new ImageStorageException(imageName);
+            File image = new File(path);
+            return FileUtils.readFileToByteArray(image);
+        }catch (IOException e){
+            throw new ImageConversionException();
         }
     }
 
-    private void storeAssignmentOnDisk(MultipartFile image, String imageName) {
-        try{
-            Path copyLocation = Paths
-                    .get(baseAssignmentImagePath + File.separator + StringUtils.cleanPath(imageName));
-            Files.copy(image.getInputStream(), copyLocation, StandardCopyOption.REPLACE_EXISTING);
-        } catch (Exception e){
-            e.printStackTrace();
-            throw new ImageStorageException(imageName);
-        }
-    }
-
-    private void storeDraftOnDisk(MultipartFile image, String imageName) {
-        try{
-            Path copyLocation = Paths
-                    .get(baseDraftImagePath + File.separator + StringUtils.cleanPath(imageName));
-            Files.copy(image.getInputStream(), copyLocation, StandardCopyOption.REPLACE_EXISTING);
-        } catch (Exception e){
-            e.printStackTrace();
-            throw new ImageStorageException(imageName);
-        }
-    }
-
-    private void storeCorrectionOnDisk(MultipartFile image, String imageName) {
-        try{
-            Path copyLocation = Paths
-                    .get(baseCorrectionImagePath + File.separator + StringUtils.cleanPath(imageName));
-            Files.copy(image.getInputStream(), copyLocation, StandardCopyOption.REPLACE_EXISTING);
-        } catch (Exception e){
-            e.printStackTrace();
-            throw new ImageStorageException(imageName);
-        }
-    }
-
+    // ritorna l'immagine della correzione per il determinato draft.
+    // chiamata dal docente o dallo studente
     @PreAuthorize("@securityApiAuth.ownDraft(#studentId, #courseName, #assignmentId, #draftId) || @securityApiAuth.ownCourse(#courseName)")
     @Override
     public byte[] getCorrectionImageForDraft(String studentId, String courseName, Long assignmentId, Long draftId) {

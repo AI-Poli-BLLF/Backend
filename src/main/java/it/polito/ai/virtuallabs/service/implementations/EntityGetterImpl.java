@@ -64,6 +64,9 @@ public class EntityGetterImpl implements EntityGetter {
     @Autowired
     private CorrectionRepository correctionRepository;
 
+
+    // todo: mettere un commento generale per il servizio?
+
     @Override
     public Course getCourse(String courseName){
         return courseRepository.findByNameIgnoreCase(courseName).orElseThrow(
