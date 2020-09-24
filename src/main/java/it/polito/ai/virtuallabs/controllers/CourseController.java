@@ -21,10 +21,10 @@ import it.polito.ai.virtuallabs.service.exceptions.assignments.DraftNotFoundExce
 import it.polito.ai.virtuallabs.service.exceptions.images.ImageServiceException;
 import it.polito.ai.virtuallabs.service.exceptions.vms.VMServiceException;
 import lombok.Synchronized;
+import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -131,15 +131,24 @@ public class CourseController {
     }
 
 
-    @PostMapping("/{courseName}/enrollMany")
+    @PostMapping("/{courseName}/enroll-many")
     @ResponseStatus(value = HttpStatus.CREATED)
-    private List<Boolean> enrollStudents(@PathVariable String courseName, @RequestParam("file") MultipartFile file){
+    private void enrollStudents(@PathVariable String courseName, @RequestParam("file") MultipartFile file){
+        try {
+            Tika tika = new Tika();
 
-        if(!file.getContentType().equals("text/csv"))
-            throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "text/csv file required");
+            String type = tika.detect(file.getBytes());
+            String contentType = file.getContentType();
+            System.out.println(type);
+            if(!type.equals("text/plain") || contentType==null ||
+                    (!contentType.equals("text/csv") && !contentType.equals("application/vnd.ms-excel")))
+                throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "text/csv file required");
+        }catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "An error occurred while reading the file, please try again later");
+        }
 
         try(Reader r = new BufferedReader(new InputStreamReader(file.getInputStream()))){
-            return teamService.addAndEnroll(r, courseName);
+            teamService.enrollByCsv(r, courseName);
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "An error occurred while reading the file, please try again later");
         } catch (TeamServiceException e){

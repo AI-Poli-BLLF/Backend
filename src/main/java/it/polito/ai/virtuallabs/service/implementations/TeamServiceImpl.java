@@ -241,58 +241,30 @@ public class TeamServiceImpl implements TeamService {
 
     @PreAuthorize("hasRole('ADMIN') || @securityApiAuth.ownCourse(#courseName)")
     @Override
-    public List<Boolean> addAndEnroll(Reader r, String courseName) {
+    public void enrollByCsv(Reader r, String courseName) {
+        Course c = entityGetter.getCourse(courseName);
+        //todo: decidere se permettere l'iscrizione a corso spento
         CsvToBean<StudentDTO> csvToBean = new CsvToBeanBuilder(r)
                 .withType(StudentDTO.class)
                 .withIgnoreLeadingWhiteSpace(true)
                 .build();
 
-        try {
-            List<StudentDTO> students = csvToBean.parse();
-            List<Boolean> results = addAll(students);
-            assert (results.size() == students.size());
+        Set<StudentDTO> studentsToEnroll = csvToBean.parse().stream()
+                .map(StudentDTO::toLowerCase).collect(Collectors.toSet());
+        Set<Student> studentsEntities = studentsToEnroll.stream()
+                .map(s-> entityGetter.getStudent(s.getId())).collect(Collectors.toSet());
 
-            //La lista conterrà solo gli studenti che potenzialmente possono
-            //incorrere in problemi di inconsistenza
-            List<StudentDTO> studentCheck = new ArrayList<>();
-            for(int i = 0; i<results.size(); i++) {
-                //Tali studenti sono quelli che una volta provati ad aggiungere all'interno del db hanno ricevuto
-                //come valore di ritorno falso dalla funzione addStudent();
-                if (!results.get(i)) {
-                    StudentDTO current = students.get(i);
-                    current.setFirstName(current.getFirstName().toLowerCase());
-                    current.setName(current.getName().toLowerCase());
-                    current.setId(current.getId().toLowerCase());
-                    studentCheck.add(current);
-                }
-            }
+        Set<StudentDTO> studentCheck = studentsEntities.stream().map(s -> mapper.map(s, StudentDTO.class).toLowerCase())
+                .collect(Collectors.toSet());
 
-            List<StudentDTO> expected = studentCheck.stream()
-                    //Assumo che essendo stato fatto su studenti che hanno precedentemente ritornato falso
-                    // sulla addStudent() esiste già quell'id sul db
-                    .map(s->{
-                        StudentDTO current = getStudent(s.getId()).get();
-                        current.setFirstName(current.getFirstName().toLowerCase());
-                        current.setName(current.getName().toLowerCase());
-                        current.setId(current.getId().toLowerCase());
-                        return current;
-                    })
-                    .collect(Collectors.toList());
+        if(!studentsToEnroll.equals(studentCheck))
+            throw new InconsistentStudentDataException();
 
-            //Se l'insieme dei dati degli studenti nel db è diverso da quelli forniti nel file
-            //Allora lancia una eccezione perchè c'è una inconsistenza
-            if(!new HashSet<>(studentCheck).equals(new HashSet<>(expected)))
-                throw new InconsistentStudentDataException();
-
-            return enrollAll(
-                    students.stream()
-                            .map(StudentDTO::getId)
-                            .collect(Collectors.toList()),
-                    courseName);
-
-        }catch (TeamServiceException e){
-            throw e;
-        }
+        List<Student> enrolled = c.getStudents();
+        studentsEntities.forEach(s-> {
+            if(!enrolled.contains(s))
+                c.addStudent(s);
+        });
     }
 
     @PreAuthorize("hasRole('ADMIN') || @securityApiAuth.isMe(#studentId)")
