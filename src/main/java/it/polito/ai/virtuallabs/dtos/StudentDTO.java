@@ -34,4 +34,8 @@ public class StudentDTO extends RepresentationModel<StudentDTO> {
     public String getEmail(){
         return String.format("%s@studenti.polito.it", id);
     }
+
+    public StudentDTO toLowerCase(){
+        return new StudentDTO(id.toLowerCase(), name.toLowerCase(), firstName.toLowerCase());
+    }
 }

@@ -249,11 +249,12 @@ public class TeamServiceImpl implements TeamService {
                 .withIgnoreLeadingWhiteSpace(true)
                 .build();
 
-        Set<StudentDTO> studentsToEnroll = new HashSet<>(csvToBean.parse());
+        Set<StudentDTO> studentsToEnroll = csvToBean.parse().stream()
+                .map(StudentDTO::toLowerCase).collect(Collectors.toSet());
         Set<Student> studentsEntities = studentsToEnroll.stream()
                 .map(s-> entityGetter.getStudent(s.getId())).collect(Collectors.toSet());
 
-        Set<StudentDTO> studentCheck = studentsEntities.stream().map(s -> mapper.map(s, StudentDTO.class))
+        Set<StudentDTO> studentCheck = studentsEntities.stream().map(s -> mapper.map(s, StudentDTO.class).toLowerCase())
                 .collect(Collectors.toSet());
 
         if(!studentsToEnroll.equals(studentCheck))
@@ -261,9 +262,8 @@ public class TeamServiceImpl implements TeamService {
 
         List<Student> enrolled = c.getStudents();
         studentsEntities.forEach(s-> {
-            if(enrolled.contains(s))
-                throw new StudentAlreadyEnrolledToCourseException(s.getId(), courseName);
-            c.addStudent(s);
+            if(!enrolled.contains(s))
+                c.addStudent(s);
         });
     }
 
