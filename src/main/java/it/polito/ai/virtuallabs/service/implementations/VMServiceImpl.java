@@ -12,6 +12,7 @@ import it.polito.ai.virtuallabs.entities.vms.VMConfig;
 import it.polito.ai.virtuallabs.entities.vms.VMInstance;
 import it.polito.ai.virtuallabs.entities.vms.VMModel;
 import it.polito.ai.virtuallabs.entities.vms.VMOs;
+import it.polito.ai.virtuallabs.repositories.CourseRepository;
 import it.polito.ai.virtuallabs.repositories.StudentRepository;
 import it.polito.ai.virtuallabs.repositories.vms.VMConfigRepository;
 import it.polito.ai.virtuallabs.repositories.vms.VMInstanceRepository;
@@ -44,6 +45,8 @@ public class VMServiceImpl implements VMService {
     private VMOsRepository vmOsRepository;
     @Autowired
     private StudentRepository studentRepository;
+    @Autowired
+    private CourseRepository courseRepository;
     @Autowired
     private ModelMapper mapper;
     @Autowired
@@ -435,7 +438,7 @@ public class VMServiceImpl implements VMService {
         if(!teamBelongToCourse(t, c))
             throw new TeamNotBelongToCourseException(t.getName(), c.getName());
 
-        //Controllo che la VM appartiene al team
+        //Controllo che la VM appartenga al team
         if(!vm.getTeam().equals(t))
             throw new VMInstanceNotBelongToTeamException(teamId, vmInstanceId);
 
@@ -584,6 +587,17 @@ public class VMServiceImpl implements VMService {
     @PreAuthorize("hasRole('ADMIN')")
     @Override
     public void deleteVMOs(String osName) {
+        // per risolvere il todo ho pensato a questo:
+//        VMOs tmp = vmOsRepository.findAll()
+//                .stream()
+//                .filter(v -> !v.getOsName().equals(osName))
+//                .collect(Collectors.toList()).get(0);
+//
+//        courseRepository.findAll()
+//                .stream()
+//                .filter(c -> c.getVmModel().getOs().equals(osName))
+//                .forEach(c -> c.getVmModel().setOs(tmp));
+
         vmOsRepository.deleteByOsNameIgnoreCase(osName);
     }
 
