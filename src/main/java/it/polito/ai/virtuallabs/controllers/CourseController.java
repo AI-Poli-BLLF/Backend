@@ -134,14 +134,18 @@ public class CourseController {
     @PostMapping("/{courseName}/enrollMany")
     @ResponseStatus(value = HttpStatus.CREATED)
     private void enrollStudents(@PathVariable String courseName, @RequestParam("file") MultipartFile file){
-        Tika tika = new Tika();
+        try {
+            Tika tika = new Tika();
 
-        try(Reader r = new BufferedReader(new InputStreamReader(file.getInputStream()))){
             String extension = tika.detect(file.getBytes());
             System.out.println(extension);
             if(!extension.equals("text/csv"))
                 throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "text/csv file required");
+        }catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "An error occurred while reading the file, please try again later");
+        }
 
+        try(Reader r = new BufferedReader(new InputStreamReader(file.getInputStream()))){
             teamService.enrollByCsv(r, courseName);
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "An error occurred while reading the file, please try again later");
