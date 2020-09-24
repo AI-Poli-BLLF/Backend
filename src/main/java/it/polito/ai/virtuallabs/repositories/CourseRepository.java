@@ -25,4 +25,8 @@ public interface CourseRepository extends JpaRepository<Course, String> {
     List<Course> findByProfessors(Professor professor);
 
     void deleteByNameIgnoreCase(String courseName);
+
+    @Query("SELECT c FROM Course c WHERE c.enabled=TRUE AND c NOT IN " +
+            "(SELECT c FROM Student s INNER JOIN s.courses c WHERE s=:student)")
+    List<Course> getAvailableCourseForStudent(Student student);
 }

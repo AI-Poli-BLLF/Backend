@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Course {
-
+    //todo: aggiungere acronimo
     @Id
     @EqualsAndHashCode.Include
     private String name;
@@ -31,7 +31,6 @@ public class Course {
     @OneToMany(mappedBy = "course")
     private List<Team> teams = new ArrayList<>();
 
-    //todo: modificare relazione molti a molti
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(name = "professor_course",
             joinColumns = @JoinColumn(name = "course_name"),

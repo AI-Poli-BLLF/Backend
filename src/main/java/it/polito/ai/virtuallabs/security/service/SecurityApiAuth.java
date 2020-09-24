@@ -4,6 +4,7 @@ import it.polito.ai.virtuallabs.entities.Assignment;
 import it.polito.ai.virtuallabs.entities.Draft;
 import it.polito.ai.virtuallabs.entities.Student;
 import it.polito.ai.virtuallabs.entities.Team;
+import it.polito.ai.virtuallabs.entities.tokens.NotificationToken;
 import it.polito.ai.virtuallabs.entities.vms.VMInstance;
 import it.polito.ai.virtuallabs.repositories.ProfessorRepository;
 import it.polito.ai.virtuallabs.repositories.StudentRepository;
@@ -133,5 +134,10 @@ public class SecurityApiAuth {
 //                .collect(Collectors.toSet())
 //                .isEmpty();
 //        return toReturn;
+    }
+
+    public boolean ownNotification(String tokenId) {
+        NotificationToken notificationToken = entityGetter.getNotificationToken(tokenId);
+        return notificationToken.getReceiverId().equals(getPrincipal().getId());
     }
 }

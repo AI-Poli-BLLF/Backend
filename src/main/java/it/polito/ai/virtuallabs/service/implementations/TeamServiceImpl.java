@@ -243,7 +243,10 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public void enrollByCsv(Reader r, String courseName) {
         Course c = entityGetter.getCourse(courseName);
-        //todo: decidere se permettere l'iscrizione a corso spento
+
+        if(!c.isEnabled())
+            throw new CourseNotEnabledException(courseName);
+
         CsvToBean<StudentDTO> csvToBean = new CsvToBeanBuilder(r)
                 .withType(StudentDTO.class)
                 .withIgnoreLeadingWhiteSpace(true)
@@ -278,6 +281,14 @@ public class TeamServiceImpl implements TeamService {
         }catch (NoSuchElementException e){
             throw new StudentNotFoundException(studentId);
         }
+    }
+
+    @Override
+    public List<CourseDTO> getAvailableCoursesForStudent(String studentId) {
+        Student s = entityGetter.getStudent(studentId);
+        return courseRepository.getAvailableCourseForStudent(s).stream()
+                .map(c-> mapper.map(c, CourseDTO.class))
+                .collect(Collectors.toList());
     }
 
     @PreAuthorize("hasRole('ADMIN') || @securityApiAuth.isMe(#studentId)")

@@ -266,13 +266,14 @@ public class NotificationServiceImpl implements NotificationService {
         );
         List<Professor> professors = c.getProfessors();
         List<NotificationToken> tokens = professors.stream()
+                .filter(p-> !isSameTokenPresent(studentId, p.getId(), courseName))
                 .map(p -> new NotificationToken(studentId, p.getId(), courseName, message, NotificationToken.NotificationType.STUDENT_ENROLLING))
                 .collect(Collectors.toList());
 
-        notificationTokenRepository.saveAll(tokens);
+        if(!tokens.isEmpty())
+            notificationTokenRepository.saveAll(tokens);
     }
 
-    // todo: controllare che non sia già stata inviata una richiesta identica
     @PreAuthorize("@securityApiAuth.isMe(#senderProfessorId)")
     @Override
     @Transactional
@@ -287,16 +288,20 @@ public class NotificationServiceImpl implements NotificationService {
 
         String message = String.format("Il professor %s %s (%s) ha richiesto la tua collaborazione per il corso %s",
                 sender.getName(), sender.getFirstName(), senderProfessorId, courseName);
-        List<NotificationToken> notificationTokens = receivers.stream().map(p->{
-            if(c.getProfessors().contains(p))
-                throw new ProfessorAlreadyOwnCourseException(p.getId(), courseName);
+        List<NotificationToken> notificationTokens = receivers.stream()
+                .filter(p-> !isSameTokenPresent(senderProfessorId, p.getId(), courseName))
+                .map(p->{
+                    if(c.getProfessors().contains(p))
+                        throw new ProfessorAlreadyOwnCourseException(p.getId(), courseName);
 
-            return new NotificationToken(senderProfessorId, p.getId(), courseName, message, NotificationToken.NotificationType.PROFESSOR_COOPERATION);
-        }).collect(Collectors.toList());
+                    return new NotificationToken(senderProfessorId, p.getId(), courseName, message, NotificationToken.NotificationType.PROFESSOR_COOPERATION);
+                }).collect(Collectors.toList());
 
-        notificationTokenRepository.saveAll(notificationTokens);
+        if(!notificationTokens.isEmpty())
+            notificationTokenRepository.saveAll(notificationTokens);
     }
 
+    @PreAuthorize("@securityApiAuth.ownNotification(#tokenId)")
     @Override
     @Transactional
     public void readNotification(String tokenId) {
@@ -304,6 +309,7 @@ public class NotificationServiceImpl implements NotificationService {
         notificationToken.setNotificationRead(true);
     }
 
+    @PreAuthorize("@securityApiAuth.ownNotification(#tokenId)")
     @Override
     @Transactional
     public void acceptEnrollingRequest(String tokenId) {
@@ -322,6 +328,7 @@ public class NotificationServiceImpl implements NotificationService {
         teamService.addStudentToCourse(sender.getId(), c.getName());
 
         String message = String.format("La tua richiesta di iscrizione al corso %s è stata accettata", notificationToken.getCourseName());
+
         NotificationToken answer = new NotificationToken(
                 notificationToken.getReceiverId(),
                 notificationToken.getSenderId(),
@@ -333,6 +340,7 @@ public class NotificationServiceImpl implements NotificationService {
         notificationTokenRepository.save(answer);
     }
 
+    @PreAuthorize("@securityApiAuth.ownNotification(#tokenId)")
     @Override
     @Transactional
     public void rejectEnrollingRequest(String tokenId) {
@@ -360,6 +368,7 @@ public class NotificationServiceImpl implements NotificationService {
         notificationTokenRepository.save(answer);
     }
 
+    @PreAuthorize("@securityApiAuth.ownNotification(#tokenId)")
     @Transactional
     @Override
     public void acceptCooperation(String tokenId) {
@@ -408,6 +417,7 @@ public class NotificationServiceImpl implements NotificationService {
         notificationTokenRepository.delete(notificationToken);
     }
 
+    @PreAuthorize("@securityApiAuth.ownNotification(#tokenId)")
     @Transactional
     @Override
     public void rejectCooperation(String tokenId) {
@@ -462,5 +472,10 @@ public class NotificationServiceImpl implements NotificationService {
 
         notifications.addAll(teamInvitation);
         return notifications;
+    }
+
+    private boolean isSameTokenPresent(String senderId, String receiverId, String courseName){
+        return notificationTokenRepository
+                .countBySenderIdAndReceiverIdAndCourseName(senderId, receiverId, courseName) > 0;
     }
 }

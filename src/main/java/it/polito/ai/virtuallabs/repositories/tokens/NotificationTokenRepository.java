@@ -10,4 +10,5 @@ import java.util.List;
 public interface NotificationTokenRepository extends JpaRepository<NotificationToken, String> {
     void deleteBySenderIdAndCourseName(String senderId, String courseName);
     List<NotificationToken> findByReceiverIdOrderByCreationDesc(String userId);
+    long countBySenderIdAndReceiverIdAndCourseName(String senderId, String receiverId, String courseName);
 }

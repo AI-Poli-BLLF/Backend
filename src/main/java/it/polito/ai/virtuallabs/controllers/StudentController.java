@@ -76,6 +76,17 @@ public class StudentController {
         }
     }
 
+    @GetMapping("{studentId}/available-courses")
+    private List<CourseDTO> getAvailableCoursesForStudent(@PathVariable String studentId) {
+        try {
+            return teamService.getAvailableCoursesForStudent(studentId).stream()
+                    .map(ModelHelper::enrich)
+                    .collect(Collectors.toList());
+        } catch (TeamServiceException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
     @GetMapping("/{studentId}/teams")
     private List<TeamDTO> getTeamsForStudent(@PathVariable String studentId) {
         try {
