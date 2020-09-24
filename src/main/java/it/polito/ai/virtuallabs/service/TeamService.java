@@ -24,7 +24,7 @@ public interface TeamService {
     void disableCourse(String courseName);
     List<Boolean> addAll(List<StudentDTO> students);
     List<Boolean> enrollAll(List<String> studentIds, String courseName);
-    List<Boolean> addAndEnroll(Reader r, String courseName);
+    void enrollByCsv(Reader r, String courseName);
     List<CourseDTO> getCourses(String studentId);
     List<TeamDTO> getTeamsForStudent(String studentId);
     List<StudentDTO> getMembers(String courseName, Long TeamId);

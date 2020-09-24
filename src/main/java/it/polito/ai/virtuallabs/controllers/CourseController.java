@@ -21,10 +21,10 @@ import it.polito.ai.virtuallabs.service.exceptions.assignments.DraftNotFoundExce
 import it.polito.ai.virtuallabs.service.exceptions.images.ImageServiceException;
 import it.polito.ai.virtuallabs.service.exceptions.vms.VMServiceException;
 import lombok.Synchronized;
+import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -133,13 +133,16 @@ public class CourseController {
 
     @PostMapping("/{courseName}/enrollMany")
     @ResponseStatus(value = HttpStatus.CREATED)
-    private List<Boolean> enrollStudents(@PathVariable String courseName, @RequestParam("file") MultipartFile file){
-
-        if(!file.getContentType().equals("text/csv"))
-            throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "text/csv file required");
+    private void enrollStudents(@PathVariable String courseName, @RequestParam("file") MultipartFile file){
+        Tika tika = new Tika();
 
         try(Reader r = new BufferedReader(new InputStreamReader(file.getInputStream()))){
-            return teamService.addAndEnroll(r, courseName);
+            String extension = tika.detect(file.getBytes());
+            System.out.println(extension);
+            if(!extension.equals("text/csv"))
+                throw new ResponseStatusException(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "text/csv file required");
+
+            teamService.enrollByCsv(r, courseName);
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "An error occurred while reading the file, please try again later");
         } catch (TeamServiceException e){
