@@ -52,9 +52,6 @@ public class AssignmentServiceImpl implements AssignmentService {
 
         Assignment assignment = mapper.map(assignmentDTO, Assignment.class);
 
-    // todo: mi sono balzato l'asert, serviva?
-        //        assert (professor.getAssignments().contains(assignment) || assignment.getProfessor() != null);
-
         assignment.setCourse(course);
 
         return mapper.map(assignmentRepository.save(assignment), AssignmentDTO.class);

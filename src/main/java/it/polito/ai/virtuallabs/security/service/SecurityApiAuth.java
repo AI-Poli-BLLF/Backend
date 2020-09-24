@@ -110,8 +110,6 @@ public class SecurityApiAuth {
     }
 
     public boolean ownDraft(String studentId, String courseName, Long assignmentId, Long draftId) {
-        //todo: testata e secondo me funzionerebbe però il draftId che arriva non è ancora presente nel db,
-        // come se la save non avesse funzionato del tutto. O forse non si chiude la transazione?
         User principal = getPrincipal();
         if (!principal.getRoles().contains(Roles.ROLE_STUDENT.toString()))
             return false;

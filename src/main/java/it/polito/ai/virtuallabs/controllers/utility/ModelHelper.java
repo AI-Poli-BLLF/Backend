@@ -65,7 +65,6 @@ public class ModelHelper {
     }
 
     public static AssignmentDTO enrich(AssignmentDTO assignmentDTO, String courseId) {
-        // todo: to test
         Link self = linkTo(ProfessorController.class).slash(assignmentDTO).slash(assignmentDTO.getId()).withSelfRel();
         Link professor = linkTo(ProfessorController.class).slash(assignmentDTO.getId()).slash("getProfessor").withRel("getProfessor");
         Link drafts = linkTo(ProfessorController.class).slash("assignments").slash(assignmentDTO.getId())

@@ -6,13 +6,13 @@ import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Entity
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Course {
-    //todo: aggiungere acronimo
     @Id
     @EqualsAndHashCode.Include
     private String name;
@@ -82,5 +82,11 @@ public class Course {
 
         professors.remove(professor);
         professor.getCourses().remove(this);
+    }
+
+    public String getAcronym() {
+        String[] pieces = name.split("\\s+");
+        return Arrays.stream(pieces).map(p -> Character.toString(Character.toUpperCase(p.toCharArray()[0])))
+                .reduce((p1, p2) -> p1 + p2).orElse(this.name);
     }
 }

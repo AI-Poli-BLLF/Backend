@@ -163,9 +163,7 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         return String.format("http://localhost8080/API/courses/%s/assignments/%s/image", courseName, assignmentId);
     }
 
-    // todo: quale controllo è giusto?
-    //    @PreAuthorize("@securityApiAuth.isMe(#studentId) && @securityApiAuth.ownDraft(#studentId, #courseName, #assignmentId, #draftId)")
-    @PreAuthorize("@securityApiAuth.isMe(#studentId) && @securityApiAuth.isEnrolled(#courseName)")
+    @PreAuthorize("@securityApiAuth.isMe(#studentId) && @securityApiAuth.ownDraft(#studentId, #courseName, #assignmentId, #draftId)")
     @Override
     public String storeDraftImage(String studentId, String courseName, Long assignmentId, Long draftId, MultipartFile image) {
         String type;
