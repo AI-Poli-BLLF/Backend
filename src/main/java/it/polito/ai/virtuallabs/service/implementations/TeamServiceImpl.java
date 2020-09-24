@@ -113,7 +113,6 @@ public class TeamServiceImpl implements TeamService {
                 .collect(Collectors.toList());
     }
 
-    // todo: PreAuth giusto?
     // aggiunge uno studente passato come parametro
     @PreAuthorize("hasAnyRole('PROFESSOR', 'ADMIN')")
     @Override
@@ -183,7 +182,6 @@ public class TeamServiceImpl implements TeamService {
         return true;
     }
 
-    //todo: gestire cosa succede ai team e alle VM quando lo studente viene rimosso dal corso
     @PreAuthorize("@securityApiAuth.ownCourse(#courseName) || hasRole('ADMIN')")
     @Override
     public void deleteStudentFromCourse(String courseName, String studentId) {
@@ -526,7 +524,6 @@ public class TeamServiceImpl implements TeamService {
         return professor.map(p -> mapper.map(p, ProfessorDTO.class));
     }
 
-    // todo: è giusto il preauth? e il commento?
     @PreAuthorize("hasRole('ADMIN')")
     @Override
     public boolean addProfessor(ProfessorDTO professorDTO) {
@@ -574,7 +571,6 @@ public class TeamServiceImpl implements TeamService {
         return teamsToEvict;
     }
 
-    // todo: controllare che sia giusto
     @Override
     public void deleteTeam(String courseName, Long teamId) {
         Team team = entityGetter.getTeam(teamId);
