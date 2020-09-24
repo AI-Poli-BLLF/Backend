@@ -48,26 +48,26 @@ public class ProfessorController {
     }
 
     @GetMapping("/{professorId}/courses")
-    private List<CourseDTO> getCourses(@PathVariable String professorId){
+    private List<CourseDTO> getCourses(@PathVariable String professorId) {
         try {
             return teamService.getAllCoursesByProfessor(professorId).stream().map(ModelHelper::enrich).collect(Collectors.toList());
-        } catch (NoSuchElementException e){
+        } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Professor not found: %s", professorId));
         }
     }
 
     @GetMapping("/{professorId}")
-    private ProfessorDTO getOne(@PathVariable String professorId){
-        try{
+    private ProfessorDTO getOne(@PathVariable String professorId) {
+        try {
             return ModelHelper.enrich(teamService.getProfessor(professorId).get());
-        }catch (NoSuchElementException e){
+        } catch (NoSuchElementException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Professor not found: %s", professorId));
         }
     }
 
     @PostMapping("/{professorId}/uploadPhoto")
     private Map<String, String> uploadPhoto(@PathVariable String professorId, @RequestParam("image") MultipartFile image) {
-        try{
+        try {
             Map<String, String> map = new HashMap<>();
             map.put("imageRef", imageUploadService.store(image, professorId));
             return map;
@@ -80,7 +80,8 @@ public class ProfessorController {
             produces = {MediaType.IMAGE_JPEG_VALUE,
                     MediaType.IMAGE_PNG_VALUE,
                     MediaType.IMAGE_JPEG_VALUE})
-    private @ResponseBody byte[] getStudentPhoto(@PathVariable String professorId){
+    private @ResponseBody
+    byte[] getStudentPhoto(@PathVariable String professorId) {
         try {
 
             return imageUploadService.getImage(professorId);
@@ -91,20 +92,32 @@ public class ProfessorController {
 
     @PostMapping("/{senderProfessorId}/courses/{courseName}/cooperate")
     @ResponseStatus(value = HttpStatus.CREATED)
-    private void cooperateWith(@PathVariable String senderProfessorId, @PathVariable String courseName, @RequestBody List<String> receiverProfessorIds){
+    private void cooperateWith(@PathVariable String senderProfessorId, @PathVariable String courseName, @RequestBody List<String> receiverProfessorIds) {
         try {
             notificationService.cooperateWithProfessor(senderProfessorId, receiverProfessorIds, courseName);
-        }catch (NotificationException | TeamServiceException e){
+        } catch (NotificationException | TeamServiceException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }
 
     @GetMapping("/{professorId}/notifications")
-    private List<BasicToken> getNotifications(@PathVariable String professorId){
+    private List<BasicToken> getNotifications(@PathVariable String professorId) {
         try {
             return notificationService.getProfessorNotification(professorId);
-        }catch (NotificationException | TeamServiceException e){
+        } catch (NotificationException | TeamServiceException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
+    @GetMapping(value = "/{professorId}/courses/{courseName}/assignments/{assignmentId}/image",
+            produces = {MediaType.IMAGE_JPEG_VALUE,
+                    MediaType.IMAGE_PNG_VALUE,
+                    MediaType.IMAGE_JPEG_VALUE})
+    private byte[] readAssignment(@PathVariable String professorId, @PathVariable String courseName, @PathVariable String assignmentId) {
+        try {
+            return imageUploadService.getAssignmentImageP(courseName, Long.parseLong(assignmentId));
+        } catch (ImageServiceException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Assignment not found for professor: %s", professorId));
         }
     }
 }

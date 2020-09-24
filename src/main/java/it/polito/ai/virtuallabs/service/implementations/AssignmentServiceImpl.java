@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -127,13 +128,13 @@ public class AssignmentServiceImpl implements AssignmentService {
 
     @Override
     public void passiveDraftSubmit() {
-        //todo: rivedere
+        //todo: oltre alla submit bisognerebbe impostare il lock! TransactionChain?
         draftRepository.findAll()
                 .stream()
                 .filter(d -> d.getAssignment()
                         .getExpiryDate()
-                        .before(new Timestamp(System.currentTimeMillis())))
-                .forEach(d -> d.setLocker(true));
+                        .before(Timestamp.valueOf(LocalDateTime.now())))
+                .forEach(d -> submitDraft(d.getStudent().getId(), d.getAssignment().getCourse().getName(), d.getAssignment().getId()));
     }
 
     @Override

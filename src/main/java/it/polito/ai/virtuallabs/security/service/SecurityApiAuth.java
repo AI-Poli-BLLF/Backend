@@ -29,13 +29,13 @@ public class SecurityApiAuth {
     @Autowired
     private EntityGetter entityGetter;
 
-    public static User getPrincipal(){
-        return (User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public static User getPrincipal() {
+        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
-    public boolean ownCourse(String courseName){
+    public boolean ownCourse(String courseName) {
         User principal = getPrincipal();
-        if(!principal.getRoles().contains(Roles.ROLE_PROFESSOR.toString()))
+        if (!principal.getRoles().contains(Roles.ROLE_PROFESSOR.toString()))
             return false;
 
         return professorRepository.getCourseNames(principal.getId())
@@ -46,7 +46,7 @@ public class SecurityApiAuth {
 
     public boolean isEnrolled(String courseName) {
         User principal = getPrincipal();
-        if(!principal.getRoles().contains(Roles.ROLE_STUDENT.toString()))
+        if (!principal.getRoles().contains(Roles.ROLE_STUDENT.toString()))
             return false;
 
         boolean toReturn = studentRepository.getCourseNames(principal.getId())
@@ -60,7 +60,7 @@ public class SecurityApiAuth {
         return toReturn;
     }
 
-    public boolean doesTeamBelongsToOwnedOrEnrolledCourses(Long teamId){
+    public boolean doesTeamBelongsToOwnedOrEnrolledCourses(Long teamId) {
         Team team = teamRepository.findById(teamId).orElseThrow(
                 () -> new TeamNotFoundException(teamId)
         );
@@ -75,7 +75,7 @@ public class SecurityApiAuth {
 
     public boolean amIbelongToMembers(List<String> memberIds) {
         User principal = getPrincipal();
-        if(!principal.getRoles().contains(Roles.ROLE_STUDENT.toString())) {
+        if (!principal.getRoles().contains(Roles.ROLE_STUDENT.toString())) {
             System.out.println("User does not have the role STUDENT");
             return false;
         }
@@ -90,7 +90,7 @@ public class SecurityApiAuth {
         return toReturn;
     }
 
-    public boolean ownVm(Long vmInstanceId){
+    public boolean ownVm(Long vmInstanceId) {
         VMInstance vmInstance = entityGetter.getVMInstance(vmInstanceId);
 
         User principal = getPrincipal();
@@ -107,7 +107,20 @@ public class SecurityApiAuth {
     }
 
     public boolean ownDraft(String studentId, String courseName, Long assignmentId, Long draftId) {
-        //todo: gestire controlli
+        //todo: testata e secondo me funzionerebbe però il draftId che arriva non è ancora presente nel db,
+        // come se la save non avesse funzionato del tutto. O forse non si chiude la transazione?
+        User principal = getPrincipal();
+        if (!principal.getRoles().contains(Roles.ROLE_STUDENT.toString()))
+            return false;
+//        boolean toReturn = !studentRepository.findAll().stream()
+//                .filter(s -> s.getId().equals(studentId))
+//                .flatMap(s -> s.getDrafts().stream())
+//                .filter(d -> d.getId().equals(draftId))
+//                .filter(d -> d.getAssignment().getCourse().getName().equals(courseName))
+//                .filter(d -> d.getAssignment().getId().equals(assignmentId))
+//                .collect(Collectors.toSet())
+//                .isEmpty();
+//        return toReturn;
         return true;
     }
 }

@@ -112,7 +112,7 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         }
         String imageName = String.format("%s-assignment.%s", assigmentId, extension);
         storeAssignmentOnDisk(image, imageName);
-        return storeAssignmentOnDb(imageName, assigmentId);
+        return storeAssignmentOnDb(imageName, courseName, assigmentId);
     }
 
     @PreAuthorize("@securityApiAuth.isMe(#studentId) && @securityApiAuth.ownDraft(#studentId, #courseName, #assignmentId, #draftId)")
@@ -245,23 +245,25 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         }
     }
 
-    private String storeAssignmentOnDb(String imageName, Long assignmentId){
+    private String storeAssignmentOnDb(String imageName, String courseName, Long assignmentId){
         Assignment assignment = getter.getAssignment(assignmentId);
         assignment.setPhotoName(imageName);
-        return String.format("http://localhost8080/API/professors/%s/photo", assignmentId);
+        return String.format("http://localhost8080/API/courses/%s/assignments/%s/image", courseName, assignmentId);
     }
 
     private String storeDraftOnDb(String imageName, String studentId, String courseName, Long assignmentId, Long draftId){
         Draft draft = getter.getDraft(draftId);
         draft.setPhotoName(imageName);
-        return String.format("http://localhost8080/API/students/%s/courses/%s/assignments/%s/drafts/%s/image", studentId, courseName, assignmentId, draftId);
+        if(!draft.getStudent().getId().equals(studentId))
+            throw new IllegalStateException("User not of this draft");
+        return String.format("http://localhost8080/API/courses/%s/assignments/%s/drafts/%s/image", courseName, assignmentId, draftId);
     }
 
     private String storeCorrectionOnDb(String imageName, String courseName, Long assignmentId, Long draftId, Long correctionId){
         Correction corr = getter.getCorrection(correctionId);
         corr.setPhotoName(imageName);
-        return String.format("http://localhost:8080/API/courses/%s/assignments/%s/drafts/%s/corrections/%s/image", courseName, assignmentId, draftId, correctionId);
-        // todo: verificare tutti i links
+        String studentId = corr.getDraft().getStudent().getId();
+        return String.format("http://localhost:8080/API/students/%s/courses/%s/assignments/%s/drafts/%s/correction-image", studentId, courseName, assignmentId, draftId);
     }
 
     private void storeOnDisk(MultipartFile image, String imageName) {
