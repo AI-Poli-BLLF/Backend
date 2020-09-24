@@ -191,11 +191,10 @@ public class StudentController {
         }
     }
 
-    // todo: è usato?
-    @GetMapping("/{professorId}/notifications")
-    private List<BasicToken> getNotifications(@PathVariable String professorId){
+    @GetMapping("/{studentId}/notifications")
+    private List<BasicToken> getNotifications(@PathVariable String studentId){
         try {
-            return notificationService.getProfessorNotification(professorId);
+            return notificationService.getStudentNotification(studentId);
         }catch (NotificationException | TeamServiceException e){
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
