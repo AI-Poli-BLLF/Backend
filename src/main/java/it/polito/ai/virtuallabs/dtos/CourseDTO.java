@@ -8,6 +8,7 @@ import org.springframework.hateoas.RepresentationModel;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
+import java.util.Arrays;
 
 @Data
 @NoArgsConstructor
@@ -32,5 +33,11 @@ public class CourseDTO extends RepresentationModel<CourseDTO> {
         this.name = name;
         this.min = min;
         this.max = max;
+    }
+
+    public String getAcronym(){
+        String[] pieces = name.split("\\s+");
+        return Arrays.stream(pieces).map(p-> Character.toString(Character.toUpperCase(p.toCharArray()[0])))
+        .reduce((p1,p2) -> p1+p2).orElse(this.name);
     }
 }

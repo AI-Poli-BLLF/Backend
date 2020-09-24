@@ -549,7 +549,7 @@ public class VMServiceImpl implements VMService {
                 .collect(Collectors.toList());
     }
 
-    @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
+    @PreAuthorize("@securityApiAuth.ownCourse(#courseName) || hasRole('ADMIN')")
     @Override
     public void deleteVmsByCourseName(String courseName){
         vmInstanceRepository.deleteByTeamCourseNameIgnoreCase(courseName);
@@ -605,7 +605,7 @@ public class VMServiceImpl implements VMService {
         vmOs.removeVersion(version);
     }
 
-    @PreAuthorize("hasRole('PROFESSOR')")
+    @PreAuthorize("hasAnyRole('PROFESSOR', 'ADMIN')")
     @Override
     public List<VMOsDTO> getAvailableVmOs() {
         return vmOsRepository.findAll().stream()

@@ -66,7 +66,9 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public CourseDTO updateCourse(String oldCourseName, CourseDTO newCourse) {
         Course course = entityGetter.getCourse(oldCourseName);
-        course.setName(newCourse.getName());
+        if(!oldCourseName.equals(newCourse.getName()))
+            throw new CourseNameEditException();
+        //course.setName(newCourse.getName());
         course.setMin(newCourse.getMin());
         course.setMax(newCourse.getMax());
         course.setEnabled(newCourse.isEnabled());
