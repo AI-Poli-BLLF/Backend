@@ -119,7 +119,11 @@ public class AssignmentServiceImpl implements AssignmentService {
         List<Student> students = assignment.getDrafts().stream().map(Draft::getStudent).distinct().collect(Collectors.toList());
         for (Student student: students){
             // non può essere nullo perchè gli studenti li abbiamo aggiunti dalla lista dei draft
-            lastDrafts.add(assignment.getDrafts().stream().min((d1, d2) -> d2.getTimestamp().compareTo(d1.getTimestamp())).get());
+            lastDrafts.add(
+                    assignment.getDrafts().stream()
+                            .filter(d -> d.getStudent().equals(student))
+                            .min((d1, d2) -> d2.getTimestamp().compareTo(d1.getTimestamp())).get()
+            );
         }
         return lastDrafts.stream()
                 .map(a -> mapper.map(a, DraftDTO.class))
