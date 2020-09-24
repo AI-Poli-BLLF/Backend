@@ -1,5 +1,4 @@
 package it.polito.ai.virtuallabs.service.implementations;
-
 import it.polito.ai.virtuallabs.dtos.*;
 import it.polito.ai.virtuallabs.entities.*;
 import it.polito.ai.virtuallabs.repositories.*;
@@ -12,12 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,6 +37,10 @@ public class AssignmentServiceImpl implements AssignmentService {
     @Autowired
     EntityGetter entityGetter;
 
+    /** aggiungo assignment, facendo autogenerare l'id al DB
+     * controllo sulle date, in modo che data fine > data inizio
+     * ogni assignment appartiene a un solo corso, che viene settato
+     * **/
     @PreAuthorize("@securityApiAuth.ownCourse(#courseId)")
     public AssignmentDTO addAssignment(AssignmentDTO assignmentDTO, String courseId){
         assignmentDTO.setId(null);
@@ -50,28 +51,17 @@ public class AssignmentServiceImpl implements AssignmentService {
             throw new AssignmentServiceException("expiryBeforeRelease");
 
         Assignment assignment = mapper.map(assignmentDTO, Assignment.class);
-//        Professor professor = entityGetter.getProfessor(professorId);
 
     // todo: mi sono balzato l'asert, serviva?
         //        assert (professor.getAssignments().contains(assignment) || assignment.getProfessor() != null);
 
-//        assignment.setProfessor(professor);
         assignment.setCourse(course);
-        Assignment assignment1 = assignmentRepository.save(assignment);
 
-        /*DraftDTO draftDTO = DraftDTO.builder()
-                .state(DraftDTO.State.NULL)
-                .grade(0)
-                .locker(false)
-                .timestamp(Timestamp.valueOf(LocalDateTime.now()))
-                .build();
-
-        course.getStudents()
-                .forEach(s -> addDraft(draftDTO, assignment1.getId(), s.getId()));*/
-
-        return mapper.map(assignment1, AssignmentDTO.class);
+        return mapper.map(assignmentRepository.save(assignment), AssignmentDTO.class);
     }
 
+    /** dato il corso, ritorna tutti gli assignments relativi a quel corso
+     * **/
     @PreAuthorize("@securityApiAuth.ownCourse(#courseName) || @securityApiAuth.isEnrolled(#courseName)")
     public List<AssignmentDTO> getAssignmentsOfCourse(String courseName) {
         return assignmentRepository.findAll()
@@ -81,33 +71,39 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .collect(Collectors.toList());
     }
 
+    /**  Quando un assignment viene letto, in automatico viene creato un draft nullo.
+     * Infatti ritorno un DraftDTO.
+     * **/
     @Override
     @PreAuthorize("@securityApiAuth.isMe(#studentId)")
     public DraftDTO readAssigment(Long assignmentId, String studentId, String courseName) {
         Student student = entityGetter.getStudent(studentId);
         Course c = entityGetter.getCourse(courseName);
 
+        /* controllo che lo studente appartenga al corso */
         if(!c.getStudents().contains(student))
             throw new StudentNotEnrolledException(studentId, courseName);
 
         Assignment assignment = entityGetter.getAssignment(assignmentId);
+
+        /* cerco drafts esistenti per il dato assignment e il dato studente */
         List<Draft> drafts = draftRepository.findByAssignmentAndStudent(assignment, student);
+
+        /* se ne trovo, non sono null e hanno lo stato a letto vuol dire che l'avevo già letto quindi lo ritorno */
         Draft anyRead = drafts.stream().filter(d -> d.getState().equals(Draft.DraftState.READ)).findFirst().orElse(null);
         if(anyRead != null){
             return mapper.map(anyRead, DraftDTO.class);
         }
 
+        /* Altrimenti lo creo e lo ritorno */
         Draft draft = new Draft(Draft.DraftState.READ, assignment, student);
-
-        draft = draftRepository.save(draft);
-        return mapper.map(draft, DraftDTO.class);
+        return mapper.map(draftRepository.save(draft), DraftDTO.class);
     }
 
     @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
     @Override
     public List<DraftDTO> getDrafts(String courseName, Long assignmentId){
         Course c = entityGetter.getCourse(courseName);
-        //Professor p = entityGetter.getProfessor(professorId);
         Assignment assignment = entityGetter.getAssignment(assignmentId);
 
         if(!assignment.getCourse().equals(c))
@@ -130,9 +126,11 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .collect(Collectors.toList());
     }
 
+    /** funzione programmata, se ci sono degli elaborati non ancora in stato SUBMITTED, li blocca
+     * in quanto la data di scadenza è relativa a un momento precedento a quello attuale
+     **/
     @Override
     public void passiveDraftSubmit() {
-        //todo: oltre alla submit bisognerebbe impostare il lock! TransactionChain?
         draftRepository.findAll()
                 .stream()
                 .filter(d -> d.getAssignment()
@@ -141,6 +139,7 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .forEach(d -> d.setLocker(true));
     }
 
+    @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
     @Override
     public void deleteAssignmentAndDraftsByCourseName(String courseName) {
         draftRepository.deleteByAssignmentCourseNameIgnoreCase(courseName);
@@ -159,6 +158,7 @@ public class AssignmentServiceImpl implements AssignmentService {
         else throw new AssignmentNotOfThisDraftException(assignmentId, draftId);
     }
 
+    /* ritorna la lista dei draft dello studente, dato l'assignment */
     @PreAuthorize("(@securityApiAuth.isMe(#studentId) && @securityApiAuth.isEnrolled(#courseName)) || @securityApiAuth.ownCourse(#courseName)")
     @Override
     public List<DraftDTO> getDraftsForStudent(String studentId, String courseName, Long assignmentId) {
@@ -169,6 +169,7 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .collect(Collectors.toList());
     }
 
+    /** Il docente può caricare una correzione per il determinato draft.**/
     @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
     @Override
     public CorrectionDTO correctDraft(String courseName, Long assignmentId, Long draftId, int grade) {
@@ -181,27 +182,34 @@ public class AssignmentServiceImpl implements AssignmentService {
 
         if(!d.getAssignment().equals(a))
             throw new AssignmentNotOfThisDraftException(assignmentId, draftId);
-        //todo: fare controlli su assignment appartenente al corso e draft appartenente all'assignment
 
         //Non può lanciare eccezioni perchè viene controllato prima che il draft appartenga all'assignment
+        //ci si fa ritornare dal repository la lista di draft in ordine decrescente (vogliamo l'ultimo) e si prende il primo
         Draft lastDraft = draftRepository.findByAssignmentAndStudentOrderByTimestampDesc(a, d.getStudent()).get(0);
         if(!lastDraft.equals(d))
             throw new DraftNotLastSubmittedException(draftId, d.getStudent().getId());
 
+        // il draft viene adesso bloccato perché ne creeremo uno nuovo. questo è il vecchio e serve solo per
+        // scopi di cronologia e storico dei drafts
         lastDraft.setLocker(true);
 
+        // si crea un nuovo oggetto Correction che è la correzione del docente, e creiamo un nuovo draft
+        // per mantenere lo storico dei cambiamenti
         Correction corr = new Correction();
         Draft newDraft= new Draft(Draft.DraftState.REVIEWED, a, d.getStudent());
         newDraft.setLocker(grade!=0);
         newDraft.setGrade(grade);
         newDraft.setPhotoName(lastDraft.getPhotoName());
         newDraft = draftRepository.save(newDraft);
+
+        //la nuova correzione è relativa al nostro nuovo draft, creato copiando il vecchio ma con nuovo stato
         corr.setDraft(newDraft);
 
         return mapper.map(correctionRepository.save(corr), CorrectionDTO.class);
     }
 
-
+    /** Per la sottomissione di un nuovo elaborato. Come sempre, per mantenere lo storico si ritorna un nuovo elaborato
+     * creato a partire da quello precedente che viene bloccato, in modo da inibire la possibilità di modificarlo ulteriormente**/
     @PreAuthorize("@securityApiAuth.isMe(#studentId) && @securityApiAuth.isEnrolled(#courseName)")
     @Override
     public DraftDTO submitDraft(String studentId, String courseName, Long assignmentId) {
