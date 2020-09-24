@@ -60,6 +60,9 @@ public class NotificationServiceImpl implements NotificationService {
     @Autowired
     private NotificationTokenRepository notificationTokenRepository;
 
+
+    // dato un indirizzo email e un body, invia un messaggio email.
+    // i parametri sono settati nell'application.properties
     @Override
     @Async
     public void sendMessage(String address, String subject, String body) {
@@ -71,6 +74,8 @@ public class NotificationServiceImpl implements NotificationService {
         emailSender.send(message);
     }
 
+    // dato un token, esegue i controlli di validità, lo elimina
+    // esegue il controllo per team, se è l'ultima conferma creerà il team per un determinato corso
     @Override
     @Transactional
     public void confirm(String token) {
@@ -102,11 +107,8 @@ public class NotificationServiceImpl implements NotificationService {
         }
     }
 
-    private void deleteTeamWithTokens(Long teamId){
-        tokenRepository.deleteAllByTeamId(teamId);
-        teamService.evictTeam(teamId);
-    }
-
+    // gestisce il rifiuto di uno studente a partecipare a un team
+    // solo se il suo token è ancora valido ovviamente
     @Override
     @Transactional
     public void reject(String token) {
@@ -117,6 +119,12 @@ public class NotificationServiceImpl implements NotificationService {
             throw new InvalidOrExpiredTokenException(token);
 
         deleteTeamWithTokens(teamId);
+    }
+
+    // elimina tutti i token pendenti per il team e lo smonta
+    private void deleteTeamWithTokens(Long teamId){
+        tokenRepository.deleteAllByTeamId(teamId);
+        teamService.evictTeam(teamId);
     }
 
     @Override
@@ -133,9 +141,6 @@ public class NotificationServiceImpl implements NotificationService {
             // cancella i team (inattivi) relativi allo stesso corso in cui compare il membro
             // del gruppo appena attivato
             List<Long> teamsToEvict = teamService.evictPendingTeamsOfMembers(team.getId());
-            /*for (Long id : teamsToEvict) {
-                tokenRepository.deleteAllByTeamId(id);
-            }*/
             return;
         }
 
@@ -160,6 +165,9 @@ public class NotificationServiceImpl implements NotificationService {
                 "Rifiuta:\t%s\n", memberId, teamName, confirm, reject);
     }
 
+    // funzione che parte in automatico come task schedulato
+    // in presenza di token scaduti provvede ad eliminarli
+    // chiamando le funzioni viste in precedenza (evictTeam)
     @Override
     @Transactional
     public void deleteExpiredToken() {
@@ -177,6 +185,7 @@ public class NotificationServiceImpl implements NotificationService {
             teams.forEach(teamService::evictTeam);
     }
 
+    // restituisce la lista degli studenti invitati ma che non hanno ancora né accettato né rifiutato
     @Override
     public List<String> getPendingMemberIds(Long teamId) {
         return tokenRepository.findAllByTeamId(teamId).stream()
@@ -184,6 +193,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .collect(Collectors.toList());
     }
 
+    // restituisce allo studente il suo token pendente
     @PreAuthorize("@securityApiAuth.isMe(#memberId)")
     @Override
     public TokenDTO getPendingMemberToken(Long teamId, String memberId) {
@@ -224,6 +234,7 @@ public class NotificationServiceImpl implements NotificationService {
         sendMessage(email, subject, body);
     }
 
+    // conferma la registrazione di uno user, sia esso studente o docente
     @Override
     @Transactional
     public void confirmRegistration(String token) {
@@ -249,6 +260,8 @@ public class NotificationServiceImpl implements NotificationService {
         registrationTokenRepository.delete(t);
     }
 
+    // lo studente può richiedere a uno dei prof del corso di iscriversi al corso
+    // al docente viene inviata una notifica con un token
     @PreAuthorize("@securityApiAuth.isMe(#studentId)")
     @Override
     @Transactional
@@ -273,6 +286,8 @@ public class NotificationServiceImpl implements NotificationService {
             notificationTokenRepository.saveAll(tokens);
     }
 
+    // un professore può chiedere a un collega di gestire insieme un corso
+    // allora uno può chiedere, tramite notifica e token, all'altro di cooperare
     @PreAuthorize("@securityApiAuth.isMe(#senderProfessorId)")
     @Override
     @Transactional
@@ -300,6 +315,7 @@ public class NotificationServiceImpl implements NotificationService {
             notificationTokenRepository.saveAll(notificationTokens);
     }
 
+    // L'user legge le notifiche, settando la notifica come letta
     @PreAuthorize("@securityApiAuth.ownNotification(#tokenId)")
     @Override
     @Transactional
@@ -308,6 +324,7 @@ public class NotificationServiceImpl implements NotificationService {
         notificationToken.setNotificationRead(true);
     }
 
+    // permette al docente di accettare la richiesta di uno studente di iscriversi a un corso tramite notifica
     @PreAuthorize("@securityApiAuth.ownNotification(#tokenId)")
     @Override
     @Transactional
@@ -339,6 +356,7 @@ public class NotificationServiceImpl implements NotificationService {
         notificationTokenRepository.save(answer);
     }
 
+    // permette al docente di rifiutare la richiesta di uno studente di iscriversi a un corso tramite notifica
     @PreAuthorize("@securityApiAuth.ownNotification(#tokenId)")
     @Override
     @Transactional
@@ -367,6 +385,8 @@ public class NotificationServiceImpl implements NotificationService {
         notificationTokenRepository.save(answer);
     }
 
+    // permette al docente di accettare la richiesta di un altro docente di cooperare per un
+    // determinato corso tramite notifica
     @PreAuthorize("@securityApiAuth.ownNotification(#tokenId)")
     @Transactional
     @Override
@@ -416,6 +436,8 @@ public class NotificationServiceImpl implements NotificationService {
         notificationTokenRepository.delete(notificationToken);
     }
 
+    // permette al docente di rifiutare la richiesta di un altro docente di cooperare per un
+    // determinato corso tramite notifica
     @PreAuthorize("@securityApiAuth.ownNotification(#tokenId)")
     @Transactional
     @Override
@@ -449,6 +471,7 @@ public class NotificationServiceImpl implements NotificationService {
         notificationTokenRepository.save(answer);
     }
 
+    // permette di ritornare le notifiche per un determinato utente
     @PreAuthorize("@securityApiAuth.isMe(#receiverId)")
     @Override
     public List<NotificationTokenDTO> getUserNotifications(String receiverId) {

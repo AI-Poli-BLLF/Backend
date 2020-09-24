@@ -64,9 +64,7 @@ public class EntityGetterImpl implements EntityGetter {
     @Autowired
     private CorrectionRepository correctionRepository;
 
-
-    // todo: mettere un commento generale per il servizio?
-
+    /** Service creato per evitare di riscrivere più volte la ricerca nei repository delle entity **/
     @Override
     public Course getCourse(String courseName){
         return courseRepository.findByNameIgnoreCase(courseName).orElseThrow(

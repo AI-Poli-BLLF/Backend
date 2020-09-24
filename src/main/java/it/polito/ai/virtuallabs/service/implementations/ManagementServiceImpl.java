@@ -1,24 +1,12 @@
 package it.polito.ai.virtuallabs.service.implementations;
 
-import it.polito.ai.virtuallabs.dtos.ProfessorDTO;
-import it.polito.ai.virtuallabs.dtos.StudentDTO;
-import it.polito.ai.virtuallabs.security.dtos.UserDTO;
-import it.polito.ai.virtuallabs.security.entities.Roles;
 import it.polito.ai.virtuallabs.security.entities.User;
 import it.polito.ai.virtuallabs.security.repositories.UserRepository;
 import it.polito.ai.virtuallabs.service.ManagementService;
-import it.polito.ai.virtuallabs.service.NotificationService;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Transactional
 @Service
@@ -26,6 +14,11 @@ public class ManagementServiceImpl implements ManagementService {
 
     @Autowired
     private UserRepository userRepository;
+
+    /** questo service serve a ricavare ed eventualmente abilitare un utente
+     * (che può essere un docente o uno studente)
+     * a servizio del NotificationService
+     **/
 
     private User getUser(String username){
         return userRepository.findByUsernameIgnoreCase(username).orElseThrow(
