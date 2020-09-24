@@ -169,7 +169,7 @@ public class StudentController {
                                  @RequestParam("image") MultipartFile image) {
         try {
             return transactionChain.submitDraftAndUploadImage(studentId, courseName, assignmentId, image);
-        } catch (AssignmentServiceException | TeamServiceException e) {
+        } catch (AssignmentServiceException | TeamServiceException | ImageServiceException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
 //            throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Draft not found for student: %s", studentId));
         }

@@ -241,7 +241,7 @@ public class ImageUploadServiceImpl implements ImageUploadService {
             s.setPhotoName(imageName);
             return String.format("http://localhost:8080/API/students/%s/photo", userId);
         }else{
-            throw new IllegalStateException("User not found");
+            throw new ImageStorageException("User not found");
         }
     }
 
@@ -255,7 +255,7 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         Draft draft = getter.getDraft(draftId);
         draft.setPhotoName(imageName);
         if(!draft.getStudent().getId().equals(studentId))
-            throw new IllegalStateException("User not of this draft");
+            throw new ImageStorageException("User not of this draft");
         return String.format("http://localhost8080/API/courses/%s/assignments/%s/drafts/%s/image", courseName, assignmentId, draftId);
     }
 
