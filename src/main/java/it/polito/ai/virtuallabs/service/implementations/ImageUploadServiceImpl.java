@@ -115,7 +115,8 @@ public class ImageUploadServiceImpl implements ImageUploadService {
         return storeAssignmentOnDb(imageName, courseName, assigmentId);
     }
 
-    @PreAuthorize("@securityApiAuth.isMe(#studentId) && @securityApiAuth.ownDraft(#studentId, #courseName, #assignmentId, #draftId)")
+    //    @PreAuthorize("@securityApiAuth.isMe(#studentId) && @securityApiAuth.ownDraft(#studentId, #courseName, #assignmentId, #draftId)")
+    @PreAuthorize("@securityApiAuth.isMe(#studentId) && @securityApiAuth.isEnrolled(#courseName)")
     @Override
     public String storeDraftImage(String studentId, String courseName, Long assignmentId, Long draftId, MultipartFile image) {
         String type;

@@ -1,5 +1,7 @@
 package it.polito.ai.virtuallabs.security.service;
 
+import it.polito.ai.virtuallabs.entities.Assignment;
+import it.polito.ai.virtuallabs.entities.Draft;
 import it.polito.ai.virtuallabs.entities.Student;
 import it.polito.ai.virtuallabs.entities.Team;
 import it.polito.ai.virtuallabs.entities.vms.VMInstance;
@@ -112,6 +114,16 @@ public class SecurityApiAuth {
         User principal = getPrincipal();
         if (!principal.getRoles().contains(Roles.ROLE_STUDENT.toString()))
             return false;
+
+        if (!isEnrolled(courseName))
+            return false;
+
+        Draft draft = entityGetter.getDraft(draftId);
+
+        if(!draft.getAssignment().getId().equals(assignmentId))
+            return false;
+
+        return draft.getStudent().getId().equals(studentId);
 //        boolean toReturn = !studentRepository.findAll().stream()
 //                .filter(s -> s.getId().equals(studentId))
 //                .flatMap(s -> s.getDrafts().stream())
@@ -121,6 +133,5 @@ public class SecurityApiAuth {
 //                .collect(Collectors.toSet())
 //                .isEmpty();
 //        return toReturn;
-        return true;
     }
 }

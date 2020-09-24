@@ -108,16 +108,16 @@ public class ProfessorController {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }
-
-    @GetMapping(value = "/{professorId}/courses/{courseName}/assignments/{assignmentId}/image",
-            produces = {MediaType.IMAGE_JPEG_VALUE,
-                    MediaType.IMAGE_PNG_VALUE,
-                    MediaType.IMAGE_JPEG_VALUE})
-    private byte[] readAssignment(@PathVariable String professorId, @PathVariable String courseName, @PathVariable String assignmentId) {
-        try {
-            return imageUploadService.getAssignmentImageP(courseName, Long.parseLong(assignmentId));
-        } catch (ImageServiceException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Assignment not found for professor: %s", professorId));
-        }
-    }
+//
+//    @GetMapping(value = "/{professorId}/courses/{courseName}/assignments/{assignmentId}/image",
+//            produces = {MediaType.IMAGE_JPEG_VALUE,
+//                    MediaType.IMAGE_PNG_VALUE,
+//                    MediaType.IMAGE_JPEG_VALUE})
+//    private byte[] readAssignment(@PathVariable String professorId, @PathVariable String courseName, @PathVariable String assignmentId) {
+//        try {
+//            return imageUploadService.getAssignmentImageP(courseName, Long.parseLong(assignmentId));
+//        } catch (ImageServiceException e) {
+//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Assignment not found for professor: %s", professorId));
+//        }
+//    }
 }

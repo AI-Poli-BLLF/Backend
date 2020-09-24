@@ -134,7 +134,7 @@ public class AssignmentServiceImpl implements AssignmentService {
                 .filter(d -> d.getAssignment()
                         .getExpiryDate()
                         .before(Timestamp.valueOf(LocalDateTime.now())))
-                .forEach(d -> submitDraft(d.getStudent().getId(), d.getAssignment().getCourse().getName(), d.getAssignment().getId()));
+                .forEach(d -> d.setLocker(true));
     }
 
     @Override

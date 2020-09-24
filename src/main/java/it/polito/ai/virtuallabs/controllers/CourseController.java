@@ -609,7 +609,6 @@ public class CourseController {
         }
     }
 
-    // todo: questo metodo è solo per i prof, ma il sevice è in comune
     @GetMapping(value = "/{courseName}/assignments/{assignmentId}/image",
             produces = {MediaType.IMAGE_JPEG_VALUE,
                     MediaType.IMAGE_PNG_VALUE,
