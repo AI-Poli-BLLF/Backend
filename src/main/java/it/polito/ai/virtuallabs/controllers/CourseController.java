@@ -189,6 +189,17 @@ public class CourseController {
         }
     }
 
+    @GetMapping("/{courseName}/teams/active")
+    private List<TeamDTO> getActiveTeamsForCourse(@PathVariable String courseName){
+        try {
+            return teamService.getActiveTeamsForCourse(courseName)
+                    .stream().map(ModelHelper::enrich)
+                    .collect(Collectors.toList());
+        }catch (TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
+    }
+
     @GetMapping("/{courseName}/teams/{teamId}")
     private TeamDTO getTeamById(@PathVariable String courseName, @PathVariable String teamId){
         try{

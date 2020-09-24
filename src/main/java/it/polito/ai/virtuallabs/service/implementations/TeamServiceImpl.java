@@ -434,6 +434,22 @@ public class TeamServiceImpl implements TeamService {
 
     }
 
+
+    @PreAuthorize("hasRole('ADMIN') || @securityApiAuth.isEnrolled(#courseName) || @securityApiAuth.ownCourse(#courseName)")
+    @Override
+    public List<TeamDTO> getActiveTeamsForCourse(String courseName) {
+        try {
+            return courseRepository.findByNameIgnoreCase(courseName).get()
+                    .getTeams().stream()
+                    .filter(t -> t.getStatus().equals(Team.Status.ACTIVE))
+                    .map(t-> mapper.map(t, TeamDTO.class))
+                    .collect(Collectors.toList());
+        }catch (NoSuchElementException e){
+            throw new CourseNotFoundException(courseName);
+        }
+
+    }
+
     @PreAuthorize("@securityApiAuth.ownCourse(#courseName) ||@securityApiAuth.isEnrolled(#courseName)")
     @Override
     public List<StudentDTO> getStudentsInTeams(String courseName) {
