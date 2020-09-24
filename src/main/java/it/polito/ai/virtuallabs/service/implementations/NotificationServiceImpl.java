@@ -3,7 +3,6 @@ package it.polito.ai.virtuallabs.service.implementations;
 import it.polito.ai.virtuallabs.dtos.ProfessorDTO;
 import it.polito.ai.virtuallabs.dtos.StudentDTO;
 import it.polito.ai.virtuallabs.dtos.TeamDTO;
-import it.polito.ai.virtuallabs.dtos.tokens.BasicToken;
 import it.polito.ai.virtuallabs.dtos.tokens.NotificationTokenDTO;
 import it.polito.ai.virtuallabs.dtos.tokens.TokenDTO;
 import it.polito.ai.virtuallabs.dtos.vms.VMConfigDTO;
@@ -450,28 +449,12 @@ public class NotificationServiceImpl implements NotificationService {
         notificationTokenRepository.save(answer);
     }
 
-    @PreAuthorize("@securityApiAuth.isMe(#professorId)")
+    @PreAuthorize("@securityApiAuth.isMe(#receiverId)")
     @Override
-    public List<BasicToken> getProfessorNotification(String professorId) {
-        Professor p = entityGetter.getProfessor(professorId);
-        return notificationTokenRepository.findByReceiverIdOrderByCreationDesc(p.getId())
+    public List<NotificationTokenDTO> getUserNotifications(String receiverId) {
+        return notificationTokenRepository.findByReceiverIdOrderByCreationDesc(receiverId)
                 .stream().map(n -> mapper.map(n, NotificationTokenDTO.class))
                 .collect(Collectors.toList());
-    }
-
-    @PreAuthorize("@securityApiAuth.isMe(#studentId)")
-    @Override
-    public List<BasicToken> getStudentNotification(String studentId) {
-        Student s = entityGetter.getStudent(studentId);
-        List<BasicToken> notifications = notificationTokenRepository.findByReceiverIdOrderByCreationDesc(s.getId())
-                .stream().map(n -> mapper.map(n, NotificationTokenDTO.class))
-                .collect(Collectors.toList());
-        List<TokenDTO> teamInvitation = tokenRepository.findByStudentIdOrderByExpiryDateDesc(s.getId())
-                .stream().map(t-> mapper.map(t, TokenDTO.class))
-                .collect(Collectors.toList());
-
-        notifications.addAll(teamInvitation);
-        return notifications;
     }
 
     private boolean isSameTokenPresent(String senderId, String receiverId, String courseName){

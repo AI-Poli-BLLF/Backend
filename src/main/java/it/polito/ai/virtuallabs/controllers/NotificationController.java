@@ -1,16 +1,16 @@
 package it.polito.ai.virtuallabs.controllers;
 
+import it.polito.ai.virtuallabs.dtos.tokens.NotificationTokenDTO;
 import it.polito.ai.virtuallabs.service.NotificationService;
 import it.polito.ai.virtuallabs.service.exceptions.NotificationException;
 import it.polito.ai.virtuallabs.service.exceptions.TeamServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+import java.util.List;
 
 
 @RestController
@@ -95,6 +95,15 @@ public class NotificationController {
         try {
             notificationService.readNotification(tokenId);
         }catch (NotificationException | TeamServiceException e){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
+    @GetMapping("/{receiverId}")
+    private List<NotificationTokenDTO> getNotifications(@PathVariable String receiverId) {
+        try {
+            return notificationService.getUserNotifications(receiverId);
+        } catch (NotificationException | TeamServiceException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }

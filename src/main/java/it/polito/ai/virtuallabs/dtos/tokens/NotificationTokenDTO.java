@@ -10,7 +10,7 @@ import java.sql.Timestamp;
 
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class NotificationTokenDTO implements BasicToken {
+public class NotificationTokenDTO {
     @EqualsAndHashCode.Include
     @NotEmpty
     private String id;
@@ -27,9 +27,4 @@ public class NotificationTokenDTO implements BasicToken {
     @NotNull
     private Timestamp creation;
     private boolean notificationRead;
-
-    @Override
-    public TokenType getDiscriminator() {
-        return TokenType.NOTIFICATION;
-    }
 }

@@ -10,7 +10,7 @@ import java.sql.Timestamp;
 @Data
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = false)
-public class TokenDTO implements BasicToken {
+public class TokenDTO {
 
     @NotEmpty
     private String id;
@@ -26,10 +26,5 @@ public class TokenDTO implements BasicToken {
         this.teamId = teamId;
         this.studentId = studentId;
         this.expiryDate = expiryDate;
-    }
-
-    @Override
-    public TokenType getDiscriminator() {
-        return TokenType.NOTIFICATION;
     }
 }
