@@ -44,7 +44,6 @@ public class NotificationController {
     @ResponseStatus(value = HttpStatus.OK)
     private void confirmRegistration(@RequestBody String token){
         try{
-            System.out.println("CIao");
             notificationService.confirmRegistration(token);
         }catch (TeamServiceException | NotificationException e){
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
