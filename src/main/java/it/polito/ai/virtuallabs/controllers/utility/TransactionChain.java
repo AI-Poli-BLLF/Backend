@@ -1,9 +1,6 @@
 package it.polito.ai.virtuallabs.controllers.utility;
 
-import it.polito.ai.virtuallabs.dtos.AssignmentDTO;
-import it.polito.ai.virtuallabs.dtos.CorrectionDTO;
-import it.polito.ai.virtuallabs.dtos.CourseDTO;
-import it.polito.ai.virtuallabs.dtos.DraftDTO;
+import it.polito.ai.virtuallabs.dtos.*;
 import it.polito.ai.virtuallabs.security.dtos.UserDTO;
 import it.polito.ai.virtuallabs.security.dtos.UserRegistration;
 import it.polito.ai.virtuallabs.security.service.UserManagementService;
@@ -14,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static it.polito.ai.virtuallabs.controllers.utility.ModelHelper.AddCourseRequest;
 
@@ -71,5 +69,11 @@ public class TransactionChain {
         DraftDTO draft = assignmentService.submitDraft(studentId, courseName, assignmentId);
         uploadService.storeDraftImage(studentId, courseName, assignmentId, draft.getId(), image);
         return draft;
+    }
+
+    public TeamDTO proposeTeamAndNotify(String courseName, ModelHelper.TeamProposal proposal) {
+        TeamDTO team = teamService.proposeTeam(courseName, proposal.getTeamName(), proposal.getMemberIds(), proposal.getProposerId());
+        notificationService.notifyTeam(team, proposal.getMemberIds(), proposal.getProposerId(), proposal.getTimeout(), courseName);
+        return team;
     }
 }

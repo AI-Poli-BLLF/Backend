@@ -160,9 +160,7 @@ public class CourseController {
     @ResponseStatus(value = HttpStatus.CREATED)
     private TeamDTO proposeTeam(@PathVariable String courseName, @RequestBody @Valid ModelHelper.TeamProposal proposal){
         try{
-            TeamDTO team = teamService.proposeTeam(courseName, proposal.getTeamName(), proposal.getMemberIds(), proposal.getProposerId());
-            notificationService.notifyTeam(team, proposal.getMemberIds(), proposal.getProposerId(), proposal.getTimeout());
-            return team;
+            return transactionChain.proposeTeamAndNotify(courseName, proposal);
         }catch (TeamServiceException e){
             String message = e.getMessage() == null ? "Error during team proposal" : e.getMessage();
             throw new ResponseStatusException(HttpStatus.CONFLICT, message);

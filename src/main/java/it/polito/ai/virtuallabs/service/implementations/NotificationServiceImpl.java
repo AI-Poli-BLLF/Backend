@@ -130,7 +130,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     @Transactional
-    public void notifyTeam(TeamDTO team, List<String> memberIds, String proposerId, Integer timeout) {
+    public void notifyTeam(TeamDTO team, List<String> memberIds, String proposerId, Integer timeout, String courseName) {
         if(team == null || team.getId() == null)
             throw new TeamNotFoundException();
 
@@ -147,7 +147,10 @@ public class NotificationServiceImpl implements NotificationService {
 
         //todo: inviare mail di notifica per i membri invitati
         memberIds.stream().filter(id -> !id.equals(proposerId))
-                .forEach(memberId -> createAndSaveToken(team.getId(), memberId, expiryDate));
+                .forEach(memberId -> {
+                    sendTeamNotification(proposerId, memberId, courseName);
+                    createAndSaveToken(team.getId(), memberId, expiryDate);
+                });
 
     }
 
@@ -249,6 +252,18 @@ public class NotificationServiceImpl implements NotificationService {
 
         managementService.enableUser(t.getUserId());
         registrationTokenRepository.delete(t);
+    }
+
+    private void sendTeamNotification(String senderId, String receiverId, String courseName){
+        Student sender = entityGetter.getStudent(senderId);
+        String message = String.format("%s %s (%s) ti ha invitato a far parte del suo team per il corso %s. " +
+                        "Vai nella sezione Teams per accettare",
+                sender.getFirstName(), sender.getName(), senderId, courseName);
+
+        NotificationToken token = new NotificationToken(senderId, receiverId, courseName, message,
+                NotificationToken.NotificationType.RESPONSE);
+
+        notificationTokenRepository.save(token);
     }
 
     // lo studente può richiedere a uno dei prof del corso di iscriversi al corso

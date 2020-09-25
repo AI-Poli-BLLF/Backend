@@ -10,7 +10,7 @@ public interface NotificationService {
     void sendMessage(String address, String subject, String body);
     void confirm(String token);
     void reject(String token);
-    void notifyTeam(TeamDTO dto, List<String> memberIds, String proposerId, Integer timeout);
+    void notifyTeam(TeamDTO dto, List<String> memberIds, String proposerId, Integer timeout, String courseName);
     void deleteExpiredToken();
     List<String> getPendingMemberIds(Long teamId);
     TokenDTO getPendingMemberToken(Long teamId, String memberId);
