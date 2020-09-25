@@ -97,6 +97,8 @@ public class AssignmentServiceImpl implements AssignmentService {
         return mapper.map(draftRepository.save(draft), DraftDTO.class);
     }
 
+    // ritorno l'ultimo draft in ordine cronologico di uno studente riferito
+    // all'assignment dato
     @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
     @Override
     public List<DraftDTO> getDrafts(String courseName, Long assignmentId){
@@ -106,8 +108,6 @@ public class AssignmentServiceImpl implements AssignmentService {
         if(!assignment.getCourse().equals(c))
             throw new AssignmentServiceException("Assignment doesn't belong to course " + courseName);
 
-
-        // todo: tornare solo un draft per studente
         List<Draft> lastDrafts = new LinkedList<>();
         List<Student> students = assignment.getDrafts().stream().map(Draft::getStudent).distinct().collect(Collectors.toList());
         for (Student student: students){
@@ -139,6 +139,7 @@ public class AssignmentServiceImpl implements AssignmentService {
     @PreAuthorize("@securityApiAuth.ownCourse(#courseName)")
     @Override
     public void deleteAssignmentAndDraftsByCourseName(String courseName) {
+        correctionRepository.deleteAllByDraftAssignmentCourseNameIgnoreCase(courseName);
         draftRepository.deleteByAssignmentCourseNameIgnoreCase(courseName);
         assignmentRepository.deleteByCourseNameIgnoreCase(courseName);
     }

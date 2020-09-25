@@ -592,7 +592,7 @@ public class VMServiceImpl implements VMService {
 //                .stream()
 //                .filter(v -> !v.getOsName().equals(osName))
 //                .collect(Collectors.toList()).get(0);
-//
+//        se la lista è vuota magari lancio un'eccezione
 //        courseRepository.findAll()
 //                .stream()
 //                .filter(c -> c.getVmModel().getOs().equals(osName))

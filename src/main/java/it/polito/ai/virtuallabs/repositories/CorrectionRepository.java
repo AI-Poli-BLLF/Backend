@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CorrectionRepository extends JpaRepository<Correction, Long> {
+    void deleteAllByDraftAssignmentCourseNameIgnoreCase(String CourseName);
 }
