@@ -145,13 +145,11 @@ public class NotificationServiceImpl implements NotificationService {
             return;
         }
 
-        //todo: inviare mail di notifica per i membri invitati
         memberIds.stream().filter(id -> !id.equals(proposerId))
                 .forEach(memberId -> {
                     sendTeamNotification(proposerId, memberId, courseName);
                     createAndSaveToken(team.getId(), memberId, expiryDate);
                 });
-
     }
 
     private void createAndSaveToken(Long teamId, String studentId, Timestamp expiryDate) {
