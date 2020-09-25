@@ -27,4 +27,6 @@ public interface NotificationService {
     void rejectEnrollingRequest(String tokenId);
 
     List<NotificationTokenDTO> getUserNotifications(String receiverId);
+
+    void deleteExpiredNotification();
 }

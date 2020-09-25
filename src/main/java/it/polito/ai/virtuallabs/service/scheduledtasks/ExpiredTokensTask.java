@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
-//todo: creare scheduled task per i token registrazione e notifiche
 @Component
 @Log(topic = "ScheduledTask")
 public class ExpiredTokensTask {
@@ -20,5 +19,11 @@ public class ExpiredTokensTask {
     public void deleteExpiredToken() {
         log.info("Erasing expired tokens: " + Timestamp.valueOf(LocalDateTime.now()));
         notificationService.deleteExpiredToken();
+    }
+
+    @Scheduled(initialDelay = 10*1000, fixedRate = 60*60*1000) //every hour
+    public void deleteExpiredNotification(){
+        log.info("Erasing expired notifications: " + Timestamp.valueOf(LocalDateTime.now()));
+        notificationService.deleteExpiredNotification();
     }
 }

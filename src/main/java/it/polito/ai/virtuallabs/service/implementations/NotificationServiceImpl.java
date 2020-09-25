@@ -156,16 +156,6 @@ public class NotificationServiceImpl implements NotificationService {
         tokenRepository.save(token);
     }
 
-    private String buildMessage(String tokenId, String teamName, String memberId){
-        String confirm = String.format("%s/notification/confirm/%s", baseURL, tokenId);
-        String reject = String.format("%s/notification/reject/%s", baseURL, tokenId);
-
-        return String.format("Congratulazioni %s!\nSei stato invitato a far parte del team %s.\n" +
-                "Se sei interessato per favore conferma la tua partecipazione altrimenti puoi anche rifiutare l'invito immediatamente:\n\n" +
-                "Accetta:\t%s\n\n" +
-                "Rifiuta:\t%s\n", memberId, teamName, confirm, reject);
-    }
-
     // funzione che parte in automatico come task schedulato
     // in presenza di token scaduti provvede ad eliminarli
     // chiamando le funzioni viste in precedenza (evictTeam)
@@ -481,8 +471,16 @@ public class NotificationServiceImpl implements NotificationService {
                 .collect(Collectors.toList());
     }
 
+    // Controlla che un token di notifica con la stessa semantica non sia già presente
     private boolean isSameTokenPresent(String senderId, String receiverId, String courseName){
         return notificationTokenRepository
                 .countBySenderIdAndReceiverIdAndCourseName(senderId, receiverId, courseName) > 0;
+    }
+
+    @Transactional
+    @Override
+    public void deleteExpiredNotification() {
+        Timestamp expiration = Timestamp.valueOf(LocalDateTime.now().minusDays(5));
+        notificationTokenRepository.deleteByCreationBefore(expiration);
     }
 }
