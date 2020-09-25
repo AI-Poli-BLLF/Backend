@@ -2,6 +2,7 @@ package it.polito.ai.virtuallabs.security.dtos;
 
 import lombok.Data;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 
@@ -14,7 +15,7 @@ public class UserRegistration {
     private String name;
     @Pattern(regexp = "[sSdD][0-9]{6}", message = "User id must be in the form s<six numbers> or d<six numbers>")
     private String userId;
-    @NotEmpty
+    @Min(8)
     private String password;
     @Pattern(regexp = "[sSdD][0-9]{6}@(studenti\\.)?polito\\.it",
     message = "User email must be in the form <userId>@(studenti.)polito.it")
