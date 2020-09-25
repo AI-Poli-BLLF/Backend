@@ -583,21 +583,27 @@ public class VMServiceImpl implements VMService {
         return vmOsDTO;
     }
 
-    // todo: mettere un modello a caso a tutti i corsi che usano quella vm
     @PreAuthorize("hasRole('ADMIN')")
     @Override
+    // sostituisco il modello alle vm che usano quello che sto eliminando
+    // e il primo disponibile, se non ce ne sono di disponibili lancio un'eccezione
     public void deleteVMOs(String osName) {
-        // per risolvere il todo ho pensato a questo:
-//        VMOs tmp = vmOsRepository.findAll()
-//                .stream()
-//                .filter(v -> !v.getOsName().equals(osName))
-//                .collect(Collectors.toList()).get(0);
-//        se la lista è vuota magari lancio un'eccezione
-//        courseRepository.findAll()
-//                .stream()
-//                .filter(c -> c.getVmModel().getOs().equals(osName))
-//                .forEach(c -> c.getVmModel().setOs(tmp));
-
+        List<VMOs> tmp = vmOsRepository.findAll()
+                .stream()
+                .filter(v -> !v.getOsName().equals(osName) && !v.getVersions().isEmpty())
+                .collect(Collectors.toList());
+        if (tmp.isEmpty()){
+            throw new NotAvailableVmModelException();
+        }
+//        se la lista è vuota lancio un'eccezione
+        courseRepository.findAll()
+                .stream()
+                .filter(c -> c.getVmModel().getOs().getOsName().equals(osName))
+                .forEach(c -> {
+                    c.getVmModel().setOs(tmp.get(0));
+                    // non può essere nullo perchè ho controllato sopra
+                    c.getVmModel().setVersion(tmp.get(0).getVersions().stream().findFirst().get());
+                });
         vmOsRepository.deleteByOsNameIgnoreCase(osName);
     }
 
@@ -614,8 +620,24 @@ public class VMServiceImpl implements VMService {
 
     @PreAuthorize("hasRole('ADMIN')")
     @Override
+    // sostituisco la versione alle vm che usano quello che sto eliminando
+    // e il primo disponibile, se non ce ne sono di disponibili lancio un'eccezione
     public void deleteOsVersion(String osName, String version) {
         VMOs vmOs = getter.getVmOs(osName);
+        List<String> tmp = vmOs.getVersions()
+                .stream()
+                .filter(v -> !v.equals(version))
+                .collect(Collectors.toList());
+        if (tmp.isEmpty()){
+            throw new NotAvailableVmModelException();
+        }
+        //        se la lista è vuota lancio un'eccezione
+        courseRepository.findAll()
+                .stream()
+                .filter(c -> c.getVmModel().getOs().getOsName().equals(osName) && c.getVmModel().getVersion().equals(version))
+                .forEach(c ->
+                    // non può essere nullo perchè ho controllato sopra
+                    c.getVmModel().setVersion(tmp.get(0)));
         vmOs.removeVersion(version);
     }
 

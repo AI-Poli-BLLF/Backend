@@ -68,7 +68,8 @@ public class NotificationServiceImpl implements NotificationService {
     public void sendMessage(String address, String subject, String body) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(from);
-        message.setTo("applicazioni.internet.test@gmail.com");
+//        message.setTo("applicazioni.internet.test@gmail.com");
+        message.setTo("stelosca96@gmail.com");
         message.setSubject(subject);
         message.setText(body);
         emailSender.send(message);
