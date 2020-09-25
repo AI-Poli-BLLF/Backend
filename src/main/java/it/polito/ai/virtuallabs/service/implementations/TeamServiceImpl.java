@@ -113,8 +113,9 @@ public class TeamServiceImpl implements TeamService {
                 .collect(Collectors.toList());
     }
 
-    // aggiunge uno studente passato come parametro
-    @PreAuthorize("hasAnyRole('PROFESSOR', 'ADMIN')")
+    // aggiunge uno studente passato come parametro,
+    // è libera da vincoli da pre auth
+    // perchè usata esclusivamente dalla confirm token
     @Override
     public boolean addStudent(StudentDTO student) {
         if(studentRepository.findByIdIgnoreCase(student.getId()).isPresent())
@@ -229,27 +230,27 @@ public class TeamServiceImpl implements TeamService {
         }
     }
 
-    // aggiungo gli studenti da una lista, di appoggio eventualmente per inserimento da CSV
-    @PreAuthorize("hasAnyRole('PROFESSOR', 'ADMIN')")
-    @Override
-    public List<Boolean> addAll(List<StudentDTO> students) {
-        List<Boolean> res = new ArrayList<>();
-        students.forEach(s-> res.add(addStudent(s)));
-        return res;
-    }
-
-    // aggiunge tutti gli studenti ad un determinato corso
-    @PreAuthorize("hasRole('ADMIN') || @securityApiAuth.ownCourse(#courseName)")
-    @Override
-    public List<Boolean> enrollAll(List<String> studentIds, String courseName) {
-        try {
-            List<Boolean> res = new ArrayList<>();
-            studentIds.forEach(s -> res.add(addStudentToCourse(s, courseName)));
-            return res;
-        }catch (TeamServiceException e){
-            throw e;
-        }
-    }
+//    // aggiungo gli studenti da una lista, di appoggio eventualmente per inserimento da CSV
+//    @PreAuthorize("hasAnyRole('PROFESSOR', 'ADMIN')")
+//    @Override
+//    public List<Boolean> addAll(List<StudentDTO> students) {
+//        List<Boolean> res = new ArrayList<>();
+//        students.forEach(s-> res.add(addStudent(s)));
+//        return res;
+//    }
+//
+//    // aggiunge tutti gli studenti ad un determinato corso
+//    @PreAuthorize("hasRole('ADMIN') || @securityApiAuth.ownCourse(#courseName)")
+//    @Override
+//    public List<Boolean> enrollAll(List<String> studentIds, String courseName) {
+//        try {
+//            List<Boolean> res = new ArrayList<>();
+//            studentIds.forEach(s -> res.add(addStudentToCourse(s, courseName)));
+//            return res;
+//        }catch (TeamServiceException e){
+//            throw e;
+//        }
+//    }
 
     //aggiunge studenti da CSV e li inserisce in un determinato corso
     @PreAuthorize("hasRole('ADMIN') || @securityApiAuth.ownCourse(#courseName)")
@@ -524,7 +525,9 @@ public class TeamServiceImpl implements TeamService {
         return professor.map(p -> mapper.map(p, ProfessorDTO.class));
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    // la add professor è usata solo dalla confirm token,
+    // non è esposta ad api pubbliche,
+    // quindi non effettuiamo pre auth
     @Override
     public boolean addProfessor(ProfessorDTO professorDTO) {
         if(professorRepository.findByIdIgnoreCase(professorDTO.getId()).isPresent())

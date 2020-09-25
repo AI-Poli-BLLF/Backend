@@ -51,16 +51,16 @@ public class StudentController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, String.format("Student not found: %s", studentId));
         }
     }
-
-    @PostMapping({"", "/"})
-    @ResponseStatus(value = HttpStatus.CREATED)
-    private StudentDTO addStudent(@RequestBody @Valid StudentDTO student) {
-
-        if (teamService.addStudent(student))
-            return ModelHelper.enrich(student);
-
-        throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Student already exist: %s", student.getId()));
-    }
+//
+//    @PostMapping({"", "/"})
+//    @ResponseStatus(value = HttpStatus.CREATED)
+//    private StudentDTO addStudent(@RequestBody @Valid StudentDTO student) {
+//
+//        if (teamService.addStudent(student))
+//            return ModelHelper.enrich(student);
+//
+//        throw new ResponseStatusException(HttpStatus.CONFLICT, String.format("Student already exist: %s", student.getId()));
+//    }
 
     @GetMapping("{studentId}/courses")
     private List<CourseDTO> getCourses(@PathVariable String studentId) {
@@ -134,8 +134,6 @@ public class StudentController {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
     }
-
-    //todo: aggiungere link all'immagine
 
     @GetMapping(value = "/{studentId}/courses/{courseName}/assignments/{assignmentId}/image",
             produces = {MediaType.IMAGE_JPEG_VALUE,

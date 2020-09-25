@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @ActiveProfiles("test")
 class VirtualLabsApplicationTests {
-    // todo: commentati i test perchè non li passa (senza test passati non posso fare il deploy)
+    //commentati i test dei laboratori perchè non li passa (senza test passati non posso fare il deploy)
 //
 //    @Autowired
 //    private TeamService teamService;
